@@ -1,0 +1,1391 @@
+// lib/services/api_service.dart
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../config.dart';
+import 'api_exceptions.dart';
+
+class ApiService {
+  static String get baseUrl => AppConfig.denoApiBaseUrl;
+  static const Duration _defaultTimeout = AppConfig.httpTimeout;
+
+  // Cache للعرائس (صفحة واحدة + نفس الفلاتر)
+  static List<Map<String, dynamic>>? _bridesCache;
+  static DateTime? _bridesCacheTime;
+  static String? _bridesCacheFilterKey;
+  static int? _bridesCachePage;
+  static int? _bridesCacheLimit;
+  static bool _bridesCacheHasMore = false;
+  static int _bridesCacheTotal = 0;
+  static const Duration _bridesCacheDuration = Duration(minutes: 1);
+
+  static void clearBridesCache() {
+    _bridesCache = null;
+    _bridesCacheTime = null;
+    _bridesCacheFilterKey = null;
+    _bridesCachePage = null;
+    _bridesCacheLimit = null;
+    _bridesCacheHasMore = false;
+    _bridesCacheTotal = 0;
+  }
+
+  // بناء Headers مع التوكن (مع تجديد تلقائي)
+  static Future<Map<String, String>> _getHeaders() async {
+    final supabase = Supabase.instance.client;
+    var session = supabase.auth.currentSession;
+
+    if (session == null) {
+      throw ApiException.unauthorized();
+    }
+
+    final expiresAt = session.expiresAt;
+    if (expiresAt != null) {
+      final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+      if (expiresAt <= now + 60) {
+        try {
+          final response = await supabase.auth.refreshSession();
+          session = response.session;
+
+          if (session == null) {
+            throw ApiException.unauthorized();
+          }
+        } on ApiException {
+          rethrow;
+        } catch (e) {
+          final msg = e.toString().toLowerCase();
+
+          if (msg.contains('network') ||
+              msg.contains('socket') ||
+              msg.contains('timeout') ||
+              msg.contains('connection') ||
+              msg.contains('failed host lookup')) {
+            throw ApiException.network(
+              'تعذر تحديث الجلسة، تحقق من الإنترنت',
+            );
+          }
+
+          throw ApiException.unauthorized();
+        }
+      }
+    }
+
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${session.accessToken}',
+    };
+  }
+
+  // دالة موحدة لكل طلبات Deno
+  static Future<dynamic> _request({
+    required String method,
+    required String path,
+    Map<String, dynamic>? body,
+    Map<String, String>? query,
+  }) async {
+    final headers = await _getHeaders();
+    var uri = Uri.parse('$baseUrl$path');
+
+    if (query != null && query.isNotEmpty) {
+      uri = uri.replace(queryParameters: query);
+    }
+
+    try {
+      http.Response response;
+
+      switch (method.toUpperCase()) {
+        case 'GET':
+          response = await http.get(uri, headers: headers).timeout(_defaultTimeout);
+          break;
+        case 'POST':
+          response = await http
+              .post(uri, headers: headers, body: jsonEncode(body ?? {}))
+              .timeout(_defaultTimeout);
+          break;
+        case 'PUT':
+          response = await http
+              .put(uri, headers: headers, body: jsonEncode(body ?? {}))
+              .timeout(_defaultTimeout);
+          break;
+        case 'DELETE':
+          response = await http
+              .delete(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
+              .timeout(_defaultTimeout);
+          break;
+        default:
+          throw ArgumentError('Method غير مدعوم: $method');
+      }
+
+      return _handleResponse(response);
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException.network('فشل الاتصال بالخادم: $e');
+    }
+  }
+
+  // معالجة الاستجابة
+  static dynamic _handleResponse(http.Response response) {
+    if (response.statusCode == 204) {
+      return null;
+    }
+
+    dynamic data;
+    final responseBody = response.bodyBytes.isNotEmpty 
+        ? utf8.decode(response.bodyBytes) 
+        : '';
+
+    if (responseBody.isNotEmpty) {
+      try {
+        data = jsonDecode(responseBody);
+      } catch (_) {
+        data = responseBody;
+      }
+    }
+
+    String errorMessage = '';
+    if (data is Map) {
+      errorMessage = (data['error'] ?? data['message'] ?? '').toString().trim();
+    } else if (data is String) {
+      errorMessage = data.trim();
+    }
+
+    switch (response.statusCode) {
+      case 200:
+      case 201:
+        return data;
+
+      case 400:
+        throw ApiException.badRequest(errorMessage);
+
+      case 401:
+        throw ApiException.unauthorized(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      case 403:
+        throw ApiException.forbidden(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      case 404:
+        throw ApiException.notFound(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      case 409:
+        throw ApiException.conflict(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      case 429:
+        throw ApiException.tooManyRequests(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      case 500:
+      case 502:
+      case 503:
+        throw ApiException.server(
+          errorMessage.isNotEmpty ? errorMessage : null,
+        );
+
+      default:
+        throw ApiException.unknown('رمز الحالة: ${response.statusCode}');
+    }
+  }
+
+  // Helpers للقراءة الآمنة
+  static Map<String, dynamic> _asMap(dynamic data) {
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+    return {};
+  }
+
+  static List<Map<String, dynamic>> _asList(dynamic data) {
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList();
+    }
+    return [];
+  }
+
+  // ============================================================
+  // قسم الزواج
+  // ============================================================
+
+  /// بحث الاستكشاف عبر Deno (فلترة + pagination على السيرفر)
+  static Future<List<Map<String, dynamic>>> getBrides({
+    int? page,
+    int limit = 10,
+    bool forceRefresh = false,
+    Map<String, dynamic>? filters,
+  }) async {
+    final result = await searchBrides(
+      page: page ?? 0,
+      limit: limit,
+      filters: filters,
+      forceRefresh: forceRefresh,
+    );
+    return result['items'] as List<Map<String, dynamic>>;
+  }
+
+  static Future<Map<String, dynamic>> searchBrides({
+    int page = 0,
+    int limit = 10,
+    Map<String, dynamic>? filters,
+    bool forceRefresh = false,
+  }) async {
+    if (limit <= 0) {
+      throw ArgumentError('limit يجب أن يكون أكبر من صفر');
+    }
+    if (page < 0) {
+      throw ArgumentError('page لا يمكن أن يكون سالباً');
+    }
+
+    // الكاش فقط لنفس الفلاتر وبدون forceRefresh
+    final filterKey = jsonEncode(filters ?? {});
+    final now = DateTime.now();
+    if (!forceRefresh &&
+        _bridesCache != null &&
+        _bridesCacheTime != null &&
+        _bridesCacheFilterKey == filterKey &&
+        _bridesCachePage == page &&
+        _bridesCacheLimit == limit &&
+        now.difference(_bridesCacheTime!) < _bridesCacheDuration) {
+      return {
+        'items': List<Map<String, dynamic>>.from(_bridesCache!),
+        'has_more': _bridesCacheHasMore,
+        'total': _bridesCacheTotal,
+        'page': page,
+        'limit': limit,
+      };
+    }
+
+    final data = await _request(
+      method: 'POST',
+      path: '/api/brides/search',
+      body: {
+        'page': page,
+        'limit': limit,
+        'filters': filters ?? <String, dynamic>{},
+      },
+    );
+
+    final map = _asMap(data);
+    final items = _asList(map['items']);
+
+    _bridesCache = items;
+    _bridesCacheTime = DateTime.now();
+    _bridesCacheFilterKey = filterKey;
+    _bridesCachePage = page;
+    _bridesCacheLimit = limit;
+    _bridesCacheHasMore = map['has_more'] == true;
+    _bridesCacheTotal = (map['total'] as num?)?.toInt() ?? items.length;
+
+    return {
+      'items': items,
+      'has_more': _bridesCacheHasMore,
+      'total': _bridesCacheTotal,
+      'page': page,
+      'limit': limit,
+    };
+  }
+
+  /// تسجيل audit / login_attempt عبر Deno (بدون الاعتماد على INSERT من العميل)
+  static Future<void> logAuthEvent({
+    required String kind,
+    required String identifier,
+    required bool success,
+    String? action,
+    String? details,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl/api/auth/events');
+      final headers = <String, String>{
+        'Content-Type': 'application/json',
+      };
+      final token =
+          Supabase.instance.client.auth.currentSession?.accessToken;
+      if (token != null && token.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      await http
+          .post(
+            uri,
+            headers: headers,
+            body: jsonEncode({
+              'kind': kind,
+              'identifier': identifier,
+              'success': success,
+              if (action != null) 'action': action,
+              if (details != null) 'details': details,
+            }),
+          )
+          .timeout(_defaultTimeout);
+    } catch (e) {
+      // لا نكسر تدفق المصادقة بسبب فشل السجل
+      assert(() {
+        // ignore: avoid_print
+        print('⚠️ logAuthEvent failed: $e');
+        return true;
+      }());
+    }
+  }
+
+  /// رغبات ما زالت قائمة: لا يُفتح بحث جديد حتى تنتهي.
+  static bool proposalBlocksGroomSearch(Map<String, dynamic> proposal) {
+    const open = {
+      'waiting',
+      'pending',
+      'awaiting_groom',
+      'accepted',
+      'pending_payment',
+      'pending_admin_review',
+      'matched',
+    };
+    return open.contains(proposal['status']?.toString());
+  }
+
+  static bool proposalNeedsContactExchange(Map<String, dynamic> proposal) {
+    const statuses = {
+      'pending_payment',
+      'pending_admin_review',
+      'matched',
+    };
+    return statuses.contains(proposal['status']?.toString());
+  }
+
+  static Future<List<Map<String, dynamic>>> getProposals() async {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/proposals',
+    );
+    return _asList(data);
+  }
+
+  static Future<bool> sendProposal(Map<String, dynamic> proposal) async {
+    final rawCode = proposal['bride_code'] ??
+        proposal['anonymous_code'] ??
+        proposal['brideCode'];
+
+    if (rawCode == null) return false;
+
+    final brideCode = rawCode.toString().trim();
+    if (brideCode.isEmpty) return false;
+
+    final result = await sendProposals([brideCode]);
+    return result['success'] == true;
+  }
+
+  static Future<Map<String, dynamic>> sendProposals(
+    List<String> brideCodes,
+  ) async {
+    if (brideCodes.isEmpty || brideCodes.length > AppConfig.maxGroomRequests) {
+      return {
+        'success': false,
+        'count': 0,
+        'message': 'يجب إرسال من 1 إلى ${AppConfig.maxGroomRequests} رغبات',
+      };
+    }
+
+    final cleaned = brideCodes.map((c) => c.trim()).toList();
+
+    if (cleaned.any((c) => c.isEmpty)) {
+      return {
+        'success': false,
+        'count': 0,
+        'message': 'يوجد كود فتاة غير صالح',
+      };
+    }
+
+    if (cleaned.toSet().length != cleaned.length) {
+      return {
+        'success': false,
+        'count': 0,
+        'message': 'لا يمكن تكرار نفس الفتاة ضمن الرغبات',
+      };
+    }
+
+    try {
+      final data = await _request(
+        method: 'POST',
+        path: '/api/proposals',
+        body: {'bride_codes': cleaned},
+      );
+
+      clearBridesCache();
+
+      final map = _asMap(data);
+
+      return {
+        'success': map['success'] == true,
+        'count': map['count'] ?? cleaned.length,
+        'message': map['message'] ?? 'تم إرسال الرغبات بنجاح',
+      };
+    } on ApiException catch (e) {
+      return {
+        'success': false,
+        'count': 0,
+        'message': e.userMessage,
+        'statusCode': e.statusCode,
+        'type': e.type,
+      };
+    }
+  }
+
+  // ============================================================
+  // قسم المحادثة
+  // ============================================================
+
+  static Future<List<Map<String, dynamic>>> getMessages(
+    String roomId,
+  ) async {
+    final cleaned = roomId.trim();
+    if (cleaned.isEmpty) return [];
+
+    final data = await _request(
+      method: 'GET',
+      path: '/api/messages',
+      query: {'room_id': cleaned},
+    );
+    return _asList(data);
+  }
+
+  static Future<Map<String, dynamic>> approveChatRoom(String roomId) async {
+    final data = await _request(
+      method: 'POST',
+      path: '/api/rooms/approve',
+      body: {'room_id': roomId.trim()},
+    );
+    return _asMap(data);
+  }
+
+  static Future<Map<String, dynamic>> rejectChatRoom(String roomId) async {
+    final data = await _request(
+      method: 'POST',
+      path: '/api/rooms/reject',
+      body: {'room_id': roomId.trim()},
+    );
+    return _asMap(data);
+  }
+
+  static Future<bool> reportChatRoom({
+    required String roomId,
+    required String reason,
+  }) async {
+    await _request(
+      method: 'POST',
+      path: '/api/rooms/report',
+      body: {'room_id': roomId.trim(), 'reason': reason.trim()},
+    );
+    return true;
+  }
+
+  static Future<bool> sendMessage(Map<String, dynamic> message) async {
+    final roomId = message['room_id']?.toString().trim();
+    final text = message['message_text']?.toString().trim();
+
+    if (roomId == null || roomId.isEmpty) return false;
+    if (text == null || text.isEmpty) return false;
+
+    try {
+      await _request(
+        method: 'POST',
+        path: '/api/messages',
+        body: {
+          'room_id': roomId,
+          'message_text': text,
+        },
+      );
+      return true;
+    } on ApiException {
+      return false;
+    }
+  }
+
+  /// GET /api/rooms/matched-contact?room_id=...
+  /// بيانات التواصل بعد تطابق + موافقة الإدارة (مع صورة الفتاة للشاب إن وُجدت).
+  static Future<Map<String, dynamic>> getMatchedContact(String roomId) async {
+    final cleaned = roomId.trim();
+    if (cleaned.isEmpty) {
+      throw ApiException.badRequest('معرّف الغرفة مطلوب');
+    }
+    final data = await _request(
+      method: 'GET',
+      path: '/api/rooms/matched-contact',
+      query: {'room_id': cleaned},
+    );
+    return _asMap(data);
+  }
+
+  /// موقوف: المحادثة أُزيلت من مسار الزواج.
+  static Future<Map<String, dynamic>?> createRoom(
+    Map<String, dynamic> room,
+  ) async {
+    return null;
+  }
+
+  /// POST /api/rooms/payment-notified
+  /// [party] = `groom` أو `bride`
+  static Future<bool> recordPaymentNotified(
+    String roomId, {
+    String party = 'groom',
+  }) async {
+    final cleaned = roomId.trim();
+    if (cleaned.isEmpty) return false;
+    final p = party.trim().toLowerCase() == 'bride' ? 'bride' : 'groom';
+    try {
+      await _request(
+        method: 'POST',
+        path: '/api/rooms/payment-notified',
+        body: {'room_id': cleaned, 'party': p},
+      );
+      return true;
+    } on ApiException {
+      return false;
+    }
+  }
+
+  /// توافق مع الاستدعاءات القديمة
+  static Future<bool> recordGroomPaymentNotified(String roomId) =>
+      recordPaymentNotified(roomId, party: 'groom');
+
+  /// POST /api/proposals/:id/accept
+  static Future<Map<String, dynamic>> acceptProposal(String proposalId) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب مطلوب'};
+    }
+    try {
+      final data = await _request(
+        method: 'POST',
+        path: '/api/proposals/$cleaned/accept',
+      );
+      return _asMap(data);
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.userMessage};
+    }
+  }
+
+  /// POST /api/proposals/:id/reject
+  static Future<Map<String, dynamic>> rejectProposal(String proposalId) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب مطلوب'};
+    }
+    try {
+      final data = await _request(
+        method: 'POST',
+        path: '/api/proposals/$cleaned/reject',
+      );
+      return _asMap(data);
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.userMessage};
+    }
+  }
+
+  /// POST /api/proposals/:id/confirm — تأكيد الشاب بعد رؤية الصورة
+  static Future<Map<String, dynamic>> confirmProposal(String proposalId) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب مطلوب'};
+    }
+    try {
+      final data = await _request(
+        method: 'POST',
+        path: '/api/proposals/$cleaned/confirm',
+      );
+      return _asMap(data);
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.userMessage};
+    }
+  }
+
+  /// POST /api/proposals/:id/reject-by-groom — حذف نهائي
+  static Future<Map<String, dynamic>> rejectProposalByGroom(
+    String proposalId,
+  ) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب مطلوب'};
+    }
+    try {
+      final data = await _request(
+        method: 'POST',
+        path: '/api/proposals/$cleaned/reject-by-groom',
+      );
+      return _asMap(data);
+    } on ApiException catch (e) {
+      return {'success': false, 'message': e.userMessage};
+    }
+  }
+
+  /// GET /api/proposals/:id/bride-preview
+  static Future<Map<String, dynamic>> getBridePreviewForProposal(
+    String proposalId,
+  ) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب غير صالح'};
+    }
+    final data = await _request(
+      method: 'GET',
+      path: '/api/proposals/$cleaned/bride-preview',
+    );
+    return _asMap(data);
+  }
+
+  /// POST /api/proposals/:id/payment-notified
+  static Future<Map<String, dynamic>> recordProposalPaymentNotified(
+    String proposalId, {
+    required String party,
+  }) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      return {'success': false, 'message': 'معرّف الطلب مطلوب'};
+    }
+    final p = party.trim().toLowerCase() == 'bride' ? 'bride' : 'groom';
+    final data = await _request(
+      method: 'POST',
+      path: '/api/proposals/$cleaned/payment-notified',
+      body: {'party': p},
+    );
+    return _asMap(data);
+  }
+
+  /// GET /api/proposals/:id/matched-contact
+  static Future<Map<String, dynamic>> getProposalMatchedContact(
+    String proposalId,
+  ) async {
+    final cleaned = proposalId.trim();
+    if (cleaned.isEmpty) {
+      throw ApiException.badRequest('معرّف الطلب مطلوب');
+    }
+    final data = await _request(
+      method: 'GET',
+      path: '/api/proposals/$cleaned/matched-contact',
+    );
+    return _asMap(data);
+  }
+
+  // ============================================================
+  // الإدارة العامة
+  // ============================================================
+
+  static Future<Map<String, dynamic>> getStats() async {
+    try {
+      final data = await _request(method: 'GET', path: '/api/stats');
+      return _asMap(data);
+    } on ApiException {
+      return {};
+    }
+  }
+
+  static Future<Map<String, dynamic>> getAdminData() async {
+    try {
+      final data = await _request(
+        method: 'GET',
+        path: '/api/admin/users',
+      );
+      return _asMap(data);
+    } on ApiException {
+      return {};
+    }
+  }
+
+  static Future<bool> contactAdmin(Map<String, dynamic> message) async {
+    final text = message['message']?.toString().trim();
+
+    if (text == null || text.isEmpty) return false;
+
+    try {
+      await _request(
+        method: 'POST',
+        path: '/api/contact',
+        body: {'message': text},
+      );
+      return true;
+    } on ApiException {
+      return false;
+    }
+  }
+
+  /// ربط بصمة الجهاز (حد حسابين لكل جهاز)
+  static Future<Map<String, dynamic>> registerDeviceFingerprint({
+    required String fingerprint,
+    String? platform,
+  }) async {
+    final data = await _request(
+      method: 'POST',
+      path: '/api/device/register',
+      body: {
+        'fingerprint': fingerprint,
+        if (platform != null && platform.isNotEmpty) 'platform': platform,
+      },
+    );
+    return _asMap(data);
+  }
+
+  static Future<void> touchLastSeen() async {
+    try {
+      await _request(method: 'POST', path: '/api/device/touch');
+    } on ApiException {
+      // غير حرج
+    }
+  }
+
+  // ============================================================
+  // سوق الخدمات
+  // ============================================================
+
+  static Future<List<Map<String, dynamic>>> getServiceSubcategories(
+    String categoryId,
+  ) async {
+    try {
+      final data = await _request(
+        method: 'GET',
+        path: '/api/service-subcategories',
+        query: {'category_id': categoryId},
+      );
+      final list = _asList(data);
+      if (list.isNotEmpty) return list;
+    } catch (_) {
+      // الواجهة المنشورة قد لا تعرف هذا المسار بعد.
+    }
+    return _subcategoriesFromDatabase(categoryId);
+  }
+
+  static Future<List<Map<String, dynamic>>> _subcategoriesFromDatabase(
+    String categoryId,
+  ) async {
+    try {
+      final rows = await Supabase.instance.client
+          .from('service_subcategories')
+          .select('id, category_id, name, sort_order')
+          .eq('category_id', categoryId)
+          .eq('is_active', true)
+          .order('sort_order');
+      return _asList(rows);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  /// ربط الخدمة بفئتها الفرعية. القراءة عامة ومسموحة بسياسة الجدول.
+  static Future<Map<String, String>> subcategoryIdByService(
+    String categoryId,
+  ) async {
+    try {
+      final rows = await Supabase.instance.client
+          .from('services')
+          .select('id, subcategory_id')
+          .eq('category_id', categoryId)
+          .eq('is_active', true);
+      final map = <String, String>{};
+      for (final row in _asList(rows)) {
+        final id = row['id']?.toString() ?? '';
+        final sub = row['subcategory_id']?.toString() ?? '';
+        if (id.isNotEmpty && sub.isNotEmpty) map[id] = sub;
+      }
+      return map;
+    } catch (_) {
+      return {};
+    }
+  }
+
+  /// يُبقي خدمات النوع المختار حتى لو الواجهة تجاهلت subcategory_id.
+  static Future<List<Map<String, dynamic>>> keepSubcategory(
+    List<Map<String, dynamic>> services, {
+    required String? categoryId,
+    required String? subcategoryId,
+  }) async {
+    if (subcategoryId == null || subcategoryId.isEmpty) return services;
+    final tagged = services
+        .where((s) => (s['subcategory_id']?.toString() ?? '').isNotEmpty)
+        .length;
+    if (services.isNotEmpty && tagged == services.length) {
+      return services
+          .where((s) => s['subcategory_id'].toString() == subcategoryId)
+          .toList();
+    }
+    if (categoryId == null || categoryId.isEmpty) return services;
+    final map = await subcategoryIdByService(categoryId);
+    return services
+        .where((s) => map[s['id']?.toString()] == subcategoryId)
+        .toList();
+  }
+
+  static Future<List<Map<String, dynamic>>> getServiceCategories() async {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/service-categories',
+    );
+    return _asList(data);
+  }
+
+  static Future<Map<String, dynamic>> getServices({
+    String? q,
+    String? categoryId,
+    String? governorate,
+    num? minPrice,
+    num? maxPrice,
+    num? minRating,
+    String? sort,
+    String? subcategoryId,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final query = <String, String>{
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+      if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+      if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+      if (subcategoryId != null && subcategoryId.isNotEmpty)
+        'subcategory_id': subcategoryId,
+      if (governorate != null && governorate.isNotEmpty) 'governorate': governorate,
+      if (minPrice != null) 'min_price': minPrice.toString(),
+      if (maxPrice != null) 'max_price': maxPrice.toString(),
+      if (minRating != null) 'min_rating': minRating.toString(),
+      if (sort != null && sort.isNotEmpty) 'sort': sort,
+    };
+
+    final data = await _request(
+      method: 'GET',
+      path: '/api/services',
+      query: query,
+    );
+    return _asMap(data);
+  }
+
+  static Future<Map<String, dynamic>> getServiceDetails(String id) async {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/service-details',
+      query: {'id': id},
+    );
+    return _asMap(data);
+  }
+
+  static Future<Map<String, dynamic>> getProviders({
+    String? q,
+    String? governorate,
+    String? categoryId,
+    num? minRating,
+    String? sort,
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final query = <String, String>{
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+      if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+      if (governorate != null && governorate.isNotEmpty) 'governorate': governorate,
+      if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
+      if (minRating != null) 'min_rating': minRating.toString(),
+      if (sort != null && sort.isNotEmpty) 'sort': sort,
+    };
+
+    final data = await _request(
+      method: 'GET',
+      path: '/api/providers',
+      query: query,
+    );
+    return _asMap(data);
+  }
+
+  static Future<Map<String, dynamic>> getProviderDetails(String id) async {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/provider-details',
+      query: {'id': id},
+    );
+    return _asMap(data);
+  }
+
+  static Future<List<Map<String, dynamic>>> getAdvertisements() async {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/advertisements',
+    );
+    return _asList(data);
+  }
+
+  /// GET /api/home-promo — بطاقات «لماذا ميثاق»
+  static Future<List<Map<String, dynamic>>> getHomePromoCards() async {
+    try {
+      final data = await _request(
+        method: 'GET',
+        path: '/api/home-promo',
+      );
+      return _asList(data);
+    } on ApiException {
+      return [];
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> getDynamicFields({
+    required String categoryId,
+    required String scope,
+  }) async {
+    if (scope != 'service' && scope != 'provider') {
+      throw ArgumentError('scope يجب أن يكون service أو provider');
+    }
+
+    final data = await _request(
+      method: 'GET',
+      path: '/api/dynamic-fields',
+      query: {
+        'category_id': categoryId,
+        'scope': scope,
+      },
+    );
+    return _asList(data);
+  }
+
+  static Future<Map<String, dynamic>> getGroomDetails(
+    String groomCode,
+  ) async {
+    final cleaned = groomCode.trim();
+
+    if (cleaned.isEmpty) {
+      throw ApiException.badRequest('كود الشاب مطلوب');
+    }
+
+    final data = await _request(
+      method: 'GET',
+      path: '/api/groom-details',
+      query: {'groom_code': cleaned},
+    );
+    return _asMap(data);
+  }
+
+  /// رابط موقّع لصورة الملف الشخصي لصاحب الحساب.
+  static Future<String?> getMyPersonalPhotoUrl() async {
+    try {
+      final data = await _request(
+        method: 'GET',
+        path: '/api/account/personal-photo',
+      );
+      if (data is! Map) {
+        debugPrint('getMyPersonalPhotoUrl: unexpected payload $data');
+        return null;
+      }
+      final url = data['signed_url']?.toString().trim();
+      if (url == null || url.isEmpty) {
+        debugPrint(
+          'getMyPersonalPhotoUrl: empty signed_url path=${data['path']}',
+        );
+        return null;
+      }
+      return url;
+    } catch (e) {
+      debugPrint('getMyPersonalPhotoUrl error: $e');
+      return null;
+    }
+  }
+// ============================================================
+// الإشعارات
+// ============================================================
+
+/// GET /api/notifications
+static Future<Map<String, dynamic>> getNotifications({
+  int limit = 50,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/notifications',
+    query: {
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    },
+  );
+  return _asMap(data);
+}
+
+/// GET /api/notifications/unread-count
+static Future<int> getUnreadNotificationsCount() async {
+  try {
+    final data = await _request(
+      method: 'GET',
+      path: '/api/notifications/unread-count',
+    );
+
+    if (data is Map) {
+      return (data['count'] as num?)?.toInt() ?? 0;
+    }
+    return 0;
+  } on ApiException {
+    return 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+/// POST /api/notifications/:id/read
+static Future<void> markNotificationRead(String id) async {
+  final cleaned = id.trim();
+  if (cleaned.isEmpty) return;
+
+  try {
+    await _request(
+      method: 'POST',
+      path: '/api/notifications/$cleaned/read',
+    );
+  } on ApiException {
+    // نتجاهل الأخطاء
+  }
+}
+
+/// POST /api/notifications/read-all
+static Future<void> markAllNotificationsRead() async {
+  try {
+    await _request(
+      method: 'POST',
+      path: '/api/notifications/read-all',
+    );
+  } on ApiException {
+    // نتجاهل الأخطاء
+  }
+}
+
+// ============================================================
+// تسجيل ملف مستخدم الخدمات
+// ============================================================
+
+/// POST /api/services/signup
+///
+/// يحفظ ملف مستخدم الخدمات (الاسم، المحافظة، الواتساب).
+/// يُستدعى مرة واحدة بعد التسجيل لأول مرة.
+static Future<Map<String, dynamic>> signupServicesUser({
+  required String fullName,
+  required String governorate,
+  required String whatsapp,
+}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/services/signup',
+    body: {
+      'full_name': fullName.trim(),
+      'governorate': governorate.trim(),
+      'whatsapp': whatsapp.trim(),
+    },
+  );
+  return _asMap(data);
+}
+// ============================================================
+// حجوزات الخدمات (عبر Deno فقط)
+// ============================================================
+
+/// POST /api/bookings/quote
+static Future<Map<String, dynamic>> quoteServiceBooking({
+  required String serviceId,
+  String? packageId,
+  num? quantity,
+  num? durationValue,
+  List<String>? addonIds,
+  String? discountId,
+  int guestsCount = 0,
+}) async {
+  if (serviceId.trim().isEmpty) {
+    throw ApiException.badRequest('معرّف الخدمة مطلوب');
+  }
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/quote',
+    body: {
+      'service_id': serviceId.trim(),
+      'package_id': packageId,
+      'quantity': quantity,
+      'duration_value': durationValue,
+      'addon_ids': addonIds ?? const <String>[],
+      'discount_id': discountId,
+      'guests_count': guestsCount,
+    },
+  );
+  return _asMap(data);
+}
+
+/// POST /api/bookings
+static Future<Map<String, dynamic>> createServiceBooking({
+  required String serviceId,
+  required String bookingDate,
+  String? bookingTime,
+  String? location,
+  int guestsCount = 0,
+  String? notes,
+  String? packageId,
+  num? quantity,
+  num? durationValue,
+  List<String>? addonIds,
+  String? discountId,
+}) async {
+  if (serviceId.trim().isEmpty) {
+    throw ApiException.badRequest('معرّف الخدمة مطلوب');
+  }
+  if (bookingDate.trim().isEmpty) {
+    throw ApiException.badRequest('تاريخ الحجز مطلوب');
+  }
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings',
+    body: {
+      'service_id': serviceId.trim(),
+      'booking_date': bookingDate.trim(),
+      'booking_time': bookingTime,
+      'location': location,
+      'guests_count': guestsCount,
+      'notes': notes,
+      'package_id': packageId,
+      'quantity': quantity,
+      'duration_value': durationValue,
+      'addon_ids': addonIds ?? const <String>[],
+      'discount_id': discountId,
+    },
+  );
+  return _asMap(data);
+}
+
+/// POST /api/bookings/cancel
+static Future<Map<String, dynamic>> cancelServiceBooking({
+  required String bookingId,
+}) async {
+  if (bookingId.trim().isEmpty) {
+    throw ApiException.badRequest('معرّف الحجز مطلوب');
+  }
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/cancel',
+    body: {'booking_id': bookingId.trim()},
+  );
+  return _asMap(data);
+}
+
+/// POST /api/bookings/review
+///
+/// يتحقق الخادم أن الحجز مكتمل ويملكه المستخدم قبل حفظ التقييم.
+static Future<Map<String, dynamic>> submitBookingReview({
+  required String bookingId,
+  required String target,
+  required int rating,
+  String? comment,
+}) async {
+  if (bookingId.trim().isEmpty) {
+    throw ApiException.badRequest('معرّف الحجز مطلوب');
+  }
+  if (target != 'service' && target != 'provider') {
+    throw ApiException.badRequest('نوع التقييم غير صالح');
+  }
+  if (rating < 1 || rating > 5) {
+    throw ApiException.badRequest('التقييم يجب أن يكون بين 1 و 5');
+  }
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/review',
+    body: {
+      'booking_id': bookingId.trim(),
+      'target': target,
+      'rating': rating,
+      'comment': comment,
+    },
+  );
+  return _asMap(data);
+}
+
+// ============================================================
+// رفع إشعار دفع العربون
+// ============================================================
+
+/// POST /api/bookings/:id/deposit
+///
+/// يُرسل مسار صورة إشعار الدفع للـ Deno.
+/// (الصورة نفسها تُرفع مسبقًا إلى Supabase Storage مباشرة)
+static Future<Map<String, dynamic>> uploadBookingDeposit({
+  required String bookingId,
+  required String proofPath,
+}) async {
+  if (bookingId.trim().isEmpty) {
+    throw ApiException.badRequest('معرّف الحجز مطلوب');
+  }
+  if (proofPath.trim().isEmpty) {
+    throw ApiException.badRequest('مسار الإشعار مطلوب');
+  }
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/$bookingId/deposit',
+    body: {
+      'proof_path': proofPath.trim(),
+    },
+  );
+  return _asMap(data);
+}
+// ═══════════════════════════════════════════════════════════
+// 🎉  Party — تنظيم الحفلات
+// ═══════════════════════════════════════════════════════════
+
+/// GET /api/party/requests
+///
+/// طلبات المستخدم الحالي.
+static Future<Map<String, dynamic>> getMyPartyRequests({
+  int limit = 20,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/party/requests',   // ← مباشرة
+    query: {
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    },
+  );
+  return _asMap(data);
+}
+
+/// POST /api/party/requests
+///
+/// إنشاء طلب تنظيم حفلة جديد.
+static Future<Map<String, dynamic>> createPartyRequest({
+  required String partyType,
+  required String governorate,
+  required String paymentProofPath,
+  num? budgetMin,
+  num? budgetMax,
+  String? address,
+  String? description,
+  required List<String> essentialCategories,
+  required List<String> luxuryCategories,
+  List<String> providerIds = const [],  // ⭐ جديد
+  List<String> serviceIds = const [],   // ⭐ جديد
+}) async {
+  // ... التحقق
+
+  final data = await _request(
+    method: 'POST',
+    path: '/api/party/requests',
+    body: {
+      'party_type': partyType,
+      'governorate': governorate.trim(),
+      'payment_proof_path': paymentProofPath.trim(),
+      if (budgetMin != null) 'budget_min': budgetMin,
+      if (budgetMax != null) 'budget_max': budgetMax,
+      if (address != null && address.trim().isNotEmpty)
+        'address': address.trim(),
+      if (description != null && description.trim().isNotEmpty)
+        'description': description.trim(),
+      'essential_categories': essentialCategories,
+      'luxury_categories': luxuryCategories,
+      // ⭐ جديد
+      if (providerIds.isNotEmpty) 'provider_ids': providerIds,
+      if (serviceIds.isNotEmpty) 'service_ids': serviceIds,
+    },
+  );
+  return _asMap(data);
+}
+
+/// إعدادات عامة (رقم شام كاش، سعر الطلب).
+///
+/// ⚠️ مؤقتًا: قيم ثابتة. سنُضيف API call لاحقًا.
+static Future<Map<String, dynamic>> getPublicSettings() async {
+  return {
+    'sham_cash_number': 'ce40f4497f5429b1db116eb9cdf4c307',
+    'party_request_fee_usd': 2,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// تنظيم مناسبة (occasion) — مسار جديد منفصل عن party/bookings
+// ═══════════════════════════════════════════════════════════
+
+static Future<Map<String, dynamic>> getMyOccasionRequests({
+  int limit = 20,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/occasion/requests',
+    query: {
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getOccasionRequestDetails(
+  String id,
+) async {
+  final cleaned = id.trim();
+  if (cleaned.isEmpty) return {};
+  final data = await _request(
+    method: 'GET',
+    path: '/api/occasion/requests/$cleaned',
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> createOccasionRequest({
+  required String occasionType,
+  required String governorate,
+  required String whatsapp,
+  required List<Map<String, dynamic>> items,
+  String? address,
+  String? notes,
+  String? discountCode,
+  String? occasionDate,
+  String? clientRequestKey,
+}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/occasion/requests',
+    body: {
+      'occasion_type': occasionType,
+      'governorate': governorate.trim(),
+      'whatsapp': whatsapp.trim(),
+      'items': items,
+      if (address != null && address.trim().isNotEmpty)
+        'address': address.trim(),
+      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      if (discountCode != null && discountCode.trim().isNotEmpty)
+        'discount_code': discountCode.trim(),
+      if (occasionDate != null && occasionDate.trim().isNotEmpty)
+        'occasion_date': occasionDate.trim(),
+      if (clientRequestKey != null && clientRequestKey.trim().isNotEmpty)
+        'client_request_key': clientRequestKey.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> decideOccasionQuote({
+  required String requestId,
+  required String quoteId,
+  required String action,
+  String? note,
+}) async {
+  final rid = requestId.trim();
+  final qid = quoteId.trim();
+  if (rid.isEmpty || qid.isEmpty) return {};
+  final data = await _request(
+    method: 'POST',
+    path: '/api/occasion/requests/$rid/quote-decision',
+    body: {
+      'quote_id': qid,
+      'action': action,
+      if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+}

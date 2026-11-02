@@ -1,0 +1,1296 @@
+// lib/widgets/islamic_decorations.dart
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'screen_fit.dart';
+import '../app_colors.dart';
+import '../design/tokens.dart';
+
+// ============================================================
+// 1. الزخرفة الهندسية الإسلامية (محسّنة)
+// ============================================================
+
+class GeometricPatternPainter extends CustomPainter {
+  final Color color;
+  final double spacing;
+  final double strokeWidth;
+  final bool drawConnectingLines;
+
+  GeometricPatternPainter({
+    this.color = AppColors.patternGold,
+    this.spacing = 60,
+    this.strokeWidth = 0.7,
+    this.drawConnectingLines = false,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..isAntiAlias = true;
+
+    for (double x = -spacing; x < size.width + spacing; x += spacing) {
+      for (double y = -spacing; y < size.height + spacing; y += spacing) {
+        _drawIslamicStar(canvas, Offset(x, y), spacing * 0.22, paint);
+
+        if (drawConnectingLines) {
+          _drawConnectingDiamond(
+            canvas,
+            Offset(x + spacing / 2, y + spacing / 2),
+            spacing * 0.15,
+            paint,
+          );
+        }
+      }
+    }
+  }
+
+  void _drawIslamicStar(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
+    final path = Path();
+    const points = 8;
+
+    for (int i = 0; i < points; i++) {
+      final outerAngle = (i * math.pi / 4) - math.pi / 2;
+      final innerAngle = outerAngle + math.pi / 8;
+
+      final outer = Offset(
+        center.dx + radius * math.cos(outerAngle),
+        center.dy + radius * math.sin(outerAngle),
+      );
+
+      final inner = Offset(
+        center.dx + radius * 0.42 * math.cos(innerAngle),
+        center.dy + radius * 0.42 * math.sin(innerAngle),
+      );
+
+      if (i == 0) {
+        path.moveTo(outer.dx, outer.dy);
+      } else {
+        path.lineTo(outer.dx, outer.dy);
+      }
+
+      path.lineTo(inner.dx, inner.dy);
+    }
+
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  void _drawConnectingDiamond(
+    Canvas canvas,
+    Offset center,
+    double radius,
+    Paint paint,
+  ) {
+    final path = Path()
+      ..moveTo(center.dx, center.dy - radius)
+      ..lineTo(center.dx + radius, center.dy)
+      ..lineTo(center.dx, center.dy + radius)
+      ..lineTo(center.dx - radius, center.dy)
+      ..close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant GeometricPatternPainter oldDelegate) {
+    return oldDelegate.color != color ||
+        oldDelegate.spacing != spacing ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.drawConnectingLines != drawConnectingLines;
+  }
+}
+
+// ============================================================
+// 2. الخلفية الإسلامية (محسّنة)
+// ============================================================
+
+class IslamicBackground extends StatelessWidget {
+  final Widget child;
+  final bool showPattern;
+  final Color? patternColor;
+  final double patternSpacing;
+
+  const IslamicBackground({
+    super.key,
+    required this.child,
+    this.showPattern = true,
+    this.patternColor,
+    this.patternSpacing = 60,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+      child: Stack(
+        children: [
+          if (showPattern)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: RepaintBoundary(
+                  child: CustomPaint(
+                    painter: GeometricPatternPainter(
+                      color: patternColor ?? AppColors.patternGold,
+                      spacing: patternSpacing,
+                    ),
+                    isComplex: true,
+                    willChange: false,
+                  ),
+                ),
+              ),
+            ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 3. Scaffold إسلامي
+// ============================================================
+
+class IslamicScaffold extends StatelessWidget {
+  final PreferredSizeWidget? appBar;
+  final Widget body;
+  final bool showPattern;
+  final Widget? floatingActionButton;
+  final Color? backgroundColor;
+
+  const IslamicScaffold({
+    super.key,
+    this.appBar,
+    required this.body,
+    this.showPattern = true,
+    this.floatingActionButton,
+    this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: backgroundColor ?? AppColors.background,
+      appBar: appBar,
+      floatingActionButton: floatingActionButton,
+      body: SafeArea(
+        top: appBar == null,
+        child: IslamicBackground(
+          showPattern: showPattern,
+          child: ScreenFrame(child: body),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 4. AppBar مزخرف (محسّن)
+// ============================================================
+
+class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final String? subtitle;
+  final List<Widget>? actions;
+  final Color? accentColor;
+  final Widget? leading;
+  final bool showGoldLine;
+
+  const IslamicAppBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.actions,
+    this.accentColor,
+    this.leading,
+    this.showGoldLine = true,
+  });
+
+  double get _titleScale {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return 1;
+    final scale = MediaQueryData.fromView(views.first).textScaler.scale(1);
+    return scale.clamp(1.0, 1.6);
+  }
+
+  @override
+  Size get preferredSize {
+    final bar = subtitle != null ? 70.0 : 58.0;
+    return Size.fromHeight(bar * _titleScale + 2);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = accentColor ?? AppColors.primary;
+    final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.6);
+    final toolbarHeight = (subtitle != null ? 70.0 : 58.0) * scale;
+    final gradient = accentColor == null
+        ? AppColors.headerGradient
+        : LinearGradient(
+            colors: [
+              Color.lerp(color, Colors.white, 0.08)!,
+              color,
+            ],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+          );
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: gradient,
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: toolbarHeight,
+        centerTitle: true,
+        leading: leading,
+        actions: actions,
+        title: subtitle != null
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 11,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+              ),
+        bottom: showGoldLine
+            ? PreferredSize(
+                preferredSize: const Size.fromHeight(2),
+                child: Container(
+                  height: 2,
+                  decoration: const BoxDecoration(
+                    gradient: AppColors.goldGradient,
+                  ),
+                ),
+              )
+            : null,
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 5. فاصل ذهبي مزخرف
+// ============================================================
+
+class OrnamentDivider extends StatelessWidget {
+  final double width;
+  final Color? color;
+
+  const OrnamentDivider({
+    super.key,
+    this.width = 120,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? AppColors.gold;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available = constraints.maxWidth;
+        final resolved = available.isFinite && available < width
+            ? available
+            : width;
+        return SizedBox(
+      width: resolved,
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    c.withValues(alpha: 0.0),
+                    c.withValues(alpha: 0.42),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Icon(Icons.auto_awesome, size: 12, color: c.withValues(alpha: 0.85)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    c.withValues(alpha: 0.42),
+                    c.withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+        );
+      },
+    );
+  }
+}
+
+// ============================================================
+// 6. بطاقة الآية (محسّنة)
+// ============================================================
+
+class AyahCard extends StatelessWidget {
+  final String ayah;
+  final String reference;
+  final bool showOrnament;
+
+  const AyahCard({
+    super.key,
+    required this.ayah,
+    required this.reference,
+    this.showOrnament = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: AppColors.spaceSm),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 18,
+      ),
+      decoration: BoxDecoration(
+        gradient: AppColors.goldGradientSoft,
+        borderRadius: BorderRadius.circular(AppColors.radiusLg),
+        border: Border.all(
+          color: AppColors.gold.withValues(alpha: 0.35),
+          width: 1,
+        ),
+        boxShadow: AppColors.shadowSubtle,
+      ),
+      child: Stack(
+        children: [
+          // زخرفة خلفية
+          if (showOrnament)
+            Positioned(
+              top: -20,
+              left: -20,
+              child: Icon(
+                Icons.auto_awesome,
+                size: 60,
+                color: AppColors.gold.withValues(alpha: 0.08),
+              ),
+            ),
+          Positioned(
+            bottom: -20,
+            right: -20,
+            child: Icon(
+              Icons.auto_awesome,
+              size: 60,
+              color: AppColors.gold.withValues(alpha: 0.08),
+            ),
+          ),
+
+          Column(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.goldSoft,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.gold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.format_quote_rounded,
+                  size: 20,
+                  color: AppColors.goldDark,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                ayah,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 15,
+                  height: 2.1,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+              OrnamentDivider(width: 80),
+              const SizedBox(height: 8),
+              Text(
+                reference,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: 'Tajawal',
+                  fontSize: 11,
+                  color: AppColors.goldDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 7. شعار ميثاق (محسّن)
+// ============================================================
+
+class IslamicLogoFrame extends StatelessWidget {
+  final double size;
+  final bool showTitle;
+  final String? subtitle;
+  final bool showOrnamentalRing;
+
+  const IslamicLogoFrame({
+    super.key,
+    this.size = 120,
+    this.showTitle = true,
+    this.subtitle,
+    this.showOrnamentalRing = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dpr = MediaQuery.of(context).devicePixelRatio;
+    final radius = size * 0.24;
+    final cacheSize = (size * dpr).toInt();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            // حلقة زخرفية خارجية
+            if (showOrnamentalRing)
+              Container(
+                width: size + 16,
+                height: size + 16,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.gold.withValues(alpha: 0.25),
+                    width: 1.5,
+                  ),
+                ),
+              ),
+            // إطار الشعار — خلفية أبيض كريمي مثل أيقونة التطبيق.
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(radius),
+                border: Border.all(
+                  color: AppColors.gold,
+                  width: 2.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.12),
+                    blurRadius: 24,
+                    offset: const Offset(0, 10),
+                  ),
+                  BoxShadow(
+                    color: AppColors.gold.withValues(alpha: 0.18),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              // الشعار ذهبي بخلفية شفافة فوق الكريمي؛ contain مع هامش
+              // حتى لا تُقصّ المئذنة والهلال.
+              child: Padding(
+                padding: EdgeInsets.all(size * 0.13),
+                child: Image.asset(
+                  AppAssets.logo,
+                  fit: BoxFit.contain,
+                  cacheWidth: cacheSize,
+                  filterQuality: FilterQuality.medium,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Icon(
+                        Icons.favorite,
+                        color: AppColors.gold,
+                        size: size * 0.42,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (showTitle) ...[
+          const SizedBox(height: 18),
+          const Text(
+            'ميثاق',
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primary,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'تيسير الزواج الشرعي',
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+        if (subtitle != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            subtitle!,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 13,
+              color: AppColors.textSecondary,
+              height: 1.6,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// ============================================================
+// 8. بطاقة بوابة ميثاق (محسّنة)
+// ============================================================
+
+class IslamicGatewayCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Color accentColor;
+  final VoidCallback onTap;
+  final String? badge;
+
+  const IslamicGatewayCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.accentColor,
+    required this.onTap,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final darkerAccent = Color.lerp(accentColor, Colors.black, 0.18)!;
+
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(AppColors.radiusLg),
+      elevation: 0,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppColors.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppColors.radiusLg),
+            border: Border.all(color: AppColors.borderLight),
+            boxShadow: AppColors.shadowSoft,
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [accentColor, darkerAccent],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accentColor.withValues(alpha: 0.25),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.goldLight,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        if (badge != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.errorLight,
+                              borderRadius:
+                                  BorderRadius.circular(AppColors.radiusRound),
+                            ),
+                            child: Text(
+                              badge!,
+                              style: const TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        height: 1.5,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_ios_new,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 9. شريط مراحل التسجيل (محسّن)
+// ============================================================
+
+class IslamicStepBanner extends StatelessWidget {
+  final int currentStep;
+  final int totalSteps;
+  final String title;
+  final String? subtitle;
+
+  const IslamicStepBanner({
+    super.key,
+    required this.currentStep,
+    required this.totalSteps,
+    required this.title,
+    this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeTotal = totalSteps <= 0 ? 1 : totalSteps;
+    final safeCurrent = currentStep.clamp(0, safeTotal);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      decoration: BoxDecoration(
+        gradient: AppColors.goldGradientSoft,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.gold.withValues(alpha: 0.35),
+          ),
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.goldSoft,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.gold.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: const Icon(
+                  Icons.auto_awesome,
+                  size: 20,
+                  color: AppColors.goldDark,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle ?? 'المرحلة $safeCurrent من $safeTotal',
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(AppColors.radiusRound),
+                ),
+                child: Text(
+                  '${(safeCurrent / safeTotal * 100).round()}%',
+                  style: const TextStyle(
+                    fontFamily: 'Tajawal',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(
+              safeTotal,
+              (i) {
+                final isCompleted = i < safeCurrent;
+                return Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: 6,
+                    margin: EdgeInsets.only(left: i > 0 ? 6 : 0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      gradient: isCompleted
+                          ? AppColors.goldGradient
+                          : null,
+                      color: isCompleted
+                          ? null
+                          : AppColors.gold.withValues(alpha: 0.18),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 10. بطاقة ميثاق العامة (محسّنة)
+// ============================================================
+
+class IslamicCard extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onTap;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final bool showShadow;
+  final double radius;
+
+  const IslamicCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+    this.onTap,
+    this.backgroundColor,
+    this.borderColor,
+    this.showShadow = true,
+    this.radius = AppColors.radiusLg,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = Container(
+      width: double.infinity,
+      padding: padding,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? AppColors.surface,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(
+          color: borderColor ?? AppColors.borderLight,
+          width: 0.8,
+        ),
+        boxShadow: showShadow ? AppColors.shadowSoft : null,
+      ),
+      child: child,
+    );
+
+    if (onTap == null) return content;
+
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(radius),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(radius),
+        child: content,
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 11. زر ميثاق (محسّن)
+// ============================================================
+
+class IslamicButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final Color? color;
+  final bool isLoading;
+  final Widget? icon;
+  final bool isOutlined;
+  final bool isFullWidth;
+
+  const IslamicButton({
+    super.key,
+    required this.label,
+    this.onPressed,
+    this.color,
+    this.isLoading = false,
+    this.icon,
+    this.isOutlined = false,
+    this.isFullWidth = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final btnColor = color ?? AppColors.primary;
+
+    final button = isOutlined
+        ? OutlinedButton(
+            onPressed: isLoading ? null : onPressed,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: btnColor,
+              side: BorderSide(color: btnColor, width: 1.5),
+              minimumSize: const Size(0, 52),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppColors.radiusMd),
+              ),
+              textStyle: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            child: _buildChild(btnColor, isOutlined: true),
+          )
+        : ElevatedButton(
+            onPressed: isLoading ? null : onPressed,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: btnColor,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.border,
+              disabledForegroundColor: AppColors.mutedText,
+              elevation: 0,
+              minimumSize: const Size(0, 52),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppColors.radiusMd),
+                side: BorderSide(
+                  color: AppColors.gold.withValues(alpha: 0.35),
+                  width: 0.8,
+                ),
+              ),
+              textStyle: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            child: _buildChild(btnColor),
+          );
+
+    return isFullWidth
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
+  }
+
+  Widget _buildChild(Color btnColor, {bool isOutlined = false}) {
+    if (isLoading) {
+      return SizedBox(
+        width: 22,
+        height: 22,
+        child: CircularProgressIndicator(
+          color: isOutlined ? btnColor : Colors.white,
+          strokeWidth: 2,
+        ),
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bounded = constraints.maxWidth.isFinite;
+        final labelText = Text(
+          label,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          textAlign: TextAlign.center,
+        );
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: bounded ? MainAxisSize.max : MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              icon!,
+              const SizedBox(width: 8),
+            ],
+            if (bounded) Flexible(child: labelText) else labelText,
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ============================================================
+// 12. مؤشر تحميل مزخرف
+// ============================================================
+
+class IslamicLoadingIndicator extends StatelessWidget {
+  final String? message;
+
+  const IslamicLoadingIndicator({super.key, this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 3,
+            ),
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              message!,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 13. حالة فارغة موحّدة
+// ============================================================
+
+class IslamicEmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const IslamicEmptyState({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.gold.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
+              ),
+              child: Icon(
+                icon,
+                size: 46,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Tajawal',
+                fontSize: 13,
+                height: 1.7,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 24),
+              IslamicButton(
+                label: actionLabel!,
+                onPressed: onAction,
+                isFullWidth: false,
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// 14. إطار القوس (Mihrab) — من صور الهوية
+// ------------------------------------------------------------
+// الشكل المعماري الإسلامي المميّز: قوس مدبّب في الأعلى.
+// يُستخدم لتأطير الصور في المقدمة والشاشات التعريفية،
+// بدل الصور المستطيلة العادية.
+//
+// التنفيذ بـ ClipPath حقيقي (لا صورة خلفية)، فيبقى حاداً
+// على كل كثافة شاشة ولا يحتاج أصولاً إضافية.
+// ============================================================
+
+class ArchFrame extends StatelessWidget {
+  const ArchFrame({
+    super.key,
+    required this.child,
+    this.width,
+    this.height,
+    this.borderColor,
+    this.borderWidth = 1.6,
+    this.padding = 0,
+    this.backgroundColor,
+  });
+
+  final Widget child;
+  final double? width;
+  final double? height;
+  final Color? borderColor;
+  final double borderWidth;
+  final double padding;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final gold = borderColor ?? AppColors.gold;
+
+    final framed = Container(
+      decoration: BoxDecoration(
+        color: backgroundColor ?? AppColors.surface,
+        border: Border.all(
+          color: gold.withValues(alpha: 0.55),
+          width: borderWidth,
+        ),
+        boxShadow: AppColors.shadowSubtle,
+      ),
+      child: ClipPath(
+        clipper: const ArchClipper(),
+        child: Padding(
+          padding: EdgeInsets.all(padding),
+          child: child,
+        ),
+      ),
+    );
+
+    if (width == null && height == null) return framed;
+
+    return SizedBox(width: width, height: height, child: framed);
+  }
+}
+
+/// يرسم قوس المحراب: جوانب مستقيمة ثم قوس مدبّب أعلى.
+class ArchClipper extends CustomClipper<Path> {
+  const ArchClipper({this.shoulderRatio = 0.58});
+
+  /// ارتفاع بداية القوس نسبةً إلى ارتفاع العنصر.
+  final double shoulderRatio;
+
+  @override
+  Path getClip(Size size) {
+    final w = size.width;
+    final h = size.height;
+    final shoulder = h * shoulderRatio;
+    final apex = h * 0.02;
+
+    return Path()
+      ..moveTo(0, h)
+      ..lineTo(0, shoulder)
+      // القوس يدور من الجانب إلى القمة ثم ينزل للجانب الآخر
+      ..quadraticBezierTo(
+        w * 0.06,
+        apex + (shoulder - apex) * 0.16,
+        w * 0.5,
+        apex,
+      )
+      ..quadraticBezierTo(
+        w * 0.94,
+        apex + (shoulder - apex) * 0.16,
+        w,
+        shoulder,
+      )
+      ..lineTo(w, h)
+      ..close();
+  }
+
+  @override
+  bool shouldReclip(covariant ArchClipper oldClipper) {
+    return oldClipper.shoulderRatio != shoulderRatio;
+  }
+}

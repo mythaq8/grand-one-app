@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "317222889119",
+    "project_id": "mythaq-29bcf",
+    "storage_bucket": "mythaq-29bcf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317222889119:android:9d6e19e9102715255424aa",
+        "android_client_info": {
+          "package_name": "com.example.mithaq"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZKpxwDZntCenw45JOPT5ID3kdef25tho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317222889119:android:76c2cd89352143955424aa",
+        "android_client_info": {
+          "package_name": "com.mithaq.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZKpxwDZntCenw45JOPT5ID3kdef25tho"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
