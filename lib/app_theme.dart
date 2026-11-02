@@ -1,18 +1,6 @@
 // lib/app_theme.dart
 // ============================================================
-// AppTheme — ثيم تطبيق ميثاق (Material 3)
-// ------------------------------------------------------------
-// كل قيمة هنا تأتي من lib/design/tokens.dart و
-// lib/design/typography.dart. لا ألوان ولا مقاسات مكتوبة يدوياً
-// في هذا الملف، حتى تبقى الهوية قابلة للتغيير من مكان واحد.
-//
-// ما أُضيف في هذه النسخة (كان ناقصاً فتُركت الودجات
-// تأخذ شكل Material الافتراضي فيتناقض مع الهوية):
-//   • navigationBarTheme  — للشريط السفلي الجديد
-//   • navigationRailTheme — للشاشات العريضة
-//   • segmentedButtonTheme — لمبدّل التبويبات داخل الشاشة
-//   • bottomAppBarTheme / bannerTheme / expansionTileTheme
-//   • iconButtonTheme — لضبط الحجم والألوان
+// AppTheme — ثيم GRAND ONE (Material 3)
 // ============================================================
 
 import 'package:flutter/cupertino.dart';
@@ -24,24 +12,27 @@ import 'design/typography.dart';
 class AppTheme {
   AppTheme._();
 
-  static ThemeData get mithaqTheme {
+  /// الاسم الجديد.
+  static ThemeData get grandOneTheme => _build();
+
+  /// توافق مؤقت مع الاستدعاءات القديمة.
+  static ThemeData get mithaqTheme => grandOneTheme;
+
+  static ThemeData _build() {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppPalette.green,
+      seedColor: AppPalette.navy,
       brightness: Brightness.light,
     ).copyWith(
-      primary: AppPalette.green,
+      primary: AppPalette.navy,
       onPrimary: AppPalette.onPrimary,
-      primaryContainer: AppPalette.greenSoft,
-      onPrimaryContainer: AppPalette.greenDark,
-
+      primaryContainer: AppPalette.navySoft,
+      onPrimaryContainer: AppPalette.navyDark,
       secondary: AppPalette.gold,
       onSecondary: AppPalette.onGold,
       secondaryContainer: AppPalette.goldSoft,
       onSecondaryContainer: AppPalette.goldDeep,
-
       tertiary: AppPalette.info,
       onTertiary: AppPalette.onPrimary,
-
       surface: AppPalette.surface,
       onSurface: AppPalette.textPrimary,
       onSurfaceVariant: AppPalette.textSecondary,
@@ -50,10 +41,8 @@ class AppTheme {
       surfaceContainer: AppPalette.backgroundAlt,
       surfaceContainerHigh: AppPalette.surfaceTint,
       surfaceContainerHighest: AppPalette.surfaceTint,
-
       outline: AppPalette.border,
       outlineVariant: AppPalette.borderLight,
-
       error: AppPalette.error,
       onError: Colors.white,
       errorContainer: AppPalette.errorLight,
@@ -63,36 +52,27 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-
-      // ── الهوية العامة ──
-      primaryColor: AppPalette.green,
+      primaryColor: AppPalette.navy,
       scaffoldBackgroundColor: AppPalette.background,
       fontFamily: kFontFamily,
       visualDensity: VisualDensity.standard,
-
-      splashColor: AppPalette.green.withValues(alpha: 0.08),
-      highlightColor: AppPalette.green.withValues(alpha: 0.04),
-
-      // منع أي لون مشتق من البذرة يظهر كخلفية وردية/رمادية غريبة.
+      splashColor: AppPalette.navy.withValues(alpha: 0.08),
+      highlightColor: AppPalette.navy.withValues(alpha: 0.04),
       canvasColor: AppPalette.background,
       dividerColor: AppPalette.divider,
-
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: MithaqPageTransitionsBuilder(),
+          TargetPlatform.android: GrandOnePageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
           TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
-          TargetPlatform.linux: MithaqPageTransitionsBuilder(),
-          TargetPlatform.windows: MithaqPageTransitionsBuilder(),
-          TargetPlatform.fuchsia: MithaqPageTransitionsBuilder(),
+          TargetPlatform.linux: GrandOnePageTransitionsBuilder(),
+          TargetPlatform.windows: GrandOnePageTransitionsBuilder(),
+          TargetPlatform.fuchsia: GrandOnePageTransitionsBuilder(),
         },
       ),
-
       textTheme: AppTextTheme.textTheme,
-
-      // ── شريط العنوان ──
       appBarTheme: AppBarTheme(
-        backgroundColor: AppPalette.green,
+        backgroundColor: AppPalette.navy,
         foregroundColor: AppPalette.onPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -113,11 +93,9 @@ class AppTheme {
           size: Sizes.iconLg,
         ),
       ),
-
-      // ── الأزرار ──
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppPalette.green,
+          backgroundColor: AppPalette.navy,
           foregroundColor: AppPalette.onPrimary,
           disabledBackgroundColor: AppPalette.borderLight,
           disabledForegroundColor: AppPalette.textMuted,
@@ -127,16 +105,13 @@ class AppTheme {
             horizontal: Space.xl,
             vertical: Space.md,
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: Radii.brMd,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: Radii.brMd),
           textStyle: AppText.button,
         ),
       ),
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppPalette.green,
+          foregroundColor: AppPalette.navy,
           disabledForegroundColor: AppPalette.textMuted,
           side: const BorderSide(color: AppPalette.gold, width: 1.2),
           minimumSize: const Size(double.infinity, Sizes.buttonHeight),
@@ -148,10 +123,9 @@ class AppTheme {
           textStyle: AppText.button,
         ),
       ),
-
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppPalette.green,
+          backgroundColor: AppPalette.navy,
           foregroundColor: AppPalette.onPrimary,
           disabledBackgroundColor: AppPalette.borderLight,
           disabledForegroundColor: AppPalette.textMuted,
@@ -165,10 +139,9 @@ class AppTheme {
           textStyle: AppText.button,
         ),
       ),
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppPalette.green,
+          foregroundColor: AppPalette.navy,
           minimumSize: const Size(0, 44),
           padding: const EdgeInsets.symmetric(
             horizontal: Space.lg,
@@ -180,30 +153,26 @@ class AppTheme {
           textStyle: AppText.buttonSmall,
         ),
       ),
-
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
-          foregroundColor: AppPalette.green,
+          foregroundColor: AppPalette.navy,
           minimumSize: const Size(Sizes.touchTarget, Sizes.touchTarget),
-          highlightColor: AppPalette.greenSoft,
+          highlightColor: AppPalette.navySoft,
           shape: const RoundedRectangleBorder(borderRadius: Radii.brSm),
         ),
       ),
-
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppPalette.green,
+        backgroundColor: AppPalette.navy,
         foregroundColor: AppPalette.onPrimary,
         elevation: 2,
         shape: RoundedRectangleBorder(borderRadius: Radii.brMd),
       ),
-
-      // ── الشريط السفلي (جديد) ──
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: Sizes.navBarHeight,
-        indicatorColor: AppPalette.greenSoft,
+        indicatorColor: AppPalette.navySoft,
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: Radii.brSm,
         ),
@@ -213,27 +182,25 @@ class AppTheme {
           return AppText.micro.copyWith(
             fontSize: 11.5,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppPalette.green : AppPalette.textTertiary,
+            color: selected ? AppPalette.navy : AppPalette.textTertiary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: 23,
-            color: selected ? AppPalette.green : AppPalette.textTertiary,
+            color: selected ? AppPalette.navy : AppPalette.textTertiary,
           );
         }),
       ),
-
-      // ── الشريط الجانبي العريض (جديد) ──
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: AppPalette.surface,
-        indicatorColor: AppPalette.greenSoft,
+        indicatorColor: AppPalette.navySoft,
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: Radii.brSm,
         ),
         selectedIconTheme: const IconThemeData(
-          color: AppPalette.green,
+          color: AppPalette.navy,
           size: Sizes.iconLg,
         ),
         unselectedIconTheme: const IconThemeData(
@@ -241,7 +208,7 @@ class AppTheme {
           size: Sizes.iconLg,
         ),
         selectedLabelTextStyle: AppText.micro.copyWith(
-          color: AppPalette.green,
+          color: AppPalette.navy,
           fontSize: 12,
         ),
         unselectedLabelTextStyle: AppText.micro.copyWith(
@@ -250,12 +217,10 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-
-      // ── مبدّل التبويبات (جديد) ──
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) return AppPalette.green;
+            if (states.contains(WidgetState.selected)) return AppPalette.navy;
             return AppPalette.surface;
           }),
           foregroundColor: WidgetStateProperty.resolveWith((states) {
@@ -268,23 +233,18 @@ class AppTheme {
             BorderSide(color: AppPalette.border),
           ),
           textStyle: const WidgetStatePropertyAll(AppText.buttonSmall),
-          minimumSize: const WidgetStatePropertyAll(
-            Size(0, 44),
-          ),
+          minimumSize: const WidgetStatePropertyAll(Size(0, 44)),
           shape: const WidgetStatePropertyAll(
             RoundedRectangleBorder(borderRadius: Radii.brSm),
           ),
         ),
       ),
-
       bottomAppBarTheme: const BottomAppBarThemeData(
         color: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: Sizes.navBarHeight,
       ),
-
-      // ── القوائم والبطاقات ──
       cardTheme: CardThemeData(
         color: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
@@ -295,9 +255,8 @@ class AppTheme {
           side: const BorderSide(color: AppPalette.borderLight, width: 0.8),
         ),
       ),
-
       listTileTheme: ListTileThemeData(
-        iconColor: AppPalette.green,
+        iconColor: AppPalette.navy,
         textColor: AppPalette.textPrimary,
         minVerticalPadding: Space.md,
         contentPadding: const EdgeInsets.symmetric(
@@ -308,9 +267,8 @@ class AppTheme {
         titleTextStyle: AppText.title.copyWith(fontSize: 15),
         subtitleTextStyle: AppText.bodySecondary,
       ),
-
       expansionTileTheme: ExpansionTileThemeData(
-        iconColor: AppPalette.green,
+        iconColor: AppPalette.navy,
         collapsedIconColor: AppPalette.textTertiary,
         textColor: AppPalette.textPrimary,
         collapsedTextColor: AppPalette.textPrimary,
@@ -318,11 +276,10 @@ class AppTheme {
         collapsedShape: RoundedRectangleBorder(borderRadius: Radii.brMd),
         tilePadding: const EdgeInsets.symmetric(horizontal: Space.lg),
       ),
-
       tabBarTheme: const TabBarThemeData(
         indicatorColor: AppPalette.gold,
         indicatorSize: TabBarIndicatorSize.label,
-        labelColor: AppPalette.green,
+        labelColor: AppPalette.navy,
         unselectedLabelColor: AppPalette.textSecondary,
         dividerColor: AppPalette.borderLight,
         labelStyle: AppText.buttonSmall,
@@ -332,8 +289,6 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
       ),
-
-      // ── حقول الإدخال ──
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppPalette.surface,
@@ -352,7 +307,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: Radii.brMd,
-          borderSide: const BorderSide(color: AppPalette.green, width: 1.5),
+          borderSide: const BorderSide(color: AppPalette.navy, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: Radii.brMd,
@@ -368,7 +323,7 @@ class AppTheme {
         ),
         labelStyle: AppText.subtitle.copyWith(color: AppPalette.textSecondary),
         floatingLabelStyle: AppText.subtitle.copyWith(
-          color: AppPalette.green,
+          color: AppPalette.navy,
           fontWeight: FontWeight.w700,
         ),
         hintStyle: AppText.subtitle.copyWith(color: AppPalette.textMuted),
@@ -386,21 +341,18 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: AppPalette.error,
         ),
-        prefixIconColor: AppPalette.green,
-        suffixIconColor: AppPalette.green,
+        prefixIconColor: AppPalette.navy,
+        suffixIconColor: AppPalette.navy,
       ),
-
       iconTheme: const IconThemeData(
-        color: AppPalette.green,
+        color: AppPalette.navy,
         size: Sizes.iconLg,
       ),
-
       dividerTheme: const DividerThemeData(
         color: AppPalette.divider,
         thickness: 1,
         space: 1,
       ),
-
       dialogTheme: DialogThemeData(
         backgroundColor: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
@@ -414,41 +366,35 @@ class AppTheme {
           color: AppPalette.textSecondary,
         ),
       ),
-
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: AppPalette.greenDark,
+        backgroundColor: AppPalette.navyDark,
         elevation: 4,
         insetPadding: const EdgeInsets.all(Space.lg),
         contentTextStyle: AppText.body.copyWith(color: Colors.white),
         shape: RoundedRectangleBorder(borderRadius: Radii.brMd),
       ),
-
       bannerTheme: const MaterialBannerThemeData(
         backgroundColor: AppPalette.goldSoft,
         surfaceTintColor: Colors.transparent,
         contentTextStyle: AppText.subtitle,
         elevation: 0,
       ),
-
-      // ── عناصر الاختيار ──
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
         side: const BorderSide(color: AppPalette.border, width: 1.4),
         fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return AppPalette.green;
+          if (states.contains(WidgetState.selected)) return AppPalette.navy;
           return AppPalette.surface;
         }),
         checkColor: WidgetStateProperty.all(Colors.white),
       ),
-
       radioTheme: RadioThemeData(
         fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return AppPalette.green;
+          if (states.contains(WidgetState.selected)) return AppPalette.navy;
           return AppPalette.border;
         }),
       ),
-
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) return AppPalette.gold;
@@ -456,15 +402,14 @@ class AppTheme {
         }),
         trackColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppPalette.greenSoft;
+            return AppPalette.navySoft;
           }
           return AppPalette.borderLight;
         }),
       ),
-
       chipTheme: ChipThemeData(
         backgroundColor: AppPalette.surfaceTint,
-        selectedColor: AppPalette.greenSoft,
+        selectedColor: AppPalette.navySoft,
         disabledColor: AppPalette.borderLight,
         side: const BorderSide(color: AppPalette.borderLight),
         shape: RoundedRectangleBorder(borderRadius: Radii.brSm),
@@ -478,7 +423,6 @@ class AppTheme {
           vertical: Space.xs + 2,
         ),
       ),
-
       popupMenuTheme: PopupMenuThemeData(
         color: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
@@ -491,17 +435,15 @@ class AppTheme {
           color: AppPalette.textPrimary,
         ),
       ),
-
       progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: AppPalette.green,
-        circularTrackColor: AppPalette.greenSoft,
-        linearTrackColor: AppPalette.greenSoft,
+        color: AppPalette.navy,
+        circularTrackColor: AppPalette.navySoft,
+        linearTrackColor: AppPalette.navySoft,
         linearMinHeight: 5,
       ),
-
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
-          color: AppPalette.greenDark,
+          color: AppPalette.navyDark,
           borderRadius: BorderRadius.circular(Radii.xs),
         ),
         textStyle: const TextStyle(
@@ -510,7 +452,6 @@ class AppTheme {
           fontSize: 12,
         ),
       ),
-
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
@@ -521,17 +462,16 @@ class AppTheme {
         showDragHandle: false,
         shape: RoundedRectangleBorder(borderRadius: Radii.sheet),
       ),
-
       datePickerTheme: DatePickerThemeData(
         backgroundColor: AppPalette.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: Radii.brXl),
-        headerBackgroundColor: AppPalette.green,
+        headerBackgroundColor: AppPalette.navy,
         headerForegroundColor: AppPalette.onPrimary,
         dayOverlayColor: WidgetStateProperty.resolveWith<Color>((states) {
-          if (states.contains(WidgetState.selected)) return AppPalette.green;
-          return AppPalette.greenSoft;
+          if (states.contains(WidgetState.selected)) return AppPalette.navy;
+          return AppPalette.navySoft;
         }),
         dayForegroundColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) return Colors.white;
@@ -542,24 +482,23 @@ class AppTheme {
           AppPalette.goldDark,
         ),
       ),
-
       timePickerTheme: TimePickerThemeData(
         backgroundColor: AppPalette.surface,
         elevation: 8,
         shape: RoundedRectangleBorder(borderRadius: Radii.brXl),
         hourMinuteColor: AppPalette.surfaceTint,
-        hourMinuteTextColor: AppPalette.green,
+        hourMinuteTextColor: AppPalette.navy,
         dayPeriodColor: AppPalette.surfaceTint,
-        dayPeriodTextColor: AppPalette.green,
-        dialHandColor: AppPalette.green,
+        dayPeriodTextColor: AppPalette.navy,
+        dialHandColor: AppPalette.navy,
         dialBackgroundColor: AppPalette.surfaceTint,
         dialTextColor: AppPalette.textPrimary,
-        entryModeIconColor: AppPalette.green,
+        entryModeIconColor: AppPalette.navy,
         hourMinuteTextStyle: const TextStyle(
           fontFamily: kFontFamily,
           fontSize: 46,
           fontWeight: FontWeight.w500,
-          color: AppPalette.green,
+          color: AppPalette.navy,
         ),
         dayPeriodTextStyle: const TextStyle(
           fontFamily: kFontFamily,
@@ -578,9 +517,8 @@ class AppTheme {
   }
 }
 
-/// انتقال خفيف بين الشاشات: ظهور مع انزلاق قصير.
-class MithaqPageTransitionsBuilder extends PageTransitionsBuilder {
-  const MithaqPageTransitionsBuilder();
+class GrandOnePageTransitionsBuilder extends PageTransitionsBuilder {
+  const GrandOnePageTransitionsBuilder();
 
   @override
   Duration get transitionDuration => Motion.normal;
@@ -611,9 +549,11 @@ class MithaqPageTransitionsBuilder extends PageTransitionsBuilder {
   }
 }
 
-/// تمرير موحّد بدون وهج أندرويد المختلف بين الشاشات.
-class MithaqScrollBehavior extends MaterialScrollBehavior {
-  const MithaqScrollBehavior();
+/// توافق مع الاسم القديم.
+typedef MithaqPageTransitionsBuilder = GrandOnePageTransitionsBuilder;
+
+class GrandOneScrollBehavior extends MaterialScrollBehavior {
+  const GrandOneScrollBehavior();
 
   @override
   ScrollPhysics getScrollPhysics(BuildContext context) {
@@ -629,3 +569,6 @@ class MithaqScrollBehavior extends MaterialScrollBehavior {
     return child;
   }
 }
+
+typedef MithaqScrollBehavior = GrandOneScrollBehavior;
+

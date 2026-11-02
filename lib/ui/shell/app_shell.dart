@@ -1,6 +1,6 @@
 // lib/ui/shell/app_shell.dart
 // ============================================================
-// هيكل التنقّل — Golden Party (خدمات فقط، بدون زواج)
+// هيكل التنقّل — GRAND ONE (خدمات فقط)
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -138,7 +138,7 @@ class _AppShellState extends State<AppShell> {
         ),
         boxShadow: [
           BoxShadow(
-            color: AppPalette.green.withValues(alpha: 0.06),
+            color: AppPalette.navy.withValues(alpha: 0.06),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),

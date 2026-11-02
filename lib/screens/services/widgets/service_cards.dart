@@ -183,7 +183,9 @@ class ServiceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppPalette.surface,
             borderRadius: Radii.brLg,
-            border: Border.all(color: AppPalette.borderLight),
+            border: Border.all(
+              color: AppPalette.gold.withValues(alpha: 0.22),
+            ),
             boxShadow: AppShadows.subtle,
           ),
           child: compact ? _buildCompact(context) : _buildRow(context),
@@ -242,7 +244,7 @@ class ServiceCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: AppText.number.copyWith(
                         fontSize: 13,
-                        color: AppPalette.green,
+                        color: AppPalette.goldDeep,
                       ),
                     ),
                 ],
@@ -296,7 +298,7 @@ class ServiceCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: AppText.number.copyWith(
                             fontSize: 13,
-                            color: AppPalette.green,
+                            color: AppPalette.goldDeep,
                           ),
                         ),
                       ),
@@ -394,7 +396,9 @@ class ProviderCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppPalette.surface,
             borderRadius: Radii.brLg,
-            border: Border.all(color: AppPalette.borderLight),
+            border: Border.all(
+              color: AppPalette.gold.withValues(alpha: 0.22),
+            ),
             boxShadow: AppShadows.subtle,
           ),
           child: Row(

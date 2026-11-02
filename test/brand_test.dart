@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/app_theme.dart';
-import 'package:mithaq_app/design/tokens.dart';
-import 'package:mithaq_app/widgets/islamic_decorations.dart';
+import 'package:golden_party_app/app_theme.dart';
+import 'package:golden_party_app/design/tokens.dart';
+import 'package:golden_party_app/widgets/islamic_decorations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -121,7 +121,7 @@ void main() {
       // الصورة قد لا تُحمّل في الاختبار، لكن الويدجت يجب أن تُبنى
       // بلا استثناء وبالعنوان.
       expect(tester.takeException(), isNull);
-      expect(find.text('ميثاق'), findsOneWidget);
+      expect(find.text('GRAND ONE'), findsOneWidget);
     });
   });
 }

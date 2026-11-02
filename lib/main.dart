@@ -1,6 +1,6 @@
 // lib/main.dart
 // ============================================================
-// Mithaq App — نقطة البداية
+// GRAND ONE — نقطة البداية
 // ============================================================
 
 import 'dart:async';
@@ -16,21 +16,12 @@ import 'app_theme.dart';
 
 import 'screens/source_screen.dart';
 import 'screens/auth_screen.dart';
-import 'screens/groom_screen.dart';
-import 'screens/bride_screen.dart';
-import 'screens/exploration_screen.dart';
 import 'screens/waiting_screen.dart';
 import 'screens/reset_password_screen.dart';
 import 'screens/change_password_screen.dart';
-import 'screens/terms_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/settings_screen.dart';
-import 'screens/groom_profile_screen.dart';
-import 'screens/bride_profile_screen.dart';
-import 'screens/edit_bride_profile_screen.dart';
-import 'screens/edit_groom_profile_screen.dart';
 import 'screens/contact_admin_screen.dart';
-import 'screens/groom_bride_review_screen.dart';
 import 'ui/shell/app_shell.dart';
 
 import 'services/notifications_service.dart';
@@ -38,6 +29,7 @@ import 'services/remote_config_service.dart';
 import 'services/device_gate.dart';
 
 import 'widgets/islamic_decorations.dart';
+import 'design/tokens.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,7 +42,6 @@ void main() async {
     anonKey: AppConfig.supabaseAnonKey,
   );
 
-  // تحديث العناوين في الخلفية للتشغيل التالي / طلبات API اللاحقة
   unawaited(RemoteConfigService.refresh());
 
   try {
@@ -73,48 +64,42 @@ void main() async {
       ],
       path: 'assets/translations',
       fallbackLocale: const Locale('ar'),
-      child: const MithaqApp(),
+      child: const GrandOneApp(),
     ),
   );
 }
 
-class MithaqApp extends StatefulWidget {
-  const MithaqApp({super.key});
+class GrandOneApp extends StatefulWidget {
+  const GrandOneApp({super.key});
 
   @override
-  State<MithaqApp> createState() => _MithaqAppState();
+  State<GrandOneApp> createState() => _GrandOneAppState();
 }
 
-class _MithaqAppState extends State<MithaqApp> {
+class _GrandOneAppState extends State<GrandOneApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Golden Party - خدمات الأعراس',
+      title: AppConfig.appFullName,
       debugShowCheckedModeBanner: false,
       locale: context.locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
-      theme: AppTheme.mithaqTheme,
+      theme: AppTheme.grandOneTheme,
       themeMode: ThemeMode.light,
-      scrollBehavior: const MithaqScrollBehavior(),
+      scrollBehavior: const GrandOneScrollBehavior(),
       home: const SplashScreen(),
       routes: {
         '/verify': (context) => const AuthScreen(),
-        '/groom': (context) => const GroomProfileSetupScreen(),
-        '/bride': (context) => const BrideProfileSetupScreen(),
-        '/exploration': (context) => const ExplorationScreen(isGroomRole: true),
-        '/guardian-panel': (context) => const ExplorationScreen(isGroomRole: false),
         '/waiting': (context) => const WaitingScreen(),
         '/reset-password': (context) => const ResetPasswordScreen(),
         '/change-password': (context) => const ChangePasswordScreen(),
-        '/terms-groom': (context) => const TermsScreen(isGroomRole: true),
-        '/terms-bride': (context) => const TermsScreen(isGroomRole: false),
         '/intro': (context) => const IntroScreen(),
         '/settings': (context) => const SettingsScreen(),
-        '/home-groom': (context) => const AppShell(isGroomRole: true),
-        '/home-bride': (context) => const AppShell(isGroomRole: false),
-        '/shell': (context) => const AppShell(isGroomRole: true),
-        '/shell-bride': (context) => const AppShell(isGroomRole: false),
+        '/home-groom': (context) => const AppShell(),
+        '/home-bride': (context) => const AppShell(),
+        '/shell': (context) => const AppShell(),
+        '/shell-bride': (context) => const AppShell(),
         '/source': (context) {
           final user = Supabase.instance.client.auth.currentUser;
           if (user == null) {
@@ -122,20 +107,11 @@ class _MithaqAppState extends State<MithaqApp> {
           }
           return const SourceScreen();
         },
-        '/groom-profile': (context) => const GroomProfileScreen(),
-        '/bride-profile': (context) => const BrideProfileScreen(),
-        '/edit-bride-profile': (context) => const EditBrideProfileScreen(),
-        '/edit-groom-profile': (context) => const EditGroomProfileScreen(),
         '/contact-admin': (context) => const ContactAdminScreen(),
-        '/groom-bride-review': (context) => const GroomBrideReviewScreen(),
       },
     );
   }
 }
-
-// ============================================================================
-// Splash Screen
-// ============================================================================
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -144,16 +120,26 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   bool _hasError = false;
   bool _errorIsDeviceBlock = false;
   String _errorMessage =
       'تعذر الاتصال بالخادم، يرجى التحقق من الاتصال بالإنترنت';
 
+  late final AnimationController _fade =
+      AnimationController(vsync: this, duration: Motion.splash)..forward();
+
   @override
   void initState() {
     super.initState();
     _checkSession();
+  }
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
   }
 
   Future<void> _checkSession() async {
@@ -191,13 +177,14 @@ class _SplashScreenState extends State<SplashScreen> {
           .eq('id', user.id)
           .maybeSingle();
 
-      if (profile == null || profile['is_banned'] == true || profile['is_active'] == false) {
+      if (profile == null ||
+          profile['is_banned'] == true ||
+          profile['is_active'] == false) {
         await client.auth.signOut();
         _goTo(const IntroScreen());
         return;
       }
 
-      // ربط بصمة الجهاز (حد حسابين) — إلزامي (fail-closed)
       final gate = await DeviceGate.ensureRegistered();
       if (!gate.isAllowed) {
         await client.auth.signOut();
@@ -205,8 +192,7 @@ class _SplashScreenState extends State<SplashScreen> {
         setState(() {
           _hasError = true;
           _errorMessage = gate.message;
-          _errorIsDeviceBlock =
-              gate.status == DeviceGateStatus.blocked;
+          _errorIsDeviceBlock = gate.status == DeviceGateStatus.blocked;
         });
         return;
       }
@@ -223,8 +209,7 @@ class _SplashScreenState extends State<SplashScreen> {
         if (!mounted) return;
         setState(() {
           _hasError = true;
-          _errorMessage =
-              'حساب الزواج يخص تطبيق ميثاق. سجّل الدخول من هناك.';
+          _errorMessage = 'هذا التطبيق لحسابات الخدمات فقط.';
         });
         return;
       }
@@ -257,45 +242,68 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const IslamicLogoFrame(
-                size: 110,
-                showTitle: true,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(gradient: AppGradients.splash),
+        child: FadeTransition(
+          opacity: _fade,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const IslamicLogoFrame(
+                    size: 120,
+                    showTitle: true,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'ALL IN ONE',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 13,
+                      letterSpacing: 3.2,
+                      fontWeight: FontWeight.w700,
+                      color: AppPalette.gold.withValues(alpha: 0.9),
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+                  if (_hasError) ...[
+                    Text(
+                      _errorMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontFamily: 'Tajawal',
+                        color: AppColors.error,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (_errorIsDeviceBlock)
+                      ElevatedButton(
+                        onPressed: () => _goTo(const IntroScreen()),
+                        child: const Text('حسناً'),
+                      )
+                    else
+                      ElevatedButton.icon(
+                        onPressed: _checkSession,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('إعادة المحاولة'),
+                      ),
+                  ] else
+                    const SizedBox(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.4,
+                        color: AppPalette.gold,
+                      ),
+                    ),
+                ],
               ),
-              const SizedBox(height: 30),
-              if (_hasError) ...[
-                Text(
-                  _errorMessage,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontFamily: 'Tajawal',
-                    color: AppColors.error,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                if (_errorIsDeviceBlock)
-                  ElevatedButton(
-                    onPressed: () => _goTo(const IntroScreen()),
-                    child: const Text('حسناً'),
-                  )
-                else
-                  ElevatedButton.icon(
-                    onPressed: _checkSession,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('إعادة المحاولة'),
-                  ),
-              ] else
-                const CircularProgressIndicator(
-                  color: AppColors.primary,
-                ),
-            ],
+            ),
           ),
         ),
       ),

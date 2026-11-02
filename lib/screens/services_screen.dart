@@ -438,7 +438,7 @@ Widget build(BuildContext context) {
       appBar: widget.embedded
           ? null
           : IslamicAppBar(
-              title: 'خدمات الزواج',
+              title: 'الخدمات',
               actions: [
                 IconButton(
                   tooltip: 'الإعدادات',
@@ -475,9 +475,9 @@ Widget build(BuildContext context) {
                 constraints: BoxConstraints(maxWidth: maxWidth),
                 child: Column(
                   children: [
-                    // داخل الهيكل نُخفي الشريط التوضيحي الطويل
-                    // لأنه يزاحم المحتوى في كل مرة.
-                    if (!widget.embedded)
+                    if (widget.embedded)
+                      _buildDiscoveryHeader()
+                    else
                       const InfoBanner(
                         message: UiCopy.servicesBrowseHint,
                         tone: InfoBannerTone.info,
@@ -497,10 +497,52 @@ Widget build(BuildContext context) {
   );
 }
 
+  Widget _buildDiscoveryHeader() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        gradient: AppGradients.header,
+        borderRadius: Radii.brLg,
+        border: Border.all(
+          color: AppPalette.gold.withValues(alpha: 0.28),
+        ),
+        boxShadow: AppShadows.soft,
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'اكتشف ما يناسب احتياجاتك',
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+              height: 1.3,
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'خيارات متنوعة في مكان واحد — اختر خدماتك بكل سهولة.',
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFE8ECF3),
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ═══ البحث ═══
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
       child: Row(
         children: [
           Expanded(
@@ -538,13 +580,15 @@ Widget build(BuildContext context) {
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
+                  borderSide: BorderSide(
+                    color: AppPalette.gold.withValues(alpha: 0.35),
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(
                     color: AppColors.primary,
-                    width: 1.3,
+                    width: 1.4,
                   ),
                 ),
               ),
@@ -565,7 +609,7 @@ Widget build(BuildContext context) {
                   border: Border.all(
                     color: _hasActiveFilters
                         ? AppColors.primary
-                        : AppColors.border,
+                        : AppPalette.gold.withValues(alpha: 0.45),
                   ),
                 ),
                 child: Stack(
@@ -667,7 +711,7 @@ Widget _buildPartyTab() {
         ),
         child: const ShrinkIconLabel(
           icon: Icons.celebration_outlined,
-          label: 'تنظيم مناسبة',
+          label: 'ابدأ التخطيط',
           color: AppColors.goldDark,
           fontSize: 12,
         ),

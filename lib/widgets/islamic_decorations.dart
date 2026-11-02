@@ -491,7 +491,7 @@ class AyahCard extends StatelessWidget {
 }
 
 // ============================================================
-// 7. شعار ميثاق (محسّن)
+// 7. شعار GRAND ONE
 // ============================================================
 
 class IslamicLogoFrame extends StatelessWidget {
@@ -510,9 +510,7 @@ class IslamicLogoFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.of(context).devicePixelRatio;
     final radius = size * 0.24;
-    final cacheSize = (size * dpr).toInt();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -520,7 +518,6 @@ class IslamicLogoFrame extends StatelessWidget {
         Stack(
           alignment: Alignment.center,
           children: [
-            // حلقة زخرفية خارجية
             if (showOrnamentalRing)
               Container(
                 width: size + 16,
@@ -528,48 +525,39 @@ class IslamicLogoFrame extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: AppColors.gold.withValues(alpha: 0.25),
+                    color: AppColors.gold.withValues(alpha: 0.35),
                     width: 1.5,
                   ),
                 ),
               ),
-            // إطار الشعار — خلفية أبيض كريمي مثل أيقونة التطبيق.
             Container(
               width: size,
               height: size,
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(radius),
                 border: Border.all(
                   color: AppColors.gold,
-                  width: 2.5,
+                  width: 1.8,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: AppColors.primary.withValues(alpha: 0.2),
                     blurRadius: 24,
                     offset: const Offset(0, 10),
                   ),
-                  BoxShadow(
-                    color: AppColors.gold.withValues(alpha: 0.18),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
                 ],
               ),
-              // الشعار ذهبي بخلفية شفافة فوق الكريمي؛ contain مع هامش
-              // حتى لا تُقصّ المئذنة والهلال.
-              child: Padding(
-                padding: EdgeInsets.all(size * 0.13),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius - 2),
                 child: Image.asset(
-                  AppAssets.logo,
-                  fit: BoxFit.contain,
-                  cacheWidth: cacheSize,
-                  filterQuality: FilterQuality.medium,
+                  AppAssets.monogram,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.high,
                   errorBuilder: (context, error, stackTrace) {
                     return Center(
                       child: Icon(
-                        Icons.favorite,
+                        Icons.diamond_outlined,
                         color: AppColors.gold,
                         size: size * 0.42,
                       ),
@@ -583,24 +571,24 @@ class IslamicLogoFrame extends StatelessWidget {
         if (showTitle) ...[
           const SizedBox(height: 18),
           const Text(
-            'ميثاق',
+            'GRAND ONE',
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: FontWeight.w800,
               color: AppColors.primary,
-              letterSpacing: 1.5,
+              letterSpacing: 2.2,
             ),
           ),
           const SizedBox(height: 4),
           const Text(
-            'تيسير الزواج الشرعي',
+            'كل ما تحتاجه، في وجهة واحدة',
             style: TextStyle(
               fontFamily: 'Tajawal',
               fontSize: 13,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.5,
+              letterSpacing: 0.2,
             ),
           ),
         ],
@@ -623,7 +611,7 @@ class IslamicLogoFrame extends StatelessWidget {
 }
 
 // ============================================================
-// 8. بطاقة بوابة ميثاق (محسّنة)
+// 8. بطاقة بوابة العلامة
 // ============================================================
 
 class IslamicGatewayCard extends StatelessWidget {
@@ -899,7 +887,7 @@ class IslamicStepBanner extends StatelessWidget {
 }
 
 // ============================================================
-// 10. بطاقة ميثاق العامة (محسّنة)
+// 10. بطاقة عامة
 // ============================================================
 
 class IslamicCard extends StatelessWidget {
@@ -954,7 +942,7 @@ class IslamicCard extends StatelessWidget {
 }
 
 // ============================================================
-// 11. زر ميثاق (محسّن)
+// 11. زر أساسي
 // ============================================================
 
 class IslamicButton extends StatelessWidget {

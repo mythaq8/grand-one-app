@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/ui/shell/app_shell.dart';
+import 'package:golden_party_app/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

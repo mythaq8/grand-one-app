@@ -70,7 +70,10 @@ class _TypeTile extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.borderLight),
+            border: Border.all(
+              color: AppColors.gold.withValues(alpha: 0.28),
+            ),
+            boxShadow: AppColors.shadowSubtle,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

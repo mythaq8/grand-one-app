@@ -32,13 +32,13 @@ class ServiceDetailScreen extends StatefulWidget {
   /// بيانات مبدئية من القائمة (لعرض فوري أثناء التحميل)
   final Map<String, dynamic>? initialService;
 
-  /// من تنظيم المناسبة: زر إضافة إلى حفلتي بدل إرسال الحجز
+  /// من تنظيم المناسبة: زر أضف إلى اختياراتي بدل إرسال الحجز
   final bool forOccasionCart;
 
-  /// الكمية الحالية في حفلتي، إن وُجدت
+  /// الكمية الحالية في اختياراتي، إن وُجدت
   final double? occasionQuantity;
 
-  /// الخدمة موجودة مسبقاً في حفلتي
+  /// الخدمة موجودة مسبقاً في اختياراتي
   final bool occasionAlreadyInCart;
 
   const ServiceDetailScreen({
@@ -747,7 +747,10 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             decoration: BoxDecoration(
               color: AppColors.surfaceTint,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.borderLight),
+              border: Border.all(
+                color: AppPalette.gold.withValues(alpha: 0.35),
+              ),
+              boxShadow: AppShadows.soft,
             ),
             child: url.isEmpty
                 ? const Center(
@@ -792,8 +795,9 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         Text(
           name,
           style: const TextStyle(
+            fontFamily: 'Tajawal',
             fontSize: 22,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w800,
             color: AppColors.textPrimary,
             height: 1.3,
           ),
@@ -1219,8 +1223,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final needsQty = model == 'per_unit' || model == 'per_duration';
     final inCart = widget.occasionAlreadyInCart;
     final label = !inCart
-        ? 'إضافة إلى حفلتي'
-        : (needsQty ? 'تحديث حفلتي' : 'في حفلتي');
+        ? 'أضف إلى اختياراتي'
+        : (needsQty ? 'تحديث اختياراتي' : 'في اختياراتي');
 
     return IslamicCard(
       padding: const EdgeInsets.all(16),
@@ -1228,7 +1232,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Text(
-            'إضافة إلى حفلتي',
+            'أضف إلى اختياراتي',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -1238,8 +1242,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(height: 8),
           Text(
             needsQty
-                ? 'حدد الكمية ثم أضف الخدمة إلى حفلتي.'
-                : 'تُضاف هذه الخدمة إلى حفلتي.',
+                ? 'حدد الكمية ثم أضف الخدمة إلى اختياراتي.'
+                : 'تُضاف هذه الخدمة إلى اختياراتي.',
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
@@ -1380,13 +1384,29 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
               const SizedBox(width: 11),
               const Expanded(
-                child: Text(
-                  'احجز الخدمة',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'احجز الخدمة',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'خطوتك الأولى نحو تجربة متكاملة',
+                      style: TextStyle(
+                        fontFamily: 'Tajawal',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -1523,15 +1543,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     ? 'جاري الإرسال...'
                     : (_isQuoteRequest
                         ? 'طلب عرض سعر'
-                        : 'إرسال طلب الحجز'),
+                        : 'أرسل طلبك'),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 52),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
+                  side: BorderSide(
+                    color: AppPalette.gold.withValues(alpha: 0.45),
+                  ),
                 ),
+                elevation: 0,
               ),
             ),
           ),

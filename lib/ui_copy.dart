@@ -1,130 +1,89 @@
 // lib/ui_copy.dart
 // ============================================================
-// نصوص إرشادية موحّدة لتجربة المستخدم (عربي بسيط)
+// نصوص واجهة GRAND ONE (عربي بسيط + اسم العلامة بالإنجليزية)
 // ============================================================
 
-import 'config.dart';
-
-/// نصوص التوضيحات والشروحات في الواجهة.
-/// لا تضع هنا منطق أعمال — نصوص عرض فقط.
+/// نصوص العرض فقط — بلا منطق أعمال.
 class UiCopy {
   UiCopy._();
 
-  // ─── آيات (نص المصحف مع اسم السورة ورقم الآية) ───
-  static const String ayahSakinah =
-      'وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً ۚ إِنَّ فِي ذَٰلِكَ لَآيَاتٍ لِّقَوْمٍ يَتَفَكَّرُونَ';
-  static const String ayahSakinahRef = 'سورة الروم، الآية 21';
-
-  static const String ayahNikah =
-      'وَأَنكِحُوا الْأَيَامَىٰ مِنكُمْ وَالصَّالِحِينَ مِنْ عِبَادِكُمْ وَإِمَائِكُمْ ۚ إِن يَكُونُوا فُقَرَاءَ يُغْنِهِمُ اللَّهُ مِن فَضْلِهِ ۗ وَاللَّهُ وَاسِعٌ عَلِيمٌ';
-  static const String ayahNikahRef = 'سورة النور، الآية 32';
-
-  static const String ayahQurrat =
-      'وَالَّذِينَ يَقُولُونَ رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا';
-  static const String ayahQurratRef = 'سورة الفرقان، الآية 74';
+  // ─── العلامة ───
+  static const String brandName = 'GRAND ONE';
+  static const String brandTaglineEn = 'ALL IN ONE';
+  static const String brandTaglineAr = 'كل ما تحتاجه، في وجهة واحدة';
+  static const String brandMessage = 'عالم متكامل من الخدمات والتجارب';
 
   // ─── مقدمة ───
-  static const String introWelcomeTitle = 'ميثاق';
-  static const String introWelcomeTagline = 'تيسير الزواج الشرعي';
+  static const String introWelcomeTitle = brandName;
+  static const String introWelcomeTagline = brandTaglineAr;
 
-  /// ملخص الصفحات التعريفية القديمة في سطرين قصيرين.
   static const String introSummary =
-      'زواج جاد في سوريا بخصوصية، والولي حاضر حين يلزم. '
-      'تكمل ملفك وتراجعه الإدارة ثم تختار رغباتك، '
-      'وتطلب قاعة أو تصويراً أو تنظيماً من هنا.';
+      'اكتشف مجموعة متكاملة من الخدمات في مكان واحد. '
+      'اختر ما تحتاجه، ونحن نساعدك في تنسيق التفاصيل.';
 
   static const String introSummaryNote =
-      'الجدية • الخصوصية • الولي • قاعة • تصوير';
+      'خيارات أوضح • تنسيق أسهل • تجربة أفضل';
 
-  static const String introStartButton = 'أبدأ على بركة الله';
+  static const String introStartButton = 'ابدأ الآن';
+
+  static const String introSecondaryHint =
+      'وجهتك الأولى لاكتشاف الخدمات المناسبة';
 
   // ─── تسجيل / دخول ───
-  static const String authMarriageHint =
-      'حساب الزواج للشاب أو الفتاة الراغبين في زواج شرعي. '
-      'بعد التسجيل تراجع الإدارة ملفك قبل التفعيل.';
-
   static const String authServicesHint =
-      'حساب الخدمات فقط لمن يريد تصفّح خدمات الأعراس وحجزها، '
-      'دون مسار التعارف للزواج.';
+      'أنشئ حسابك لتصفّح الخدمات وإرسال الطلبات ومتابعة حجوزاتك بسهولة.';
 
   static const String authAfterSignupHint =
-      'بعد إكمال الملف تنتقل إلى الصفحة الرئيسية وتكمل رحلتك بهدوء.';
+      'بعد إكمال بياناتك تنتقل إلى الصفحة الرئيسية وتتابع من هناك.';
 
   static const String authLoginTitle = 'أهلاً بعودتك';
-  static const String authSignupTitle = 'ابدأ حسابك في ميثاق';
+  static const String authSignupTitle = 'أنشئ حسابك في GRAND ONE';
   static const String authLoginSubtitle =
-      'ادخل لمتابعة ملفك ورحلتك في ميثاق.';
+      'ادخل لمتابعة طلباتك واكتشاف الخدمات.';
   static const String authSignupSubtitle =
-      'خطوة جادة نحو زواج شرعي، في بيئة واضحة وموثوقة.';
-  static const String authSignupButton = 'أنشئ الحساب على بركة الله';
+      'خطوة أولى نحو تجربة أوضح وخيارات أوسع.';
+  static const String authSignupButton = 'إنشاء الحساب';
   static const String authLoginButton = 'تسجيل الدخول';
 
-  // ─── انتظار التحقق (للحالات الإدارية القديمة إن وُجدت) ───
+  // ─── انتظار ───
   static const String waitingTitle = 'حسابك قيد المراجعة';
   static const String waitingBody =
-      'الإدارة تراجع حسابك الآن. '
-      'لا حاجة لتحديث الصفحة بنفسك؛ نتحقق من التفعيل تلقائياً.';
-
+      'نراجع حسابك الآن. لا حاجة لتحديث الصفحة؛ نتحقق من التفعيل تلقائياً.';
   static const String waitingWhatChecked =
-      'يُراجع عادة اكتمال الملف وملاءمة البيانات.';
+      'يُراجع عادة اكتمال البيانات وملاءمتها.';
 
   // ─── الرئيسية ───
-  static const String homeWelcomeHint =
-      'مساران: زواج شرعي جاد، وخدمات تيسّر العرس.';
+  static const String homeWelcomeHint = brandMessage;
 
-  static const String homeMarriageCardTitle = 'مسار الزواج';
-  static const String homeMarriageCardBody =
-      'تصفّح الملفات المناسبة، أرسل رغباتك، وتواصل ضمن ضوابط تحفظ الكرامة.';
+  static const String homeHeroTitle = 'عالم متكامل من الخدمات، أقرب إليك';
+  static const String homeHeroBody =
+      'من اختيار الخدمة المناسبة إلى تنسيق التفاصيل، '
+      'اكتشف كل ما تحتاجه في مكان واحد.';
+  static const String homePrimaryCta = 'اكتشف خدماتنا';
+  static const String homeSecondaryCta = 'ابدأ التخطيط';
 
-  static const String homeServicesCardTitle = 'خدمات الأعراس';
+  static const String homeServicesCardTitle = 'الخدمات';
   static const String homeServicesCardBody =
-      'اختر مزود الخدمة واطلب الحجز. الإدارة تراجع الطلب قبل التأكيد.';
-
-  static const String homeServicesAction = 'تصفّح خدمات العرس';
+      'تصفّح التصنيفات واختر ما يناسب احتياجك، ثم أرسل طلبك بوضوح.';
+  static const String homeServicesAction = 'تصفّح الخدمات';
 
   static const String homeSettingsCardTitle = 'الإعدادات والحساب';
   static const String homeSettingsCardBody =
       'تحديث كلمة المرور، التواصل مع الإدارة، أو إدارة حسابك.';
 
-  // ─── استكشاف / رغبات ───
-  static String get explorationGroomHint =>
-      'يمكنك اختيار حتى ${AppConfig.maxGroomRequests} رغبات في الطلب الواحد. '
-      'الهوية تظهر برمز يحفظ الخصوصية حتى مراحل لاحقة.';
-
-  static const String explorationBrideHint =
-      'تظهر لك الرغبات الواردة لتراجعيها. القبول يفتح تواصلاً منظماً داخل المنصة.';
-
-  static const String explorationPrivacyHint =
-      'أرقام الهواتف لا تُعرض في هذه المرحلة. التواصل يبدأ داخل المنصة.';
-
-  // ─── تبادل التواصل (بدل المحادثة) ───
-  static String get chatRulesShort =>
-      'بعد تأكيد الشاب للصورة يطلب من الطرفين دفع رسوم تبادل التواصل، '
-      'ثم يراجع المشرف ويوافق على إظهار الأرقام.';
-
-  static String get chatRulesLong =>
-      '• بعد موافقة الفتاة يؤكد الشاب بعد رؤية الصورة.\n'
-      '• يدفع الطرفان رسوم تبادل التواصل عبر شام كاش.\n'
-      '• المشرف يراجع الدفع ثم يوافق على تبادل الأرقام.\n'
-      '• بيانات التواصل تظهر فقط بعد موافقة الإدارة.';
-
-  static const String chatAdminReviewHint =
-      'بانتظار مراجعة الإدارة قبل إظهار بيانات التواصل.';
-
   // ─── خدمات ───
   static const String servicesBrowseHint =
-      'هذه خدمات معتمدة. إرسال الحجز طلب مراجعة، '
-      'وليس دفعاً إلكترونياً داخل التطبيق.';
+      'اختر ما يناسبك وأرسل طلبك. الإدارة تراجع الطلب قبل التأكيد.';
 
   static const String serviceDetailBookHint =
-      'بعد الإرسال تتابع الإدارة الطلب مع مزود الخدمة. '
-      'حالة الطلب تظهر في «حجوزاتي».';
+      'بعد الإرسال نتابع معك الخطوات وننسّق التفاصيل مع مزود الخدمة.';
+
+  static const String bookingTrustHint =
+      'خيارات واضحة وتواصل مباشر — نهتم بالتفاصيل لنقدّم تجربة أفضل.';
 
   static const String bookingsStatusHint =
-      'بعد قبول الطلب ارفع إشعار العربون. عند تأكيده يصبح الحجز جاهزاً، '
-      'ثم يكتمل بعد تنفيذ الخدمة.';
+      'تابع حالة طلبك هنا. التأكيد يتم بعد مراجعة الإدارة.';
 
   static const String partyRequestHint =
-      'طلب تنظيم المناسبة يُرسل للإدارة مع الخدمات التي اخترتها. '
-      'إن طُلب إثبات دفع، فارفعه من المسار المخصص في حسابك.';
+      'أدخل تفاصيل طلبك بوضوح، وسنتابع معك الخطوات التالية.';
 }

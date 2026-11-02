@@ -11,7 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'session_service.dart';
 
 const String _kAndroidChannelId = 'golden_party_default';
-const String _kAndroidChannelName = 'Golden Party';
+const String _kAndroidChannelName = 'GRAND ONE';
 
 final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -114,7 +114,7 @@ class NotificationsService {
       const AndroidNotificationChannel(
         _kAndroidChannelId,
         _kAndroidChannelName,
-        description: 'إشعارات تطبيق Golden Party',
+        description: 'إشعارات تطبيق GRAND ONE',
         importance: Importance.high,
       ),
     );
@@ -125,7 +125,7 @@ class NotificationsService {
   static Future<void> _showLocalNotification(RemoteMessage message) async {
     final title = message.notification?.title ??
         message.data['title']?.toString() ??
-        'Golden Party';
+        'GRAND ONE';
     final body = message.notification?.body ??
         message.data['body']?.toString() ??
         message.data['message']?.toString() ??
@@ -138,7 +138,7 @@ class NotificationsService {
     const androidDetails = AndroidNotificationDetails(
       _kAndroidChannelId,
       _kAndroidChannelName,
-      channelDescription: 'إشعارات تطبيق Golden Party',
+      channelDescription: 'إشعارات تطبيق GRAND ONE',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',

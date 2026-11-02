@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/app_theme.dart';
-import 'package:mithaq_app/screens/intro_screen.dart';
-import 'package:mithaq_app/ui_copy.dart';
+import 'package:golden_party_app/app_theme.dart';
+import 'package:golden_party_app/screens/intro_screen.dart';
+import 'package:golden_party_app/ui_copy.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

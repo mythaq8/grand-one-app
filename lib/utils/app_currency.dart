@@ -1,4 +1,4 @@
-// العملة المعتمدة في ميثاق لكل المعاملات المالية.
+// العملة المعتمدة في GRAND ONE لكل المعاملات المالية.
 const String kAppCurrencyCode = 'USD';
 const String kAppCurrencySymbol = '\$';
 

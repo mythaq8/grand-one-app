@@ -564,10 +564,11 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
               ),
         body: Column(
             children: [
-              const InfoBanner(
-                message: UiCopy.bookingsStatusHint,
-                tone: InfoBannerTone.info,
-              ),
+              if (!widget.embedded)
+                const InfoBanner(
+                  message: UiCopy.bookingsStatusHint,
+                  tone: InfoBannerTone.info,
+                ),
               _buildFiltersBar(),
               Expanded(child: _buildBody()),
             ],

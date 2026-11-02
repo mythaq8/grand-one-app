@@ -41,19 +41,6 @@ class AppConfig {
   static String get supabaseAnonKey => _supabaseAnonKey;
 
   // ============================================================
-  // منطق العمل
-  // ============================================================
-
-  /// الحد الأقصى لعدد الرغبات التي يمكن للشاب إرسالها دفعة واحدة
-  static const int maxGroomRequests = 5;
-
-  /// الحد الأقصى لعدد الرسائل في غرفة محادثة واحدة
-  static const int maxChatMessages = 50;
-
-  /// مدة صلاحية غرفة المحادثة بالساعات
-  static const int chatRoomHoursLimit = 48;
-
-  // ============================================================
   // Deno API
   // ============================================================
 
@@ -112,10 +99,10 @@ class AppConfig {
   // ============================================================
 
   /// اسم التطبيق
-  static const String appName = 'Golden Party';
+  static const String appName = 'GRAND ONE';
 
   /// اسم التطبيق الكامل
-  static const String appFullName = 'Golden Party - خدمات الأعراس';
+  static const String appFullName = 'GRAND ONE - ALL IN ONE';
 
   /// نسخة التطبيق
   static const String appVersion = '1.0.0';
@@ -154,21 +141,6 @@ class AppConfig {
     assert(
       supabaseAnonKey.isNotEmpty,
       '❌ supabaseAnonKey مطلوب',
-    );
-
-    assert(
-      maxGroomRequests > 0 && maxGroomRequests <= 10,
-      '❌ maxGroomRequests يجب أن يكون بين 1 و 10',
-    );
-
-    assert(
-      maxChatMessages > 0 && maxChatMessages <= 1000,
-      '❌ maxChatMessages يجب أن يكون بين 1 و 1000',
-    );
-
-    assert(
-      chatRoomHoursLimit > 0 && chatRoomHoursLimit <= 720,
-      '❌ chatRoomHoursLimit يجب أن يكون بين 1 و 720 (30 يوماً)',
     );
 
     assert(

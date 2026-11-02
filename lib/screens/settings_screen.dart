@@ -544,7 +544,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: AppColors.primarySoft,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppColors.borderLight,
+                            color: AppColors.gold.withValues(alpha: 0.3),
                           ),
                         ),
                         child: const Row(
@@ -559,10 +559,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             SizedBox(width: 10),
                             Expanded(
                               child: Text(
-                                'نحرص في ميثاق على حماية خصوصيتك وبياناتك، '
+                                'نحرص في GRAND ONE على حماية خصوصيتك وبياناتك، '
                                 'ولا يتم عرض معلوماتك إلا ضمن الصلاحيات المسموح بها.',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
+                                  fontFamily: 'Tajawal',
                                   fontSize: 12,
                                   height: 1.7,
                                   color: AppColors.textSecondary,
@@ -576,10 +577,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       const SizedBox(height: 16),
 
                       const Text(
-                        'ميثاق • الخصوصية والجدية والاحترام',
+                        'GRAND ONE • ALL IN ONE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
+                          fontFamily: 'Tajawal',
                           fontSize: 11.5,
+                          letterSpacing: 1.1,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.mutedText,
                         ),
                       ),
@@ -647,9 +651,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 5),
                 const Text(
-                  'إدارة إعدادات حسابك وخصوصيتك',
+                  'إدارة حسابك بخصوصية ووضوح',
                   textAlign: TextAlign.right,
                   style: TextStyle(
+                    fontFamily: 'Tajawal',
                     fontSize: 12.5,
                     height: 1.5,
                     color: Colors.white70,

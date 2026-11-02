@@ -256,36 +256,52 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
               borderRadius: const BorderRadius.vertical(
                 top: Radius.circular(18),
               ),
-              child: Container(
-                height: 160,
+              child: SizedBox(
+                height: 180,
                 width: double.infinity,
-                color: AppColors.surfaceTint,
-                child: Image.network(
-                  coverUrl,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (ctx, child, progress) {
-                    if (progress == null) return child;
-                    return Container(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    ColoredBox(
                       color: AppColors.surfaceTint,
-                      child: const Center(
-                        child: SizedBox(
-                          width: 28,
-                          height: 28,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primary,
+                      child: Image.network(
+                        coverUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (ctx, child, progress) {
+                          if (progress == null) return child;
+                          return const Center(
+                            child: SizedBox(
+                              width: 28,
+                              height: 28,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (_, __, ___) => const Center(
+                          child: Icon(
+                            Icons.storefront_outlined,
+                            size: 48,
+                            color: AppColors.gold,
                           ),
                         ),
                       ),
-                    );
-                  },
-                  errorBuilder: (_, __, ___) => const Center(
-                    child: Icon(
-                      Icons.storefront_outlined,
-                      size: 48,
-                      color: AppColors.gold,
                     ),
-                  ),
+                    const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0x000B1E44),
+                            Color(0x990B1E44),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

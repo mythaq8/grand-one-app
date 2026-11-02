@@ -11,7 +11,6 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 import '../widgets/islamic_decorations.dart';
-import 'exploration_screen.dart';
 import '../ui/shell/app_shell.dart';
 import 'my_bookings_screen.dart';
 import 'my_party_requests_screen.dart';
@@ -128,36 +127,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (!mounted) return;
 
     Widget? screen;
-    // نوع صريح من الخادم أولاً (أوثق من مطابقة النص)
-    if (dataType == 'proposal_awaiting_groom' ||
-        dataType == 'proposal' ||
-        dataType == 'chat' ||
-        dataType == 'message') {
-      if (role == 'groom' || role == 'bride') {
-        screen = ExplorationScreen(
-          isGroomRole: role == 'groom',
-          forceOpenAwaitingReview:
-              dataType == 'proposal_awaiting_groom' && role == 'groom',
-        );
-      }
-    } else if (text.contains('حجز') || text.contains('سعر')) {
+    if (text.contains('حجز') ||
+        text.contains('سعر') ||
+        dataType == 'booking' ||
+        dataType == 'service_booking') {
       screen = const MyBookingsScreen();
-    } else if (text.contains('حفلة') || text.contains('سهرة')) {
+    } else if (text.contains('حفلة') ||
+        text.contains('سهرة') ||
+        text.contains('مناسبة') ||
+        dataType == 'occasion' ||
+        dataType == 'party') {
       screen = const MyPartyRequestsScreen();
-    } else if (text.contains('توثيق')) {
+    } else if (text.contains('توثيق') || dataType == 'account') {
       screen = const AppShell();
-    } else if (role == 'groom' || role == 'bride') {
-      final marriage = text.contains('طلب') ||
-          text.contains('رغبة') ||
-          text.contains('محادثة') ||
-          text.contains('رسالة') ||
-          text.contains('تعارف') ||
-          text.contains('تواصل') ||
-          text.contains('مراجعة') ||
-          text.contains('قبول');
-      if (marriage) {
-        screen = ExplorationScreen(isGroomRole: role == 'groom');
-      }
+    }
+    // تجاهل إشعارات الزواج القديمة إن وُجدت في الحسابات القديمة.
+    if (role == 'groom' || role == 'bride') {
+      screen = null;
     }
 
     if (screen == null) return;
@@ -271,8 +257,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       child: InkWell(
         onTap: () => _markRead(userNotif),
         borderRadius: BorderRadius.circular(18),
-        child: IslamicCard(
+        child: Container(
           padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: isRead
+                  ? AppColors.borderLight
+                  : AppColors.gold.withValues(alpha: 0.45),
+            ),
+            boxShadow: AppColors.shadowSubtle,
+          ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -285,6 +281,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ? AppColors.surfaceTint
                       : AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(13),
+                  border: Border.all(
+                    color: isRead
+                        ? AppColors.borderLight
+                        : AppColors.gold.withValues(alpha: 0.35),
+                  ),
                 ),
                 child: Icon(
                   isRead
@@ -326,7 +327,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             width: 8,
                             height: 8,
                             decoration: const BoxDecoration(
-                              color: AppColors.error,
+                              color: AppColors.gold,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -438,14 +439,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Container(
               width: 100,
               height: 100,
-              decoration: const BoxDecoration(
-                color: AppColors.goldSoft,
+              decoration: BoxDecoration(
+                color: AppColors.primarySoft,
                 shape: BoxShape.circle,
+                border: Border.all(
+                  color: AppColors.gold.withValues(alpha: 0.4),
+                ),
               ),
               child: const Icon(
                 Icons.notifications_none_rounded,
                 size: 48,
-                color: AppColors.goldDark,
+                color: AppColors.primary,
               ),
             ),
             const SizedBox(height: 20),
@@ -460,7 +464,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'ستظهر هنا إشعارات الإدارة عند وصولها.',
+              'ستظهر هنا التحديثات المهمة عن طلباتك وحسابك.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'Tajawal',

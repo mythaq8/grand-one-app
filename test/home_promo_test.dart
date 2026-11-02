@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/app_theme.dart';
-import 'package:mithaq_app/screens/home_screen.dart';
+import 'package:golden_party_app/app_theme.dart';
+import 'package:golden_party_app/screens/home_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

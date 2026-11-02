@@ -22,7 +22,7 @@ class SectionHeader extends StatelessWidget {
       top: Space.xl,
       bottom: Space.md,
     ),
-    this.accent = AppPalette.green,
+    this.accent = AppPalette.navy,
   });
 
   final String title;

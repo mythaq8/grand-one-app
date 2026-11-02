@@ -1,6 +1,6 @@
 // lib/screens/more_screen.dart
 // ============================================================
-// تبويب «المزيد» — Golden Party (خدمات فقط)
+// تبويب «المزيد» — GRAND ONE (خدمات فقط)
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -79,13 +79,14 @@ class _MoreScreenState extends State<MoreScreen> {
                         ),
                         ActionTile(
                           icon: Icons.celebration_outlined,
-                          title: 'طلبات تنظيم المناسبة',
+                          title: 'طلبات التخطيط',
+                          subtitle: 'تنظيم الخدمات في طلب واحد',
                           onTap: () => _push(const MyOccasionRequestsScreen()),
                         ),
                         ActionTile(
                           icon: Icons.history_outlined,
-                          title: 'طلبات الحفلات',
-                          subtitle: 'المسار السابق',
+                          title: 'الطلبات السابقة',
+                          subtitle: 'أرشيف المسار القديم',
                           onTap: () => _push(const MyPartyRequestsScreen()),
                         ),
                       ],
@@ -139,10 +140,11 @@ class _MoreScreenState extends State<MoreScreen> {
                     const SizedBox(height: Space.xl),
                     Center(
                       child: Text(
-                        '${AppConfig.appName} • v1.0.0',
+                        '${AppConfig.appName} • ALL IN ONE • v${AppConfig.appVersion}',
                         style: AppText.micro.copyWith(
                           color: AppPalette.textMuted,
                           fontWeight: FontWeight.w500,
+                          letterSpacing: 0.4,
                         ),
                       ),
                     ),
@@ -182,13 +184,23 @@ class _ProfileHeader extends StatelessWidget {
                   style: AppText.section.copyWith(
                     color: AppPalette.onPrimary,
                     fontSize: 20,
+                    letterSpacing: 1.2,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'خدمات الأعراس',
+                  'ALL IN ONE',
                   style: AppText.caption.copyWith(
                     color: AppPalette.goldLight,
+                    letterSpacing: 1.6,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'كل ما تحتاجه، في وجهة واحدة',
+                  style: AppText.caption.copyWith(
+                    color: AppPalette.onPrimary.withValues(alpha: 0.78),
                   ),
                 ),
               ],
@@ -211,7 +223,9 @@ class _Group extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppPalette.surface,
         borderRadius: Radii.brLg,
-        border: Border.all(color: AppPalette.borderLight),
+        border: Border.all(
+          color: AppPalette.gold.withValues(alpha: 0.22),
+        ),
         boxShadow: AppShadows.subtle,
       ),
       child: Column(

@@ -204,61 +204,15 @@ class _WaitingScreenState extends State<WaitingScreen>
 
       final role = profile['role'] as String?;
 
-      // ============================================================
-      // 4. الشاب
-      // ============================================================
-      if (role == 'groom') {
-        final groomData = await _client
-            .from('grooms')
-            .select('is_verified')
-            .eq('user_id', userId)
-            .maybeSingle();
-
-        if (!mounted) return;
-
-        final isVerified = groomData != null &&
-            (groomData['is_verified'] == true ||
-                groomData['is_verified'] == 'true' ||
-                groomData['is_verified'] == 1);
-
-        if (isVerified) {
-          debugPrint('✅ WaitingScreen: groom verified → home');
-          _navigateToHome(isGroom: true);
-          return;
-        }
-
+      if (role == 'groom' || role == 'bride') {
+        debugPrint('⚠️ WaitingScreen: marriage role not supported');
+        try {
+          await _client.auth.signOut();
+        } catch (_) {}
+        _navigateToIntro();
         return;
       }
 
-      // ============================================================
-      // 5. الفتاة
-      // ============================================================
-      if (role == 'bride') {
-        final brideData = await _client
-            .from('brides')
-            .select('is_verified')
-            .eq('user_id', userId)
-            .maybeSingle();
-
-        if (!mounted) return;
-
-        final isVerified = brideData != null &&
-            (brideData['is_verified'] == true ||
-                brideData['is_verified'] == 'true' ||
-                brideData['is_verified'] == 1);
-
-        if (isVerified) {
-          debugPrint('✅ WaitingScreen: bride verified → home');
-          _navigateToHome(isGroom: false);
-          return;
-        }
-
-        return;
-      }
-
-      // ============================================================
-      // 6. حساب الخدمات
-      // ============================================================
       if (role == 'services_only') {
         debugPrint('✅ WaitingScreen: services account → services');
         _navigateToServices();
@@ -497,9 +451,9 @@ class _WaitingScreenState extends State<WaitingScreen>
 
                       const SizedBox(height: 16),
 
-                      const AyahCard(
-                        ayah: UiCopy.ayahQurrat,
-                        reference: UiCopy.ayahQurratRef,
+                      const InfoBanner(
+                        message: UiCopy.brandTaglineAr,
+                        tone: InfoBannerTone.tip,
                       ),
 
                       const SizedBox(height: 16),
@@ -584,7 +538,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                       const SizedBox(height: 16),
 
                       const Text(
-                        'ميثاق • الجدية والخصوصية والاحترام',
+                        'GRAND ONE • خيارات أوضح وتجربة أفضل',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 11.5,

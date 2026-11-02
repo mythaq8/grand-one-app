@@ -505,7 +505,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         );
       }
     });
-    ErrorHandler.showSuccess(context, 'أُضيفت إلى حفلتي');
+    ErrorHandler.showSuccess(context, 'أُضيفت إلى اختياراتك');
   }
 
   Future<void> _openServiceDetails(Map<String, dynamic> service) async {
@@ -551,7 +551,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     if (!mounted || clamped) return;
     ErrorHandler.showSuccess(
       context,
-      wasInCart ? 'تم تحديث حفلتي' : 'أُضيفت إلى حفلتي',
+      wasInCart ? 'تم تحديث اختياراتك' : 'أُضيفت إلى اختياراتك',
     );
   }
 
@@ -599,7 +599,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     if (_submitting) return;
     if (!_validateStep0()) return;
     if (_cart.isEmpty) {
-      ErrorHandler.showWarning(context, 'حفلتي فارغة');
+      ErrorHandler.showWarning(context, 'لا توجد اختيارات بعد');
       return;
     }
 
@@ -672,7 +672,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         textDirection: ui.TextDirection.rtl,
         child: IslamicScaffold(
           appBar: IslamicAppBar(
-            title: 'تنظيم مناسبة',
+            title: 'ابدأ التخطيط',
             actions: [
               IconButton(
                 tooltip: 'طلباتي',
@@ -733,7 +733,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
       alignment: Alignment.centerLeft,
       child: Semantics(
         button: true,
-        label: 'فتح حفلتي، $count خدمة',
+        label: 'فتح الاختيارات، $count خدمة',
         child: Material(
           color: AppColors.primary,
           elevation: 6,
@@ -781,7 +781,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                     ),
                     const SizedBox(height: 6),
                     const Text(
-                      'حفلتي',
+                      'اختياراتي',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -830,7 +830,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'حفلتي',
+              'اختياراتي',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: AppColors.primary,
@@ -888,7 +888,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           if (_partyVisible && _cart.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              'حفلتي: ${_cart.length} خدمة'
+              'اختياراتي: ${_cart.length} خدمة'
               '${_estimatedPriced > 0 ? ' · تقديري ${_formatPrice(_estimatedPriced)} \$' : ''}'
               '${_manualCount > 0 ? ' · $_manualCount بانتظار تسعير' : ''}',
               style: const TextStyle(
@@ -1470,7 +1470,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                   elevation: 0,
                 ),
                 child: Text(
-                  inCart ? 'في حفلتي — إضافة أخرى' : 'إضافة إلى حفلتي',
+                  inCart ? 'في اختياراتك — إضافة أخرى' : 'أضف إلى اختياراتي',
                 ),
               ),
             ],
@@ -1695,7 +1695,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
               ),
               const SizedBox(height: 12),
               const Text(
-                'حفلتي فارغة',
+                'لا توجد اختيارات بعد',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,
@@ -1704,7 +1704,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
               ),
               const SizedBox(height: 6),
               const Text(
-                'أضف خدمات من أي تصنيف. تبقى في حفلتي حتى لو رجعت ولم تختر تصنيفاً.',
+                'أضف خدمات من أي تصنيف. تبقى في اختياراتك حتى لو رجعت ولم تختر تصنيفاً.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,

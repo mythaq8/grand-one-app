@@ -1,39 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/app_theme.dart';
-import 'package:mithaq_app/design/tokens.dart';
-import 'package:mithaq_app/ui/shell/app_shell.dart';
+import 'package:golden_party_app/app_theme.dart';
+import 'package:golden_party_app/design/tokens.dart';
+import 'package:golden_party_app/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  /// ملاحظة: AppShell يفتح شاشات تتصل بـ Supabase، فاختبار
-  /// الشاشات الفعلية يحتاج تهيئة خدمة. هنا نتحقّق من:
-  ///   • بناء شريط التنقّل بعدد التبويبات الصحيح،
-  ///   • تبديل التبويب يعمل ويحفظ الحالة،
-  ///   • التحوّل إلى الشريط الجانبي على الشاشات العريضة.
   group('AppShell', () {
-    testWidgets('يعرض خمسة تبويبات بالترتيب المتفق عليه', (tester) async {
+    testWidgets('يعرض أربعة تبويبات بالترتيب المتفق عليه', (tester) async {
       final tabs = AppTab.values;
 
-      expect(tabs.length, 5);
+      expect(tabs.length, 4);
       expect(
         tabs.map((t) => t.label).toList(),
-        ['الرئيسية', 'الزواج', 'الخدمات', 'طلباتي', 'المزيد'],
+        ['الرئيسية', 'الخدمات', 'طلباتي', 'المزيد'],
       );
     });
 
     testWidgets('التبويبات تُستخدم كأسماء مسارات منطقية', (tester) async {
       expect(AppTab.home.index, 0);
-      expect(AppTab.marriage.index, 1);
-      expect(AppTab.services.index, 2);
-      expect(AppTab.requests.index, 3);
-      expect(AppTab.more.index, 4);
+      expect(AppTab.services.index, 1);
+      expect(AppTab.requests.index, 2);
+      expect(AppTab.more.index, 3);
     });
 
     testWidgets('شريط التنقّل يحترم حدّ اللمس الأدنى', (tester) async {
-      // نتحقق من ثيم الشريط بدل بناء الشاشات الكاملة.
-      final theme = AppTheme.mithaqTheme;
+      final theme = AppTheme.grandOneTheme;
       expect(theme.navigationBarTheme.height, Sizes.navBarHeight);
       expect(
         theme.navigationBarTheme.labelBehavior,
@@ -46,9 +39,9 @@ void main() {
     });
 
     testWidgets('الشريط الجانبي معرّف بنفس ألوان الهوية', (tester) async {
-      final theme = AppTheme.mithaqTheme;
+      final theme = AppTheme.grandOneTheme;
       expect(theme.navigationRailTheme.selectedIconTheme?.color,
-          AppPalette.green);
+          AppPalette.navy);
       expect(theme.navigationRailTheme.unselectedIconTheme?.color,
           AppPalette.textTertiary);
     });

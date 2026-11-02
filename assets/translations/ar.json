@@ -1,5 +1,5 @@
-{
-  "app_name": "ميثاق",
+﻿{
+  "app_name": "GRAND ONE",
   "login": "تسجيل الدخول",
   "signup": "إنشاء حساب",
   "email": "البريد الإلكتروني",
@@ -23,10 +23,10 @@
   "verify": "تأكيد",
   "back": "رجوع",
   "error": "خطأ",
-  "groom_title": "أنا شاب باحث عن الزواج",
-  "groom_subtitle": "سجل بياناتك واختر رغباتك",
-  "bride_title": "أنا ولي أمر فتاة",
-  "bride_subtitle": "سجل بيانات الفتاة واستقبل الطلبات",
+  "groom_title": "حساب خدمات",
+  "groom_subtitle": "تصفّح واحجز الخدمات",
+  "bride_title": "حساب خدمات",
+  "bride_subtitle": "تابع طلباتك بسهولة",
   "admin_title": "بوابة المشرف",
   "admin_subtitle": "لوحة الرقابة والمراجعة",
   "deactivate_title": "⚠️ تعطيل الحساب",

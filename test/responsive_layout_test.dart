@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/widgets/form_fields.dart';
-import 'package:mithaq_app/widgets/islamic_decorations.dart';
-import 'package:mithaq_app/widgets/screen_fit.dart';
-import 'package:mithaq_app/widgets/ux_helpers.dart';
+import 'package:golden_party_app/widgets/form_fields.dart';
+import 'package:golden_party_app/widgets/islamic_decorations.dart';
+import 'package:golden_party_app/widgets/screen_fit.dart';
+import 'package:golden_party_app/widgets/ux_helpers.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

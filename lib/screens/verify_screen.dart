@@ -11,9 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/islamic_decorations.dart';
 import '../app_colors.dart';
 import '../services/device_gate.dart';
-import 'services_screen.dart';
-import 'terms_screen.dart';
-import 'source_screen.dart';
+import 'services_user_profile_setup_screen.dart';
 
 class VerifyScreen extends StatefulWidget {
   final String email;
@@ -143,27 +141,14 @@ class _VerifyScreenState extends State<VerifyScreen> {
     final phone = user.phone ??
         (widget.isPhoneVerification ? widget.identifier : null);
 
-    String role;
-
-    // ═══ تحديد نوع الحساب ═══
-    if (widget.accountType == 'services') {
-      role = 'services_only';
-    } else if (widget.accountType == 'marriage') {
-      if (widget.marriageRole == 'groom') {
-        role = 'groom';
-      } else if (widget.marriageRole == 'bride') {
-        role = 'bride';
-      } else {
-        throw Exception('نوع حساب الزواج غير محدد.');
-      }
-    } else {
-      throw Exception('نوع الحساب غير صحيح.');
+    // تطبيق الخدمات يقبل حسابات الخدمات فقط.
+    if (widget.accountType != 'services') {
+      throw Exception('هذا التطبيق لحسابات الخدمات فقط.');
     }
 
-    // ═══ إنشاء Profile ═══
     await _createProfile(
       userId: user.id,
-      role: role,
+      role: 'services_only',
       phone: phone,
     );
 
@@ -182,11 +167,10 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
     if (!mounted) return;
 
-    // ═══ الانتقال إلى SourceScreen ═══
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (_) => const SourceScreen(),
+        builder: (_) => const ServicesUserProfileSetupScreen(),
       ),
     );
   }
@@ -440,7 +424,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
       return 'حساب الفتاة';
     }
 
-    return 'حساب ميثاق';
+    return 'حساب GRAND ONE';
   }
 
   String _getVerificationMethod() {
@@ -822,7 +806,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                       const SizedBox(height: 8),
 
                       const Text(
-                        'خطوة بسيطة لإتمام إنشاء حسابك في ميثاق',
+                        'خطوة بسيطة لإتمام إنشاء حسابك في GRAND ONE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 14,
@@ -874,7 +858,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                             Expanded(
                               child: Text(
                                 'رمز التحقق خاص بك، ولا تشاركه مع أي شخص. '
-                                'نحرص في ميثاق على حماية بياناتك وخصوصيتك.',
+                                'نحرص في GRAND ONE على حماية بياناتك وخصوصيتك.',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
                                   fontSize: 12.5,
@@ -890,7 +874,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                       const SizedBox(height: 12),
 
                       const Text(
-                        'ميثاق • زواج قائم على الجدية والاحترام',
+                        'GRAND ONE • كل ما تحتاجه، في وجهة واحدة',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 11.5,

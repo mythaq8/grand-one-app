@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/screens/intro_screen.dart';
-import 'package:mithaq_app/screens/more_screen.dart';
-import 'package:mithaq_app/screens/my_requests_screen.dart';
-import 'package:mithaq_app/ui/shell/app_shell.dart';
+import 'package:golden_party_app/screens/intro_screen.dart';
+import 'package:golden_party_app/screens/more_screen.dart';
+import 'package:golden_party_app/screens/my_requests_screen.dart';
+import 'package:golden_party_app/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

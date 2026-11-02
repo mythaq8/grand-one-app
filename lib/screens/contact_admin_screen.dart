@@ -213,8 +213,9 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                     const SizedBox(height: 7),
 
                     const Text(
-                      'يسعدنا تواصلك معنا',
+                      'نعمل على تسهيل تجربتك من البداية حتى النهاية',
                       style: TextStyle(
+                        fontFamily: 'Tajawal',
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
@@ -224,9 +225,10 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                     const SizedBox(height: 5),
 
                     const Text(
-                      'اكتب رسالتك وسيتولى فريق الإدارة مراجعتها والرد عليك عند الحاجة.',
+                      'اكتب رسالتك بوضوح، وسيتولى فريق الإدارة مراجعتها والرد عند الحاجة.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
+                        fontFamily: 'Tajawal',
                         fontSize: 11,
                         height: 1.6,
                         color: AppColors.textSecondary,

@@ -160,16 +160,12 @@ class _HomeScreenState extends State<HomeScreen>
                       // ── 1. من أنت الآن ──
                       _buildWelcomeCard(),
 
-                      // ── 2. بطاقات التعريف بخدمات الأعراس ──
+                      // ── 2. بطاقات التعريف بالخدمات ──
                       const SizedBox(height: 24),
                       _buildHeroPages(),
 
-                      // ── 4. مرجع روحي هادئ ──
                       const SizedBox(height: 24),
-                      const AyahCard(
-                        ayah: UiCopy.ayahSakinah,
-                        reference: UiCopy.ayahSakinahRef,
-                      ),
+                      _buildBrandPromiseCard(),
                     ],
                   ),
                 ),
@@ -222,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
                 const Text(
-                  'خدمات الأعراس',
+                  'ALL IN ONE',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -230,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen>
                     fontSize: 11.5,
                     height: 1.3,
                     fontWeight: FontWeight.w600,
+                    letterSpacing: 1.4,
                     color: AppColors.goldDark,
                   ),
                 ),
@@ -368,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ),
                           child: const Text(
-                            'حساب خدمات الأعراس',
+                            'حساب خدمات',
                             style: TextStyle(
                               fontFamily: 'Tajawal',
                               fontSize: 11.5,
@@ -385,6 +382,62 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBrandPromiseCard() {
+    return Container(
+      padding: const EdgeInsets.all(Space.xl),
+      decoration: BoxDecoration(
+        color: AppPalette.surface,
+        borderRadius: Radii.brLg,
+        border: Border.all(color: AppPalette.borderLight),
+        boxShadow: AppShadows.subtle,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            UiCopy.homeHeroTitle,
+            style: const TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: Space.sm),
+          Text(
+            UiCopy.homeHeroBody,
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontSize: 13.5,
+              height: 1.55,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: Space.lg),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: widget.onOpenServicesTab,
+                  child: const Text(UiCopy.homePrimaryCta),
+                ),
+              ),
+              const SizedBox(width: Space.sm),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: widget.onOpenRequestsTab ??
+                      widget.onOpenServicesTab,
+                  child: const Text(UiCopy.homeSecondaryCta),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -681,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           const SizedBox(height: 8),
           Text(
-            'خدمات الأعراس في مكان واحد',
+            UiCopy.brandTaglineAr,
             style: TextStyle(
               fontFamily: 'Tajawal',
               fontSize: 12,
@@ -957,37 +1010,37 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
       _HeroSlide(
         assetImage: AppAssets.homePromo[0],
         tag: 'الهدف',
-        title: 'خدمات أعراس واضحة',
+        title: 'عالم متكامل من الخدمات',
         description:
-            'قاعات وتصوير وتنظيم ومزوّدون موثوقون في مكان واحد.',
+            'خيارات متنوعة في مكان واحد، من الفكرة إلى التنفيذ.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[1],
         tag: 'كيف يعمل',
-        title: 'اطلب وتابع خطوة بخطوة',
+        title: 'اختر خدماتك بكل سهولة',
         description:
-            'اختر الخدمة، أرسل الطلب، وتابع حالة الحجز من تبويب طلباتي.',
+            'اختر الخدمة، أرسل الطلب، وتابع الخطوات من تبويب طلباتي.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[2],
-        tag: 'التحقق',
-        title: 'مراجعة قبل التأكيد',
+        tag: 'الثقة',
+        title: 'خيارات واضحة وتواصل مباشر',
         description:
-            'الإدارة تراجع الطلبات قبل التثبيت حتى تبقى الأسعار والالتزامات واضحة.',
+            'الإدارة تراجع الطلبات قبل التأكيد حتى تبقى التفاصيل واضحة.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[7],
-        tag: 'الدفع',
-        title: 'لا دفع إلكتروني تلقائي',
+        tag: 'التنسيق',
+        title: 'نجمع لك التفاصيل لتستمتع بالتجربة',
         description:
-            'الحجز يمر على الإدارة. التأكيد يدوي وواضح قبل أي التزام مالي.',
+            'أرسل طلبك وسنتابع معك الخطوات بهدوء ووضوح.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[8],
         tag: 'الخدمات',
-        title: 'قاعة وتصوير وتنظيم',
+        title: 'اكتشف ما يناسب احتياجاتك',
         description:
-            'تصفّح المزودين والباقات واطلب ما يناسب مناسبتك.',
+            'تصفّح المزودين والباقات واطلب ما يناسبك.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[9],
@@ -1020,7 +1073,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
-                'لماذا Golden Party',
+                'لماذا GRAND ONE',
                 style: TextStyle(
                   fontFamily: 'Tajawal',
                   fontSize: 17,

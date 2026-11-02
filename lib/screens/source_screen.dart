@@ -1,6 +1,6 @@
 // lib/screens/source_screen.dart
 // ============================================================
-// SourceScreen — كيف تعرفت على ميثاق؟
+// SourceScreen — كيف تعرفت على GRAND ONE؟
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -161,7 +161,7 @@ class _SourceScreenState extends State<SourceScreen> {
     if (_selectedSource == null ||
         _selectedSource!.trim().isEmpty) {
       _showWarning(
-        'يرجى اختيار الطريقة التي تعرفت من خلالها على ميثاق',
+        'يرجى اختيار الطريقة التي تعرفت من خلالها على GRAND ONE',
       );
       return;
     }
@@ -229,18 +229,13 @@ class _SourceScreenState extends State<SourceScreen> {
         return;
       }
 
-      if (role == 'groom') {
-        Navigator.pushReplacementNamed(
+      if (role == 'groom' || role == 'bride') {
+        await _client.auth.signOut();
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(
           context,
-          '/terms-groom',
-        );
-        return;
-      }
-
-      if (role == 'bride') {
-        Navigator.pushReplacementNamed(
-          context,
-          '/terms-bride',
+          '/intro',
+          (route) => false,
         );
         return;
       }
@@ -306,7 +301,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       ),
                       const SizedBox(height: 12),
                       const Text(
-                        'اختيارك يساعدنا على تحسين تجربة ميثاق',
+                        'اختيارك يساعدنا على تحسين تجربة GRAND ONE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Tajawal',
@@ -358,7 +353,7 @@ class _SourceScreenState extends State<SourceScreen> {
         ),
         const SizedBox(height: 20),
         const Text(
-          'كيف تعرفت على ميثاق؟',
+          'كيف تعرفت على GRAND ONE؟',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Tajawal',
@@ -392,9 +387,9 @@ class _SourceScreenState extends State<SourceScreen> {
         ),
         const SizedBox(height: 12),
         const Text(
-          'نرغب في معرفة الطريقة التي وصلت بها إلى ميثاق، '
+          'نرغب في معرفة الطريقة التي وصلت بها إلى GRAND ONE، '
           'وذلك لمساعدتنا على تطوير خدماتنا والوصول إلى من يبحث '
-          'عن الزواج الجاد والشرعي.',
+          'عن تجربة خدمات أوضح وأكثر تكاملاً.',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Tajawal',

@@ -75,7 +75,7 @@ class ActionTile extends StatelessWidget {
     this.subtitle,
     this.onTap,
     this.trailing,
-    this.accent = AppPalette.green,
+    this.accent = AppPalette.navy,
     this.showChevron = true,
   });
 
@@ -167,7 +167,7 @@ class StatTile extends StatelessWidget {
     required this.value,
     required this.label,
     this.icon,
-    this.accent = AppPalette.green,
+    this.accent = AppPalette.navy,
     this.onTap,
   });
 

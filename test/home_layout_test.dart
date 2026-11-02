@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mithaq_app/app_theme.dart';
-import 'package:mithaq_app/design/tokens.dart';
-import 'package:mithaq_app/ui/kit/kit.dart';
-import 'package:mithaq_app/ui/shell/app_shell.dart';
+import 'package:golden_party_app/app_theme.dart';
+import 'package:golden_party_app/design/tokens.dart';
+import 'package:golden_party_app/ui/kit/kit.dart';
+import 'package:golden_party_app/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

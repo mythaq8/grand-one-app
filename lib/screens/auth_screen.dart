@@ -16,11 +16,7 @@ import '../services/api_service.dart';
 import '../services/device_gate.dart';
 
 import 'verify_screen.dart';
-import 'groom_screen.dart';
-import 'bride_screen.dart';
-import 'source_screen.dart';
 import 'services_user_profile_setup_screen.dart';
-import 'waiting_screen.dart';
 import '../ui/shell/app_shell.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -40,8 +36,7 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLogin = true;
   bool _obscurePassword = true;
 
-  String _accountType = 'services';
-  String? _marriageRole;
+  final String _accountType = 'services'; // خدمات فقط — لا زواج
 
   static final RegExp _emailRegex = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
@@ -193,16 +188,7 @@ class _AuthScreenState extends State<AuthScreen> {
     rethrow;
   }
 }
-bool _validateSignupType() {
-  if (_accountType == 'marriage' && _marriageRole == null) {
-    _showMessage(
-      'يرجى اختيار نوع حساب الزواج: شاب أو فتاة',
-      AppColors.warning,
-    );
-    return false;
-  }
-  return true;
-}
+bool _validateSignupType() => true;
 
   void _showMessage(
     String message,
@@ -324,62 +310,8 @@ bool _validateSignupType() {
 
   if (!mounted) return;
 
-  if (role == 'groom') {
-    final groomData = await _supabase
-        .from('grooms')
-        .select('is_verified')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-    if (!mounted) return;
-
-    if (groomData == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const GroomProfileSetupScreen(),
-        ),
-      );
-      return;
-    }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const AppShell(isGroomRole: true),
-      ),
-    );
-    return;
-  }
-
-  if (role == 'bride') {
-    final brideData = await _supabase
-        .from('brides')
-        .select('is_verified')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-    if (!mounted) return;
-
-    if (brideData == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const BrideProfileSetupScreen(),
-        ),
-      );
-      return;
-    }
-
-    final verified = brideData['is_verified'] == true;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => verified
-            ? const AppShell(isGroomRole: false)
-            : const WaitingScreen(),
-      ),
-    );
+  if (role == 'groom' || role == 'bride') {
+    await _signOutWithMessage('هذا التطبيق لحسابات الخدمات فقط.');
     return;
   }
 
@@ -494,8 +426,7 @@ bool _validateSignupType() {
       identifier: email,
       action: 'signup',
       success: true,
-      details:
-          'Signup success - accountType: $_accountType, marriageRole: $_marriageRole',
+      details: 'Signup success - accountType: services',
     );
 
     if (response.session == null) {
@@ -513,24 +444,17 @@ bool _validateSignupType() {
             email: email,
             identifier: email,
             isPhoneVerification: false,
-            accountType: _accountType,
-            marriageRole: _marriageRole,
+            accountType: 'services',
+            marriageRole: null,
           ),
         ),
       );
       return;
     }
 
-    final isServicesAccount = _accountType == 'services';
-
-    final String role = isServicesAccount
-        ? 'services_only'
-        : (_marriageRole == 'groom' ? 'groom' : 'bride');
-
-    // ═══ لا نُرسل phone — يُملأ لاحقًا في شاشة المعلومات ═══
     await _createProfile(
       userId: user.id,
-      role: role,
+      role: 'services_only',
       phone: null,
     );
 
@@ -544,21 +468,12 @@ bool _validateSignupType() {
 
     if (!mounted) return;
 
-    if (isServicesAccount) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const ServicesUserProfileSetupScreen(),
-        ),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SourceScreen(),
-        ),
-      );
-    }
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ServicesUserProfileSetupScreen(),
+      ),
+    );
   } on AuthException catch (e) {
     await _logAttempt(email, false);
     debugPrint('🔴 Auth error: ${e.message}');
@@ -602,16 +517,7 @@ bool _validateSignupType() {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: _isLoading
-            ? null
-            : () {
-                setState(() {
-                  _accountType = value;
-                  if (value == 'services') {
-                    _marriageRole = null;
-                  }
-                });
-              },
+        onTap: null,
         borderRadius: BorderRadius.circular(16),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -684,97 +590,6 @@ bool _validateSignupType() {
                 ),
               ),
               const SizedBox(width: 8),
-              _buildCheckCircle(selected),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMarriageRoleCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required String value,
-  }) {
-    final selected = _marriageRole == value;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _isLoading
-            ? null
-            : () {
-                setState(() {
-                  _marriageRole = value;
-                });
-              },
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 14,
-          ),
-          decoration: BoxDecoration(
-            color: selected
-                ? AppColors.primarySoft
-                : AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected
-                  ? AppColors.primary
-                  : AppColors.borderLight,
-              width: selected ? 1.4 : 0.9,
-            ),
-          ),
-          child: Column(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? AppColors.primary
-                      : AppColors.surfaceGreen,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: selected
-                        ? AppColors.primary
-                        : AppColors.border,
-                  ),
-                ),
-                child: Icon(
-                  icon,
-                  size: 25,
-                  color: selected
-                      ? AppColors.goldLight
-                      : AppColors.primary,
-                ),
-              ),
-              const SizedBox(height: 9),
-              Text(
-                title,
-                style: TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: selected
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 10,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
               _buildCheckCircle(selected),
             ],
           ),
@@ -906,8 +721,8 @@ Widget _buildInputFields() {
         ),
         const SizedBox(height: 10),
         _buildAccountTypeCard(
-          title: 'حساب خدمات الأعراس',
-          subtitle: 'لتصفّح وحجز خدمات الأعراس',
+          title: 'حساب خدمات',
+          subtitle: 'لتصفّح الخدمات وإرسال الطلبات',
           icon: Icons.business_center_outlined,
           value: 'services',
         ),
@@ -969,9 +784,10 @@ Widget _buildInputFields() {
         ),
         if (!_isLogin) ...[
           const SizedBox(height: 14),
-          const AyahCard(
-            ayah: UiCopy.ayahNikah,
-            reference: UiCopy.ayahNikahRef,
+          const InfoBanner(
+            message: UiCopy.brandTaglineAr,
+            tone: InfoBannerTone.tip,
+            padding: EdgeInsets.zero,
           ),
         ],
       ],
@@ -1002,7 +818,7 @@ Widget _buildInputFields() {
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              'نحرص على الخصوصية والجدية، ونهدف إلى تيسير الزواج الشرعي بطريقة منظمة.',
+              'نحرص على وضوح الخيارات وسهولة التنسيق لحماية تجربتك.',
               style: TextStyle(
                 fontFamily: 'Tajawal',
                 fontSize: 11,
@@ -1077,10 +893,6 @@ Widget _buildInputFields() {
                                   : () {
                                       setState(() {
                                         _isLogin = !_isLogin;
-                                        if (!_isLogin) {
-                                          _accountType = 'marriage';
-                                          _marriageRole = null;
-                                        }
                                       });
                                     },
                               child: Text(
@@ -1110,12 +922,13 @@ Widget _buildInputFields() {
                       _buildFooterInfo(),
                       const SizedBox(height: 12),
                       const Text(
-                        'ميثاق • تيسير الزواج الشرعي',
+                        'GRAND ONE • ALL IN ONE',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Tajawal',
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 1.2,
                           color: AppColors.mutedText,
                         ),
                       ),

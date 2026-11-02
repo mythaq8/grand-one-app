@@ -61,7 +61,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                   ),
                   const SizedBox(height: Space.xs),
                   Text(
-                    'تابع حالة حجوزاتك وطلبات التنظيم في مكان واحد.',
+                    'خيارات واضحة وتواصل مباشر — تابع كل طلباتك من هنا.',
                     style: AppText.caption,
                   ),
                 ],
@@ -88,8 +88,8 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
   Widget _buildSwitcher(BuildContext context) {
     final items = <({String label, IconData icon})>[
       (label: 'الحجوزات', icon: Icons.calendar_month_outlined),
-      (label: 'طلبات المناسبة', icon: Icons.celebration_outlined),
-      (label: 'الحفلات', icon: Icons.history_outlined),
+      (label: 'التخطيط', icon: Icons.celebration_outlined),
+      (label: 'السابق', icon: Icons.history_outlined),
     ];
 
     return Padding(
@@ -147,7 +147,7 @@ class _SwitcherChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppPalette.green : AppPalette.surface,
+      color: selected ? AppPalette.navy : AppPalette.surface,
       borderRadius: Radii.brSm,
       child: InkWell(
         onTap: onTap,
@@ -158,7 +158,9 @@ class _SwitcherChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: Radii.brSm,
             border: Border.all(
-              color: selected ? AppPalette.green : AppPalette.border,
+              color: selected
+                  ? AppPalette.gold.withValues(alpha: 0.55)
+                  : AppPalette.border,
             ),
           ),
           child: Row(
@@ -167,7 +169,7 @@ class _SwitcherChip extends StatelessWidget {
               Icon(
                 icon,
                 size: Sizes.iconSm + 2,
-                color: selected ? AppPalette.onPrimary : AppPalette.textSecondary,
+                color: selected ? AppPalette.goldLight : AppPalette.textSecondary,
               ),
               const SizedBox(width: Space.xs + 2),
               Flexible(

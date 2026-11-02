@@ -107,7 +107,7 @@ class _ServicesUserProfileSetupScreenState
       child: IslamicScaffold(
         showPattern: true,
         appBar: IslamicAppBar(
-          title: 'إكمال ملف الخدمات',
+          title: 'إكمال بياناتك',
         ),
         body: Form(
             key: _formKey,
@@ -236,7 +236,7 @@ class _ServicesUserProfileSetupScreenState
         ),
         const SizedBox(height: 8),
         const Text(
-          'نحتاج هذه المعلومات لإكمال حسابك وتقديم خدماتنا لك',
+          'خطوة قصيرة لنقدّم لك تجربة أوضح وخيارات أوسع',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'Tajawal',
