@@ -15,8 +15,6 @@ class AppTheme {
   /// الاسم الجديد.
   static ThemeData get grandOneTheme => _build();
 
-  /// توافق مؤقت مع الاستدعاءات القديمة.
-  static ThemeData get mithaqTheme => grandOneTheme;
 
   static ThemeData _build() {
     final colorScheme = ColorScheme.fromSeed(
@@ -113,7 +111,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppPalette.navy,
           disabledForegroundColor: AppPalette.textMuted,
-          side: const BorderSide(color: AppPalette.gold, width: 1.2),
+          side: const BorderSide(color: AppPalette.navy, width: 1.2),
           minimumSize: const Size(double.infinity, Sizes.buttonHeight),
           padding: const EdgeInsets.symmetric(
             horizontal: Space.xl,
@@ -172,7 +170,7 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: Sizes.navBarHeight,
-        indicatorColor: AppPalette.navySoft,
+        indicatorColor: AppPalette.goldSoft,
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: Radii.brSm,
         ),
@@ -182,25 +180,25 @@ class AppTheme {
           return AppText.micro.copyWith(
             fontSize: 11.5,
             fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppPalette.navy : AppPalette.textTertiary,
+            color: selected ? AppPalette.goldDeep : AppPalette.textTertiary,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: 23,
-            color: selected ? AppPalette.navy : AppPalette.textTertiary,
+            color: selected ? AppPalette.goldDeep : AppPalette.textTertiary,
           );
         }),
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: AppPalette.surface,
-        indicatorColor: AppPalette.navySoft,
+        indicatorColor: AppPalette.goldSoft,
         indicatorShape: const RoundedRectangleBorder(
           borderRadius: Radii.brSm,
         ),
         selectedIconTheme: const IconThemeData(
-          color: AppPalette.navy,
+          color: AppPalette.goldDeep,
           size: Sizes.iconLg,
         ),
         unselectedIconTheme: const IconThemeData(
@@ -208,7 +206,7 @@ class AppTheme {
           size: Sizes.iconLg,
         ),
         selectedLabelTextStyle: AppText.micro.copyWith(
-          color: AppPalette.navy,
+          color: AppPalette.goldDeep,
           fontSize: 12,
         ),
         unselectedLabelTextStyle: AppText.micro.copyWith(
@@ -550,7 +548,6 @@ class GrandOnePageTransitionsBuilder extends PageTransitionsBuilder {
 }
 
 /// توافق مع الاسم القديم.
-typedef MithaqPageTransitionsBuilder = GrandOnePageTransitionsBuilder;
 
 class GrandOneScrollBehavior extends MaterialScrollBehavior {
   const GrandOneScrollBehavior();
@@ -570,5 +567,4 @@ class GrandOneScrollBehavior extends MaterialScrollBehavior {
   }
 }
 
-typedef MithaqScrollBehavior = GrandOneScrollBehavior;
 

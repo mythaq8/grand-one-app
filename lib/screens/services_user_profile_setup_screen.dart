@@ -12,7 +12,7 @@ import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../ui/shell/app_shell.dart';
 
 class ServicesUserProfileSetupScreen extends StatefulWidget {
@@ -104,9 +104,9 @@ class _ServicesUserProfileSetupScreenState
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
+      child: BrandScaffold(
         showPattern: true,
-        appBar: IslamicAppBar(
+        appBar: BrandAppBar(
           title: 'إكمال بياناتك',
         ),
         body: Form(
@@ -117,7 +117,7 @@ class _ServicesUserProfileSetupScreenState
                 children: [
                   _buildHeader(),
                   const SizedBox(height: 24),
-                  IslamicCard(
+                  BrandCard(
                     padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
                     child: Column(
                       children: [

@@ -40,7 +40,7 @@ class DeviceGateResult {
 
 /// بوابة إلزامية: لا يدخل المستخدم التطبيق دون ربط ناجح للجهاز (أو تأكيد سابق لنفس البصمة).
 class DeviceGate {
-  static const _linkedFpKey = 'mithaq_device_linked_fp_v1';
+  static const _linkedFpKey = 'grand_one_device_linked_fp_v1';
 
   static bool isLimitMessage(String message) {
     return message.contains('حسابان فقط') || message.contains('تجاوز الحد');

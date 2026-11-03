@@ -20,7 +20,7 @@ if (file("google-services.json").exists()) {
 }
 
 android {
-    namespace = "com.goldenparty.app"
+    namespace = "com.grandone.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -31,7 +31,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.goldenparty.app"
+        applicationId = "com.grandone.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

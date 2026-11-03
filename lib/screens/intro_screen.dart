@@ -10,7 +10,7 @@ import '../design/typography.dart';
 import '../ui/layout/responsive.dart';
 import '../ui_copy.dart';
 import '../widgets/brand_mark.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import 'auth_screen.dart';
 
 class IntroScreen extends StatelessWidget {
@@ -25,7 +25,7 @@ class IntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
+    return BrandScaffold(
       showPattern: true,
       body: Column(
         children: [
@@ -42,7 +42,7 @@ class IntroScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IslamicButton(
+                  BrandButton(
                     label: UiCopy.introStartButton,
                     icon: const Icon(
                       Icons.arrow_forward_rounded,
@@ -88,60 +88,25 @@ class _WelcomePage extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: Space.lg),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: Space.xxxl,
-                horizontal: Space.lg,
-              ),
-              decoration: BoxDecoration(
-                gradient: AppGradients.splash,
-                borderRadius: Radii.brXl,
-                border: Border.all(
-                  color: AppPalette.gold.withValues(alpha: 0.35),
-                ),
-                boxShadow: AppShadows.medium,
-              ),
-              child: Column(
-                children: [
-                  const BrandMark(
-                    size: 96,
-                    framed: false,
-                    onDark: true,
-                  ),
-                  const SizedBox(height: Space.xl),
-                  const BrandWordmark(
-                    fontSize: 28,
-                    showTagline: true,
-                  ),
-                  const SizedBox(height: Space.md),
-                  Text(
-                    UiCopy.brandTaglineAr,
-                    textAlign: TextAlign.center,
-                    style: AppText.subtitle.copyWith(
-                      color: AppPalette.goldLight,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return BrandMark(
+                  variant: BrandMarkVariant.lockup,
+                  size: constraints.maxWidth,
+                );
+              },
             ),
             const SizedBox(height: Space.xxl),
             Text(
               UiCopy.brandMessage,
               textAlign: TextAlign.center,
-              style: AppText.section.copyWith(
-                color: AppPalette.textPrimary,
-                fontSize: 20,
-              ),
+              style: AppText.section,
             ),
             const SizedBox(height: Space.md),
             Text(
               UiCopy.introSummary,
               textAlign: TextAlign.center,
-              style: AppText.body.copyWith(
-                color: AppPalette.textSecondary,
-              ),
+              style: AppText.bodySecondary.copyWith(fontSize: 14),
             ),
             const SizedBox(height: Space.xl),
             Wrap(
@@ -156,9 +121,11 @@ class _WelcomePage extends StatelessWidget {
                       vertical: Space.sm,
                     ),
                     decoration: BoxDecoration(
-                      color: AppPalette.navySoft,
+                      gradient: AppGradients.goldSoft,
                       borderRadius: Radii.brPill,
-                      border: Border.all(color: AppPalette.borderLight),
+                      border: Border.all(
+                        color: AppPalette.gold.withValues(alpha: 0.55),
+                      ),
                     ),
                     child: Text(
                       tag,

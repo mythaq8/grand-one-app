@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/screens/home_screen.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/screens/home_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +20,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.mithaqTheme,
+        theme: AppTheme.grandOneTheme,
         home: const Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(
@@ -31,20 +31,23 @@ void main() {
         ),
       ),
     );
+    // اسمح لمحاولة التحميل البعيد بالفشل بهدوء والبقاء على الـ fallback
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
   }
 
   testWidgets('البطاقة الأولى تظهر ثم تتقلب وحدها', (tester) async {
     await pumpCarousel(tester);
 
-    expect(find.text('ثقة تبدأ قبل الخطوبة'), findsWidgets);
-    expect(find.text('1 / 10'), findsOneWidget);
+    expect(find.text('عالم متكامل من الخدمات'), findsWidgets);
+    expect(find.text('1 / 6'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    expect(find.text('2 / 10'), findsOneWidget);
-    expect(find.text('من الملف إلى التواصل المنضبط'), findsWidgets);
+    expect(find.text('2 / 6'), findsOneWidget);
+    expect(find.text('اختر خدماتك بكل سهولة'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

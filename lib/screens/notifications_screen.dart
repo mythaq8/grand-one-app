@@ -10,10 +10,10 @@ import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../ui/shell/app_shell.dart';
 import 'my_bookings_screen.dart';
-import 'my_party_requests_screen.dart';
+import 'my_occasion_requests_screen.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({Key? key}) : super(key: key);
@@ -137,7 +137,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         text.contains('مناسبة') ||
         dataType == 'occasion' ||
         dataType == 'party') {
-      screen = const MyPartyRequestsScreen();
+      screen = const MyOccasionRequestsScreen();
     } else if (text.contains('توثيق') || dataType == 'account') {
       screen = const AppShell();
     }
@@ -192,9 +192,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
+    return BrandScaffold(
       showPattern: false,
-      appBar: IslamicAppBar(
+      appBar: BrandAppBar(
         title: 'الإشعارات',
         actions: [
           if (_unreadCount > 0)
@@ -388,7 +388,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: IslamicCard(
+        child: BrandCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -417,7 +417,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              IslamicButton(
+              BrandButton(
                 label: 'إعادة المحاولة',
                 icon: const Icon(Icons.refresh_rounded),
                 onPressed: _loadNotifications,

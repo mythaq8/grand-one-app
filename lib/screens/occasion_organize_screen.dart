@@ -17,7 +17,7 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 import '../utils/service_price_label.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/subcategory_type_grid.dart';
 import 'my_occasion_requests_screen.dart';
 import 'service_detail_screen.dart';
@@ -82,7 +82,11 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
   final _addressCtrl = TextEditingController();
   final _whatsappCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
-  final _discountCtrl = TextEditingController();
+
+  String? _organizerId;
+  String? _organizerName;
+  List<Map<String, dynamic>> _organizers = [];
+  bool _loadingOrganizers = true;
 
   // التصنيفات والخدمات وحفلتي
   List<Map<String, dynamic>> _categories = [];
@@ -126,6 +130,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
   void initState() {
     super.initState();
     _loadCategories();
+    _loadOrganizers();
   }
 
   @override
@@ -133,13 +138,31 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     _addressCtrl.dispose();
     _whatsappCtrl.dispose();
     _notesCtrl.dispose();
-    _discountCtrl.dispose();
     _serviceSearchCtrl.dispose();
     _searchTimer?.cancel();
     for (final ctrl in _qtyCtrls.values) {
       ctrl.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _loadOrganizers() async {
+    setState(() => _loadingOrganizers = true);
+    try {
+      final res = await ApiService.getOrganizers(limit: 50);
+      final data = res['data'];
+      if (data is List) {
+        _organizers = data
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .toList();
+      } else {
+        _organizers = [];
+      }
+    } catch (_) {
+      _organizers = [];
+    }
+    if (mounted) setState(() => _loadingOrganizers = false);
   }
 
   double _minQty(_CartLine line) {
@@ -388,6 +411,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         minPrice: _filterMinPrice,
         maxPrice: _filterMaxPrice,
         sort: _filterSort,
+        forOccasion: true,
         limit: 40,
         offset: 0,
       );
@@ -427,6 +451,10 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
   bool _validateStep0() {
     if (_occasionType == null) {
       ErrorHandler.showWarning(context, 'اختر نوع المناسبة');
+      return false;
+    }
+    if (_organizerId == null || _organizerId!.isEmpty) {
+      ErrorHandler.showWarning(context, 'اختر المنظّم');
       return false;
     }
     if (_governorate == null || _governorate!.isEmpty) {
@@ -621,9 +649,9 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         occasionType: _occasionType!,
         governorate: _governorate!,
         whatsapp: _whatsappCtrl.text.trim(),
+        organizerId: _organizerId!,
         address: _addressCtrl.text.trim(),
         notes: _notesCtrl.text.trim(),
-        discountCode: _discountCtrl.text.trim(),
         occasionDate: _occasionDate == null
             ? null
             : _occasionDate!.toIso8601String().substring(0, 10),
@@ -670,8 +698,8 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
       },
       child: Directionality(
         textDirection: ui.TextDirection.rtl,
-        child: IslamicScaffold(
-          appBar: IslamicAppBar(
+        child: BrandScaffold(
+          appBar: BrandAppBar(
             title: 'ابدأ التخطيط',
             actions: [
               IconButton(
@@ -811,7 +839,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           offset: _cartOpen ? Offset.zero : const Offset(-1.05, 0),
           duration: const Duration(milliseconds: 320),
           curve: Curves.easeOutCubic,
-          child: IslamicBackground(
+          child: BrandBackground(
             child: SizedBox.expand(
               child: _buildCartStep(),
             ),
@@ -980,7 +1008,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'أدخل التفاصيل الأساسية أولاً. اختيار الخدمات يكون في الخطوة التالية، والطلب يُراجع من الإدارة قبل التأكيد.',
+                      'أدخل التفاصيل الأساسية واختر المنظّم أولاً. اختيار الخدمات في الخطوة التالية، ثم يراجع المنظّم الطلب ويرسل عرضاً.',
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         fontSize: 12.5,
@@ -1064,6 +1092,65 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         ),
         const SizedBox(height: 20),
         const Text(
+          'المنظّم',
+          style: TextStyle(
+            fontFamily: 'Tajawal',
+            fontWeight: FontWeight.w800,
+            fontSize: 14,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: 10),
+        BrandCard(
+          padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+          child: _loadingOrganizers
+              ? const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                )
+              : _organizers.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Text(
+                        'لا يوجد منظّمون معتمدون حالياً. تواصل مع الإدارة.',
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
+                    )
+                  : DropdownButtonFormField<String>(
+                      value: _organizerId,
+                      decoration: const InputDecoration(
+                        labelText: 'اختر المنظّم *',
+                        prefixIcon: Icon(Icons.person_outline),
+                        border: OutlineInputBorder(),
+                      ),
+                      items: _organizers.map((o) {
+                        final id = o['id']?.toString() ?? '';
+                        final name = o['display_name']?.toString() ?? 'منظّم';
+                        final gov = o['governorate']?.toString();
+                        final label = (gov == null || gov.isEmpty)
+                            ? name
+                            : '$name · $gov';
+                        return DropdownMenuItem(value: id, child: Text(label));
+                      }).toList(),
+                      onChanged: (v) {
+                        String? name;
+                        for (final o in _organizers) {
+                          if (o['id']?.toString() == v) {
+                            name = o['display_name']?.toString();
+                            break;
+                          }
+                        }
+                        setState(() {
+                          _organizerId = v;
+                          _organizerName = name;
+                        });
+                      },
+                    ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
           'الموعد والمكان',
           style: TextStyle(
             fontFamily: 'Tajawal',
@@ -1073,7 +1160,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        IslamicCard(
+        BrandCard(
           padding: EdgeInsets.zero,
           child: Material(
             color: AppColors.surface,
@@ -1149,7 +1236,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        IslamicCard(
+        BrandCard(
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1190,7 +1277,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           ),
         ),
         const SizedBox(height: 10),
-        IslamicCard(
+        BrandCard(
           padding: const EdgeInsets.all(14),
           child: TextField(
             controller: _whatsappCtrl,
@@ -1230,7 +1317,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         final id = c['id']?.toString() ?? '';
         final name = c['name']?.toString() ?? 'تصنيف';
         final selected = id == _selectedCategoryId;
-        return IslamicCard(
+        return BrandCard(
           padding: EdgeInsets.zero,
           child: Material(
             color: AppColors.surface,
@@ -1423,7 +1510,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         final s = _services[i - 1];
         final inCart = _cart.containsKey(s['id']?.toString());
         final price = servicePriceLabel(s, formatPrice: _formatPrice);
-        return IslamicCard(
+        return BrandCard(
           padding: const EdgeInsets.all(12),
           onTap: () => _openServiceDetails(s),
           child: Column(
@@ -1725,7 +1812,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        IslamicCard(
+        BrandCard(
           padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1748,7 +1835,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         ...lines.map((l) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: IslamicCard(
+            child: BrandCard(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1850,20 +1937,17 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
             border: OutlineInputBorder(),
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _discountCtrl,
-          decoration: const InputDecoration(
-            labelText: 'كود خصم (اختياري — يُراجع من الإدارة)',
-            border: OutlineInputBorder(),
-          ),
-        ),
         const SizedBox(height: 12),
-        IslamicCard(
+        BrandCard(
           padding: const EdgeInsets.all(14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (_organizerName != null && _organizerName!.isNotEmpty)
+                Text(
+                  'المنظّم: $_organizerName',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               Text(
                 'التكلفة التقديرية الأولية: ${_formatPrice(_estimatedPriced)} \$',
                 style: const TextStyle(
@@ -1878,7 +1962,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                 ),
               const SizedBox(height: 6),
               const Text(
-                'هذا ليس السعر النهائي. ستصلك مراجعة وعرض من الإدارة قبل التأكيد.',
+                'هذا ليس السعر النهائي. سيراجع المنظّم الطلب ويرسل عرضاً. بعد موافقتك يُطلب عربون 20٪ خلال 24 ساعة.',
                 style: TextStyle(fontSize: 11, height: 1.45, color: AppColors.textSecondary),
               ),
             ],

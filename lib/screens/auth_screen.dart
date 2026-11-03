@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
 import '../app_colors.dart';
 import '../ui_copy.dart';
@@ -17,6 +17,8 @@ import '../services/device_gate.dart';
 
 import 'verify_screen.dart';
 import 'services_user_profile_setup_screen.dart';
+import 'provider_shell_screen.dart';
+import 'organizer_shell_screen.dart';
 import '../ui/shell/app_shell.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -315,6 +317,22 @@ bool _validateSignupType() => true;
     return;
   }
 
+  if (role == 'provider') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const ProviderShellScreen()),
+    );
+    return;
+  }
+
+  if (role == 'organizer') {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const OrganizerShellScreen()),
+    );
+    return;
+  }
+
   if (role == 'services_only') {
     try {
       final servicesProfile = await _supabase
@@ -445,7 +463,6 @@ bool _validateSignupType() => true;
             identifier: email,
             isPhoneVerification: false,
             accountType: 'services',
-            marriageRole: null,
           ),
         ),
       );
@@ -733,7 +750,7 @@ Widget _buildInputFields() {
   Widget _buildHeader() {
     return Column(
       children: [
-        const IslamicLogoFrame(
+        const BrandLogoFrame(
           size: 94,
           showTitle: true,
         ),
@@ -834,7 +851,7 @@ Widget _buildInputFields() {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
+    return BrandScaffold(
       showPattern: true,
       body: LayoutBuilder(
           builder: (context, constraints) {
@@ -851,7 +868,7 @@ Widget _buildInputFields() {
                     children: [
                       _buildHeader(),
                       const SizedBox(height: 24),
-                      IslamicCard(
+                      BrandCard(
                         padding: const EdgeInsets.fromLTRB(
                           18,
                           20,
@@ -872,7 +889,7 @@ Widget _buildInputFields() {
                               ),
                             ],
                             const SizedBox(height: 22),
-                            IslamicButton(
+                            BrandButton(
                               label: _isLogin
                                   ? UiCopy.authLoginButton
                                   : UiCopy.authSignupButton,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/design/tokens.dart';
-import 'package:golden_party_app/ui/kit/kit.dart';
-import 'package:golden_party_app/ui/layout/responsive.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/design/tokens.dart';
+import 'package:grand_one/ui/kit/kit.dart';
+import 'package:grand_one/ui/layout/responsive.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +23,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.mithaqTheme,
+        theme: AppTheme.grandOneTheme,
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(body: child),
@@ -51,11 +51,11 @@ void main() {
     });
 
     test('الثيم يستعمل الخط والألوان الموحّدة', () {
-      final theme = AppTheme.mithaqTheme;
+      final theme = AppTheme.grandOneTheme;
       expect(theme.colorScheme.primary, AppPalette.green);
       expect(theme.colorScheme.secondary, AppPalette.gold);
       expect(theme.scaffoldBackgroundColor, AppPalette.background);
-      expect(theme.navigationBarTheme.indicatorColor, AppPalette.greenSoft);
+      expect(theme.navigationBarTheme.indicatorColor, AppPalette.goldSoft);
       expect(theme.textTheme.bodyLarge?.fontFamily, 'Tajawal');
     });
   });

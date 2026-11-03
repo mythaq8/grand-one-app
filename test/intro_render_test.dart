@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/screens/intro_screen.dart';
-import 'package:golden_party_app/ui_copy.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/screens/intro_screen.dart';
+import 'package:grand_one/ui_copy.dart';
+import 'package:grand_one/widgets/brand_mark.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +25,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.mithaqTheme,
+        theme: AppTheme.grandOneTheme,
         home: const Directionality(
           textDirection: TextDirection.rtl,
           child: IntroScreen(),
@@ -56,7 +57,7 @@ void main() {
         textScale: entry.key.contains('360') ? 1.4 : 1.0,
       );
 
-      expect(find.text(UiCopy.introWelcomeTitle), findsOneWidget);
+      expect(find.byType(BrandMark), findsOneWidget);
       expect(find.text(UiCopy.introSummary), findsOneWidget);
       expect(find.text('التالي'), findsNothing);
       expect(find.text('تخطي'), findsNothing);
@@ -64,7 +65,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expectAboveButton(
         tester,
-        find.text(UiCopy.introWelcomeTitle),
+        find.byType(BrandMark),
         find.text(UiCopy.introStartButton),
       );
     });

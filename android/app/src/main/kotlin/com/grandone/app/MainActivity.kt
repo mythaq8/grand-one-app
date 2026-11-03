@@ -1,4 +1,4 @@
-package com.goldenparty.app
+package com.grandone.app
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -10,7 +10,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
-    private val deviceIdChannel = "com.goldenparty.app/device_id"
+    private val deviceIdChannel = "com.grandone.app/device_id"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -37,7 +37,7 @@ class MainActivity : FlutterActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
 
         val channel = NotificationChannel(
-            "golden_party_default",
+            "grand_one_default",
             "Golden Party",
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {

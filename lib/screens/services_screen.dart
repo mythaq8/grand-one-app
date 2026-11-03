@@ -19,7 +19,7 @@ import '../services/session_service.dart';
 import '../utils/service_category_icon.dart';
 import '../utils/service_price_label.dart';
 import '../widgets/screen_fit.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/subcategory_type_grid.dart';
 import '../widgets/ux_helpers.dart';
 import 'services/widgets/results_grid.dart';
@@ -146,7 +146,10 @@ final PageController _adsPageController = PageController();
     ),
   ]);
 
-  final categories = results[0] as List<Map<String, dynamic>>;
+  // التصفح المباشر يخفي تصنيفات requires_organizer (تظهر في تنظيم مناسبة)
+  final categories = (results[0] as List<Map<String, dynamic>>)
+      .where((c) => c['requires_organizer'] != true)
+      .toList();
   final ads = results[1] as List<Map<String, dynamic>>;
   final resp = results[2] as Map<String, dynamic>;
 
@@ -434,10 +437,10 @@ final PageController _adsPageController = PageController();
 Widget build(BuildContext context) {
   return Directionality(
     textDirection: ui.TextDirection.rtl,
-    child: IslamicScaffold(
+    child: BrandScaffold(
       appBar: widget.embedded
           ? null
-          : IslamicAppBar(
+          : BrandAppBar(
               title: 'الخدمات',
               actions: [
                 IconButton(
@@ -853,7 +856,7 @@ Widget _buildPartyTab() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: IslamicCard(
+        child: BrandCard(
           padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -874,7 +877,7 @@ Widget _buildPartyTab() {
                 ),
               ),
               const SizedBox(height: 15),
-              IslamicButton(
+              BrandButton(
                 label: 'إعادة المحاولة',
                 icon: const Icon(Icons.refresh_rounded, size: 19),
                 onPressed: () {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/design/tokens.dart';
-import 'package:golden_party_app/widgets/islamic_decorations.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/design/tokens.dart';
+import 'package:grand_one/widgets/brand_decorations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +22,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.mithaqTheme,
+        theme: AppTheme.grandOneTheme,
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: Scaffold(body: child),
@@ -86,18 +86,19 @@ void main() {
     test('كل مسار موجود فعلياً ويشير إلى الهوية', () {
       expect(AppAssets.logo, startsWith('assets/images/'));
       expect(AppAssets.logo, endsWith('.png'));
-      expect(AppAssets.introCovenant, endsWith('.jpg'));
-      expect(AppAssets.introPath, endsWith('.jpg'));
-      expect(AppAssets.introHall, endsWith('.jpg'));
+      expect(AppAssets.monogram, contains('g1-monogram'));
+      expect(AppAssets.lockup, contains('grand-one-lockup'));
+      expect(AppAssets.homePromo, isNotEmpty);
+      expect(AppAssets.homePromo.first, endsWith('.jpg'));
     });
   });
 
   group('عناصر الهوية الأخرى', () {
-    testWidgets('AyahCard تعرض النص والمرجع', (tester) async {
+    testWidgets('BrandQuoteCard تعرض النص والمرجع', (tester) async {
       await pumpAt(
         tester,
         const SingleChildScrollView(
-          child: AyahCard(
+          child: BrandQuoteCard(
             ayah: 'وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً',
             reference: 'سورة الروم، الآية 21',
           ),
@@ -110,11 +111,11 @@ void main() {
       expect(find.text('سورة الروم، الآية 21'), findsOneWidget);
     });
 
-    testWidgets('IslamicLogoFrame يستعمل الشعار المحسّن',
+    testWidgets('BrandLogoFrame يستعمل الشعار المحسّن',
         (tester) async {
       await pumpAt(
         tester,
-        const Center(child: IslamicLogoFrame(size: 100)),
+        const Center(child: BrandLogoFrame(size: 100)),
         size: const Size(360, 640),
       );
 

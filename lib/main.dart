@@ -22,13 +22,15 @@ import 'screens/change_password_screen.dart';
 import 'screens/intro_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/contact_admin_screen.dart';
+import 'screens/provider_shell_screen.dart';
+import 'screens/organizer_shell_screen.dart';
 import 'ui/shell/app_shell.dart';
 
 import 'services/notifications_service.dart';
 import 'services/remote_config_service.dart';
 import 'services/device_gate.dart';
 
-import 'widgets/islamic_decorations.dart';
+import 'widgets/brand_decorations.dart';
 import 'design/tokens.dart';
 
 void main() async {
@@ -96,10 +98,7 @@ class _GrandOneAppState extends State<GrandOneApp> {
         '/change-password': (context) => const ChangePasswordScreen(),
         '/intro': (context) => const IntroScreen(),
         '/settings': (context) => const SettingsScreen(),
-        '/home-groom': (context) => const AppShell(),
-        '/home-bride': (context) => const AppShell(),
         '/shell': (context) => const AppShell(),
-        '/shell-bride': (context) => const AppShell(),
         '/source': (context) {
           final user = Supabase.instance.client.auth.currentUser;
           if (user == null) {
@@ -204,6 +203,16 @@ class _SplashScreenState extends State<SplashScreen>
         return;
       }
 
+      if (role == 'provider') {
+        _goTo(const ProviderShellScreen());
+        return;
+      }
+
+      if (role == 'organizer') {
+        _goTo(const OrganizerShellScreen());
+        return;
+      }
+
       if (role == 'groom' || role == 'bride') {
         await client.auth.signOut();
         if (!mounted) return;
@@ -254,7 +263,7 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const IslamicLogoFrame(
+                  const BrandLogoFrame(
                     size: 120,
                     showTitle: true,
                   ),

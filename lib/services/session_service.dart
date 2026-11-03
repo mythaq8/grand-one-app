@@ -24,50 +24,6 @@ class SessionService {
   }
 
   // ============================================================
-  // كود الشاب
-  // ============================================================
-
-  /// حفظ كود الشاب محلياً
-  static Future<void> saveGroomCode(String groomCode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('groom_code', groomCode);
-  }
-
-  /// قراءة كود الشاب
-  static Future<String?> getGroomCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('groom_code');
-  }
-
-  /// حذف كود الشاب
-  static Future<void> clearGroomCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('groom_code');
-  }
-
-  // ============================================================
-  // كود الفتاة
-  // ============================================================
-
-  /// حفظ كود الفتاة محلياً
-  static Future<void> saveBrideCode(String brideCode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('bride_code', brideCode);
-  }
-
-  /// قراءة كود الفتاة
-  static Future<String?> getBrideCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('bride_code');
-  }
-
-  /// حذف كود الفتاة
-  static Future<void> clearBrideCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('bride_code');
-  }
-
-  // ============================================================
   // تسجيل الخروج
   // ============================================================
 

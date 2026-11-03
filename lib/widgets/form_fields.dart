@@ -88,7 +88,7 @@ Widget? _fieldHintWidget(String? hint) {
 // InputDecoration موحّد
 // ============================================================
 
-InputDecoration _mithaqFieldDecoration({
+InputDecoration _brandFieldDecoration({
   required String hintText,
   Widget? suffixIcon,
   Widget? prefixIcon,
@@ -182,7 +182,7 @@ class AppTextField extends StatelessWidget {
             autocorrect: autocorrect,
             autofillHints: autofillHints,
             style: _fieldInputStyle,
-            decoration: _mithaqFieldDecoration(
+            decoration: _brandFieldDecoration(
               hintText: required ? 'مطلوب' : 'اختياري',
             ),
             validator: required
@@ -241,7 +241,7 @@ class AppDropdown extends StatelessWidget {
             initialValue: current,
             isExpanded: true,
             style: _fieldInputStyle,
-            decoration: _mithaqFieldDecoration(
+            decoration: _brandFieldDecoration(
               hintText: required ? 'اختر $label' : 'اختياري',
               suffixIcon: const Icon(
                 Icons.keyboard_arrow_down_rounded,

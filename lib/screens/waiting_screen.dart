@@ -9,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
 import '../app_colors.dart';
 import '../ui_copy.dart';
 import '../ui/shell/app_shell.dart';
+import 'provider_shell_screen.dart';
+import 'organizer_shell_screen.dart';
 
 class WaitingScreen extends StatefulWidget {
   const WaitingScreen({super.key});
@@ -119,19 +121,6 @@ class _WaitingScreenState extends State<WaitingScreen>
   // التنقلات الموحّدة
   // ============================================================
 
-  void _navigateToHome({required bool isGroom}) {
-    _stopTimer();
-
-    if (!mounted) return;
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AppShell(isGroomRole: isGroom),
-      ),
-    );
-  }
-
   void _navigateToServices() {
     _stopTimer();
 
@@ -219,6 +208,24 @@ class _WaitingScreenState extends State<WaitingScreen>
         return;
       }
 
+      if (role == 'provider') {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ProviderShellScreen()),
+        );
+        return;
+      }
+
+      if (role == 'organizer') {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const OrganizerShellScreen()),
+        );
+        return;
+      }
+
       debugPrint('⚠️ WaitingScreen: unknown role: $role');
     } catch (e, stackTrace) {
       debugPrint('🔴 WaitingScreen error: $e');
@@ -280,7 +287,7 @@ class _WaitingScreenState extends State<WaitingScreen>
   // ============================================================
 
   Widget _buildStatusCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -392,8 +399,8 @@ class _WaitingScreenState extends State<WaitingScreen>
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
-      appBar: IslamicAppBar(
+    return BrandScaffold(
+      appBar: BrandAppBar(
         title: 'حالة الحساب',
         actions: [
           // ═══ زر تسجيل الخروج ═══
@@ -486,7 +493,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                       const SizedBox(height: 20),
 
                       // ═══ زر التحديث ═══
-                      IslamicButton(
+                      BrandButton(
                         label: _checking
                             ? tr('checking')
                             : tr('refresh'),

@@ -12,7 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../app_colors.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 
 class ContactAdminScreen extends StatefulWidget {
   const ContactAdminScreen({super.key});
@@ -165,8 +165,8 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
-        appBar: IslamicAppBar(
+      child: BrandScaffold(
+        appBar: BrandAppBar(
           title: tr('contact_admin'),
         ),
         body: SingleChildScrollView(
@@ -176,7 +176,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
               // ------------------------------------------------
               // رأس الصفحة
               // ------------------------------------------------
-              IslamicCard(
+              BrandCard(
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
@@ -243,7 +243,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
               // ------------------------------------------------
               // نموذج الرسالة
               // ------------------------------------------------
-              IslamicCard(
+              BrandCard(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

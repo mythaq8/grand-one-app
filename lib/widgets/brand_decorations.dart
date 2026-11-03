@@ -1,12 +1,14 @@
-// lib/widgets/islamic_decorations.dart
+// lib/widgets/brand_decorations.dart
+// زخارف وودجات واجهة GRAND ONE
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'screen_fit.dart';
 import '../app_colors.dart';
 import '../design/tokens.dart';
+import '../design/typography.dart';
 
 // ============================================================
-// 1. الزخرفة الهندسية الإسلامية (محسّنة)
+// 1. زخرفة هندسية خفيفة
 // ============================================================
 
 class GeometricPatternPainter extends CustomPainter {
@@ -32,7 +34,7 @@ class GeometricPatternPainter extends CustomPainter {
 
     for (double x = -spacing; x < size.width + spacing; x += spacing) {
       for (double y = -spacing; y < size.height + spacing; y += spacing) {
-        _drawIslamicStar(canvas, Offset(x, y), spacing * 0.22, paint);
+        _drawStar(canvas, Offset(x, y), spacing * 0.22, paint);
 
         if (drawConnectingLines) {
           _drawConnectingDiamond(
@@ -46,7 +48,7 @@ class GeometricPatternPainter extends CustomPainter {
     }
   }
 
-  void _drawIslamicStar(
+  void _drawStar(
     Canvas canvas,
     Offset center,
     double radius,
@@ -111,34 +113,57 @@ class GeometricPatternPainter extends CustomPainter {
 // 2. الخلفية الإسلامية (محسّنة)
 // ============================================================
 
-class IslamicBackground extends StatelessWidget {
+class BrandBackground extends StatelessWidget {
   final Widget child;
   final bool showPattern;
   final Color? patternColor;
   final double patternSpacing;
 
-  const IslamicBackground({
+  const BrandBackground({
     super.key,
     required this.child,
-    this.showPattern = true,
+    this.showPattern = false,
     this.patternColor,
-    this.patternSpacing = 60,
+    this.patternSpacing = 72,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(gradient: AppColors.splashGradient),
+      decoration: const BoxDecoration(gradient: AppGradients.primarySoft),
       child: Stack(
         children: [
+          const Positioned(
+            top: -140,
+            left: -40,
+            right: -40,
+            height: 320,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: AppGradients.glowGold),
+              ),
+            ),
+          ),
+          const Positioned(
+            right: -120,
+            bottom: -140,
+            width: 320,
+            height: 320,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: AppGradients.glowNavy),
+              ),
+            ),
+          ),
           if (showPattern)
             Positioned.fill(
               child: IgnorePointer(
                 child: RepaintBoundary(
                   child: CustomPaint(
                     painter: GeometricPatternPainter(
-                      color: patternColor ?? AppColors.patternGold,
+                      color: patternColor ?? AppPalette.patternGoldStrong,
                       spacing: patternSpacing,
+                      strokeWidth: 0.55,
                     ),
                     isComplex: true,
                     willChange: false,
@@ -157,18 +182,18 @@ class IslamicBackground extends StatelessWidget {
 // 3. Scaffold إسلامي
 // ============================================================
 
-class IslamicScaffold extends StatelessWidget {
+class BrandScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
   final Widget body;
   final bool showPattern;
   final Widget? floatingActionButton;
   final Color? backgroundColor;
 
-  const IslamicScaffold({
+  const BrandScaffold({
     super.key,
     this.appBar,
     required this.body,
-    this.showPattern = true,
+    this.showPattern = false,
     this.floatingActionButton,
     this.backgroundColor,
   });
@@ -181,7 +206,7 @@ class IslamicScaffold extends StatelessWidget {
       floatingActionButton: floatingActionButton,
       body: SafeArea(
         top: appBar == null,
-        child: IslamicBackground(
+        child: BrandBackground(
           showPattern: showPattern,
           child: ScreenFrame(child: body),
         ),
@@ -194,7 +219,7 @@ class IslamicScaffold extends StatelessWidget {
 // 4. AppBar مزخرف (محسّن)
 // ============================================================
 
-class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
+class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final String? subtitle;
   final List<Widget>? actions;
@@ -202,7 +227,7 @@ class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final bool showGoldLine;
 
-  const IslamicAppBar({
+  const BrandAppBar({
     super.key,
     required this.title,
     this.subtitle,
@@ -230,27 +255,20 @@ class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
     final color = accentColor ?? AppColors.primary;
     final scale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 1.6);
     final toolbarHeight = (subtitle != null ? 70.0 : 58.0) * scale;
-    final gradient = accentColor == null
-        ? AppColors.headerGradient
-        : LinearGradient(
-            colors: [
-              Color.lerp(color, Colors.white, 0.08)!,
-              color,
-            ],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          );
 
     return Container(
       decoration: BoxDecoration(
-        gradient: gradient,
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.2),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        gradient: accentColor == null
+            ? AppGradients.sheen
+            : LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.lerp(color, Colors.white, 0.18)!,
+                  color,
+                  Color.lerp(color, Colors.black, 0.18)!,
+                ],
+              ),
       ),
       child: AppBar(
         backgroundColor: Colors.transparent,
@@ -270,11 +288,9 @@ class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
+                    style: AppText.title.copyWith(
                       color: Colors.white,
+                      fontSize: 17,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -282,10 +298,8 @@ class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
                     subtitle!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.8),
+                    style: AppText.caption.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
                     ),
                   ),
                 ],
@@ -294,20 +308,19 @@ class IslamicAppBar extends StatelessWidget implements PreferredSizeWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                style: AppText.title.copyWith(
                   color: Colors.white,
+                  fontSize: 18,
                 ),
               ),
         bottom: showGoldLine
-            ? PreferredSize(
-                preferredSize: const Size.fromHeight(2),
-                child: Container(
-                  height: 2,
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.goldGradient,
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(2.5),
+                child: SizedBox(
+                  height: 2.5,
+                  width: double.infinity,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(gradient: AppGradients.gold),
                   ),
                 ),
               )
@@ -383,15 +396,15 @@ class OrnamentDivider extends StatelessWidget {
 }
 
 // ============================================================
-// 6. بطاقة الآية (محسّنة)
+// 6. بطاقة اقتباس / رسالة
 // ============================================================
 
-class AyahCard extends StatelessWidget {
+class BrandQuoteCard extends StatelessWidget {
   final String ayah;
   final String reference;
   final bool showOrnament;
 
-  const AyahCard({
+  const BrandQuoteCard({
     super.key,
     required this.ayah,
     required this.reference,
@@ -466,7 +479,7 @@ class AyahCard extends StatelessWidget {
                   fontSize: 15,
                   height: 2.1,
                   color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 10),
@@ -494,13 +507,13 @@ class AyahCard extends StatelessWidget {
 // 7. شعار GRAND ONE
 // ============================================================
 
-class IslamicLogoFrame extends StatelessWidget {
+class BrandLogoFrame extends StatelessWidget {
   final double size;
   final bool showTitle;
   final String? subtitle;
   final bool showOrnamentalRing;
 
-  const IslamicLogoFrame({
+  const BrandLogoFrame({
     super.key,
     this.size = 120,
     this.showTitle = true,
@@ -587,7 +600,7 @@ class IslamicLogoFrame extends StatelessWidget {
               fontFamily: 'Tajawal',
               fontSize: 13,
               color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
               letterSpacing: 0.2,
             ),
           ),
@@ -614,7 +627,7 @@ class IslamicLogoFrame extends StatelessWidget {
 // 8. بطاقة بوابة العلامة
 // ============================================================
 
-class IslamicGatewayCard extends StatelessWidget {
+class BrandGatewayCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
@@ -622,7 +635,7 @@ class IslamicGatewayCard extends StatelessWidget {
   final VoidCallback onTap;
   final String? badge;
 
-  const IslamicGatewayCard({
+  const BrandGatewayCard({
     super.key,
     required this.icon,
     required this.title,
@@ -758,13 +771,13 @@ class IslamicGatewayCard extends StatelessWidget {
 // 9. شريط مراحل التسجيل (محسّن)
 // ============================================================
 
-class IslamicStepBanner extends StatelessWidget {
+class BrandStepBanner extends StatelessWidget {
   final int currentStep;
   final int totalSteps;
   final String title;
   final String? subtitle;
 
-  const IslamicStepBanner({
+  const BrandStepBanner({
     super.key,
     required this.currentStep,
     required this.totalSteps,
@@ -890,7 +903,7 @@ class IslamicStepBanner extends StatelessWidget {
 // 10. بطاقة عامة
 // ============================================================
 
-class IslamicCard extends StatelessWidget {
+class BrandCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
@@ -899,7 +912,7 @@ class IslamicCard extends StatelessWidget {
   final bool showShadow;
   final double radius;
 
-  const IslamicCard({
+  const BrandCard({
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(16),
@@ -945,7 +958,63 @@ class IslamicCard extends StatelessWidget {
 // 11. زر أساسي
 // ============================================================
 
-class IslamicButton extends StatelessWidget {
+class _ShineButton extends StatelessWidget {
+  const _ShineButton({required this.onPressed, required this.child});
+
+  final VoidCallback? onPressed;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onPressed != null;
+    final radius = BorderRadius.circular(AppColors.radiusMd);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: enabled ? AppShadows.goldGlow : null,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: enabled ? AppGradients.sheen : null,
+            color: enabled ? null : AppColors.border,
+            borderRadius: radius,
+            border: Border.all(
+              color: enabled
+                  ? AppPalette.goldLight.withValues(alpha: 0.85)
+                  : AppColors.border,
+            ),
+          ),
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: radius,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 52),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: IconTheme(
+                  data: IconThemeData(
+                    color: enabled ? AppPalette.goldLight : AppColors.mutedText,
+                    size: 20,
+                  ),
+                  child: DefaultTextStyle(
+                    style: AppText.button.copyWith(
+                      color: enabled ? Colors.white : AppColors.mutedText,
+                    ),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BrandButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
   final Color? color;
@@ -954,7 +1023,7 @@ class IslamicButton extends StatelessWidget {
   final bool isOutlined;
   final bool isFullWidth;
 
-  const IslamicButton({
+  const BrandButton({
     super.key,
     required this.label,
     this.onPressed,
@@ -991,32 +1060,8 @@ class IslamicButton extends StatelessWidget {
             ),
             child: _buildChild(btnColor, isOutlined: true),
           )
-        : ElevatedButton(
+        : _ShineButton(
             onPressed: isLoading ? null : onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: btnColor,
-              foregroundColor: Colors.white,
-              disabledBackgroundColor: AppColors.border,
-              disabledForegroundColor: AppColors.mutedText,
-              elevation: 0,
-              minimumSize: const Size(0, 52),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppColors.radiusMd),
-                side: BorderSide(
-                  color: AppColors.gold.withValues(alpha: 0.35),
-                  width: 0.8,
-                ),
-              ),
-              textStyle: const TextStyle(
-                fontFamily: 'Tajawal',
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
             child: _buildChild(btnColor),
           );
 
@@ -1066,10 +1111,10 @@ class IslamicButton extends StatelessWidget {
 // 12. مؤشر تحميل مزخرف
 // ============================================================
 
-class IslamicLoadingIndicator extends StatelessWidget {
+class BrandLoadingIndicator extends StatelessWidget {
   final String? message;
 
-  const IslamicLoadingIndicator({super.key, this.message});
+  const BrandLoadingIndicator({super.key, this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -1106,14 +1151,14 @@ class IslamicLoadingIndicator extends StatelessWidget {
 // 13. حالة فارغة موحّدة
 // ============================================================
 
-class IslamicEmptyState extends StatelessWidget {
+class BrandEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
 
-  const IslamicEmptyState({
+  const BrandEmptyState({
     super.key,
     required this.icon,
     required this.title,
@@ -1171,7 +1216,7 @@ class IslamicEmptyState extends StatelessWidget {
             ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: 24),
-              IslamicButton(
+              BrandButton(
                 label: actionLabel!,
                 onPressed: onAction,
                 isFullWidth: false,

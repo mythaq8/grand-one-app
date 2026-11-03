@@ -1,28 +1,23 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/screens/intro_screen.dart';
-import 'package:golden_party_app/screens/more_screen.dart';
-import 'package:golden_party_app/screens/my_requests_screen.dart';
-import 'package:golden_party_app/ui/shell/app_shell.dart';
+import 'package:grand_one/screens/intro_screen.dart';
+import 'package:grand_one/screens/more_screen.dart';
+import 'package:grand_one/screens/my_requests_screen.dart';
+import 'package:grand_one/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('الشاشات الجديدة موجودة وقابلة للبناء', () {
     test('فئات الشاشات معرّفة', () {
-      // اختبار بسيط يضمن عدم حذف أي شاشة أو إعادة تسميتها خطأً
-      // أثناء الهيكلة. أي كسر في الاستيراد يظهر هنا.
       expect(const IntroScreen(), isNotNull);
       expect(const MyRequestsScreen(), isNotNull);
-      expect(const MoreScreen(isGroomRole: true), isNotNull);
-      expect(const MoreScreen(isGroomRole: false), isNotNull);
-      expect(const AppShell(isGroomRole: true), isNotNull);
-      expect(const AppShell(isGroomRole: false), isNotNull);
+      expect(const MoreScreen(), isNotNull);
+      expect(const AppShell(), isNotNull);
     });
 
     test('الهيكل يبدأ من الرئيسية افتراضياً', () {
-      const shell = AppShell(isGroomRole: true);
+      const shell = AppShell();
       expect(shell.initialTab, AppTab.home);
-      expect(shell.isGroomRole, isTrue);
     });
 
     test('كل تبويب له اسم عربي غير فارغ', () {
@@ -30,6 +25,10 @@ void main() {
         expect(tab.label.trim(), isNotEmpty);
         expect(tab.label, isNot(contains('_')));
       }
+      expect(
+        AppTab.values.map((t) => t.label).toList(),
+        ['الرئيسية', 'الخدمات', 'طلباتي', 'المزيد'],
+      );
     });
   });
 }

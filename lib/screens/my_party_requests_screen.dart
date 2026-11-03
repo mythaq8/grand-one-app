@@ -11,7 +11,7 @@ import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import 'party_request_screen.dart';
 
 class MyPartyRequestsScreen extends StatefulWidget {
@@ -142,10 +142,10 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
+      child: BrandScaffold(
         appBar: widget.embedded
             ? null
-            : IslamicAppBar(
+            : BrandAppBar(
                 title: 'طلبات تنظيم الحفلات',
                 actions: [
                   IconButton(
@@ -210,7 +210,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: IslamicCard(
+      child: BrandCard(
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -365,7 +365,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: IslamicCard(
+        child: BrandCard(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -384,7 +384,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              IslamicButton(
+              BrandButton(
                 label: 'إعادة المحاولة',
                 icon: const Icon(Icons.refresh_rounded),
                 onPressed: _load,

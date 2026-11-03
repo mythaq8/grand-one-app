@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
 
 class RemoteConfigService {
-  static const _prefsKey = 'mithaq_remote_bootstrap_v1';
+  static const _prefsKey = 'grand_one_remote_bootstrap_v1';
 
   /// تطبيق القيم المحفوظة قبل تهيئة Supabase
   static Future<void> applyCached() async {

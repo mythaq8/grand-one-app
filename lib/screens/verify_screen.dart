@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../app_colors.dart';
 import '../services/device_gate.dart';
 import 'services_user_profile_setup_screen.dart';
@@ -21,8 +21,6 @@ class VerifyScreen extends StatefulWidget {
   /// نوع الحساب
   final String accountType;
 
-  /// نوع حساب الزواج (groom / bride)
-  final String? marriageRole;
 
   const VerifyScreen({
     Key? key,
@@ -30,7 +28,6 @@ class VerifyScreen extends StatefulWidget {
     required this.identifier,
     this.isPhoneVerification = false,
     required this.accountType,
-    this.marriageRole,
   }) : super(key: key);
 
   @override
@@ -400,28 +397,12 @@ class _VerifyScreenState extends State<VerifyScreen> {
       return 'تحقق من الحساب';
     }
 
-    if (widget.marriageRole == 'groom') {
-      return 'تحقق من حساب الشاب';
-    }
-
-    if (widget.marriageRole == 'bride') {
-      return 'تحقق من حساب الفتاة';
-    }
-
     return 'تحقق من الحساب';
   }
 
   String _getAccountLabel() {
     if (widget.accountType == 'services') {
       return 'حساب الخدمات';
-    }
-
-    if (widget.marriageRole == 'groom') {
-      return 'حساب الشاب';
-    }
-
-    if (widget.marriageRole == 'bride') {
-      return 'حساب الفتاة';
     }
 
     return 'حساب GRAND ONE';
@@ -440,7 +421,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
   Widget _buildDestinationCard(bool isPhone) {
     final destination = isPhone ? widget.identifier : widget.email;
 
-    return IslamicCard(
+    return BrandCard(
       child: Column(
         children: [
           Container(
@@ -526,7 +507,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
   // ============================================================
 
   Widget _buildOtpField() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -734,8 +715,8 @@ class _VerifyScreenState extends State<VerifyScreen> {
   Widget build(BuildContext context) {
     final isPhone = widget.isPhoneVerification;
 
-    return IslamicScaffold(
-      appBar: IslamicAppBar(
+    return BrandScaffold(
+      appBar: BrandAppBar(
         title: _getTitle(),
       ),
       body: LayoutBuilder(
@@ -825,7 +806,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
                       const SizedBox(height: 16),
 
-                      IslamicButton(
+                      BrandButton(
                         label: 'تأكيد الرمز',
                         onPressed: _isLoading ? null : _verifyOtp,
                         isLoading: _isLoading,

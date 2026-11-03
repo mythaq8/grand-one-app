@@ -18,7 +18,7 @@ import '../app_colors.dart';
 import '../ui_copy.dart';
 import '../services/api_service.dart';
 import '../services/api_exceptions.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
 import 'service_detail_screen.dart';
 
@@ -547,12 +547,12 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
+      child: BrandScaffold(
         // عند العرض داخل تبويب «طلباتي» لا نعيد شريط عنوان،
         // فالهيكل يوفّر العنوان والمبدّل.
         appBar: widget.embedded
             ? null
-            : IslamicAppBar(
+            : BrandAppBar(
                 title: 'حجوزاتي',
                 actions: [
                   IconButton(
@@ -699,7 +699,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: IslamicCard(
+        child: BrandCard(
           padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -720,7 +720,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
                 ),
               ),
               const SizedBox(height: 15),
-              IslamicButton(
+              BrandButton(
                 label: 'إعادة المحاولة',
                 icon: const Icon(Icons.refresh_rounded, size: 19),
                 onPressed: _loadBookings,

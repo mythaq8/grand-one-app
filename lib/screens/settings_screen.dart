@@ -13,7 +13,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../config.dart';
 import '../services/session_service.dart';
 import '../services/notifications_service.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../app_colors.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -436,8 +436,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
-      appBar: IslamicAppBar(
+    return BrandScaffold(
+      appBar: BrandAppBar(
         title: tr('settings'),
       ),
       body: LayoutBuilder(

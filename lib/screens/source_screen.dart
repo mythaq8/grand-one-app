@@ -6,9 +6,11 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../app_colors.dart';
 import '../ui/shell/app_shell.dart';
+import 'provider_shell_screen.dart';
+import 'organizer_shell_screen.dart';
 
 class SourceScreen extends StatefulWidget {
   const SourceScreen({Key? key}) : super(key: key);
@@ -229,6 +231,26 @@ class _SourceScreenState extends State<SourceScreen> {
         return;
       }
 
+      if (role == 'provider') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const ProviderShellScreen(),
+          ),
+        );
+        return;
+      }
+
+      if (role == 'organizer') {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const OrganizerShellScreen(),
+          ),
+        );
+        return;
+      }
+
       if (role == 'groom' || role == 'bride') {
         await _client.auth.signOut();
         if (!mounted) return;
@@ -263,8 +285,8 @@ class _SourceScreenState extends State<SourceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
-      appBar: const IslamicAppBar(
+    return BrandScaffold(
+      appBar: const BrandAppBar(
         title: 'خطوة أخيرة قبل البدء',
       ),
       body: LayoutBuilder(
@@ -289,7 +311,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       const SizedBox(height: 24),
                       _buildSourceCard(),
                       const SizedBox(height: 24),
-                      IslamicButton(
+                      BrandButton(
                         label: 'متابعة',
                         icon: const Icon(
                           Icons.arrow_back_rounded,
@@ -407,7 +429,7 @@ class _SourceScreenState extends State<SourceScreen> {
   // ============================================================
 
   Widget _buildSourceCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.fromLTRB(
         16,
         20,

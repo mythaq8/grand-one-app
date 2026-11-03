@@ -2,37 +2,35 @@
 // ============================================================
 // BrandMark — رمز G1 المعتمد لـ GRAND ONE
 // ============================================================
-// لا تشوّه الشعار ولا تعيد تلوينه. استخدم النسخ الرسمية فقط.
-// ============================================================
 
 import 'package:flutter/material.dart';
 
 import '../design/tokens.dart';
 
 enum BrandMarkVariant {
-  /// رمز G1 وحده (خلفية Navy داخل الأصل).
+  /// رمز G1 وحده على خلفية Navy.
   monogram,
 
-  /// الشعار الكامل مع الاسم والشعار العربي.
+  /// الشعار الكامل مع الاسم والعبارة العربية.
   lockup,
 }
 
 class BrandMark extends StatelessWidget {
   const BrandMark({
     super.key,
-    this.size = 40,
+    this.size = 48,
     this.onDark = false,
-    this.framed = true,
+    this.framed = false,
     this.variant = BrandMarkVariant.monogram,
   });
 
-  /// الضلع الخارجي للرمز (مربع). للـ lockup يُستخدم كارتفاع تقريبي.
+  /// للرمز: طول الضلع. للشعار الكامل: العرض.
   final double size;
 
-  /// true فوق خلفية Navy (إطار ذهبي أوضح).
+  /// يُبقى للتوافق. الأصل نفسه بخلفية Navy.
   final bool onDark;
 
-  /// false = الشعار وحده بلا إطار.
+  /// حلقة ذهبية رفيعة حول الرمز فقط.
   final bool framed;
 
   final BrandMarkVariant variant;
@@ -44,55 +42,48 @@ class BrandMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dpr = MediaQuery.devicePixelRatioOf(context);
     final isLockup = variant == BrandMarkVariant.lockup;
-    final width = isLockup ? size * 2.4 : size;
-    final height = size;
-    final innerW = framed && !isLockup ? size * 0.82 : width;
-    final innerH = framed && !isLockup ? size * 0.82 : height;
-    final cache = (innerW * dpr).ceil();
+    final width = size;
+    final height = isLockup ? size * 9 / 16 : size;
+    final radius = isLockup ? 18.0 : size * 0.18;
 
     final logo = Image.asset(
       _asset,
-      width: innerW,
-      height: innerH,
-      fit: BoxFit.contain,
-      cacheWidth: cache,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
       filterQuality: FilterQuality.high,
+      gaplessPlayback: true,
       excludeFromSemantics: true,
       errorBuilder: (_, _, _) => Icon(
         Icons.diamond_outlined,
         color: AppPalette.gold,
-        size: innerH * 0.55,
+        size: height * 0.45,
       ),
     );
 
-    if (!framed || isLockup) {
-      return SizedBox(width: width, height: height, child: logo);
-    }
-
     return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
+      width: width,
+      height: height,
       decoration: BoxDecoration(
-        color: onDark ? AppPalette.navyDark : AppPalette.navy,
-        borderRadius: BorderRadius.circular(size * 0.28),
-        border: Border.all(
-          color: AppPalette.gold.withValues(alpha: onDark ? 0.7 : 0.45),
-          width: 1.1,
-        ),
-        boxShadow: AppShadows.subtle,
+        borderRadius: BorderRadius.circular(radius),
+        border: framed && !isLockup
+            ? Border.all(
+                color: AppPalette.gold.withValues(alpha: onDark ? 0.85 : 0.65),
+                width: 1.2,
+              )
+            : null,
+        boxShadow: isLockup ? AppShadows.soft : null,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(size * 0.22),
+        borderRadius: BorderRadius.circular(radius),
         child: logo,
       ),
     );
   }
 }
 
-/// عنوان العلامة النصي — دائماً بالإنجليزية كما هي.
+/// عنوان العلامة النصي — يُستخدم فقط حين لا نعرض الشعار الكامل.
 class BrandWordmark extends StatelessWidget {
   const BrandWordmark({
     super.key,
@@ -119,22 +110,22 @@ class BrandWordmark extends StatelessWidget {
             fontFamily: 'Tajawal',
             fontSize: fontSize,
             fontWeight: FontWeight.w800,
-            letterSpacing: 2.4,
-            height: 1.1,
+            letterSpacing: 1.2,
+            height: 1.15,
             color: color,
           ),
         ),
         if (showTagline) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
             'ALL IN ONE',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: fontSize * 0.42,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 3.2,
-              color: taglineColor ?? AppPalette.gold,
+              fontSize: (fontSize * 0.38).clamp(11, 14),
+              fontWeight: FontWeight.w500,
+              letterSpacing: 2.2,
+              color: taglineColor ?? AppPalette.goldLight,
             ),
           ),
         ],

@@ -22,7 +22,7 @@ import '../services/api_service.dart';
 import '../services/api_exceptions.dart';
 import '../utils/service_category_icon.dart';
 import '../utils/service_price_label.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
@@ -461,6 +461,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     if (!mounted) return;
     if (_isBooking) return;   // ← حماية من الضغط المزدوج
 
+    if (!widget.forOccasionCart && _category?['requires_organizer'] == true) {
+      _showMessage(
+        'هذا التصنيف يُحجز عبر تنظيم مناسبة مع منظّم فقط',
+        isError: true,
+      );
+      return;
+    }
+
     final user = _supabase.auth.currentUser;
     if (user == null) {
       _showMessage('يجب تسجيل الدخول أولاً', isError: true);
@@ -630,8 +638,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
-        appBar: IslamicAppBar(
+      child: BrandScaffold(
+        appBar: BrandAppBar(
           title: _service?['name']?.toString() ?? 'تفاصيل الخدمة',
         ),
         body: _buildBody(),
@@ -851,7 +859,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       formatPrice: _formatPrice,
     );
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Column(
         children: [
@@ -978,7 +986,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final rating = _toDouble(_provider?['rating']);
     final isVerified = _provider?['is_verified'] == true;
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
@@ -1065,7 +1073,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   // ─── الوصف ───
 
   Widget _buildDescriptionCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,7 +1127,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
     if (visible.isEmpty) return const SizedBox.shrink();
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1226,7 +1234,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         ? 'أضف إلى اختياراتي'
         : (needsQty ? 'تحديث اختياراتي' : 'في اختياراتي');
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1326,6 +1334,34 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
   Widget _buildBookingSection() {
     final isBookable = _service?['is_bookable'] == true;
+    final requiresOrganizer = _category?['requires_organizer'] == true;
+
+    if (!widget.forOccasionCart && requiresOrganizer) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceTint,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: const Row(
+          children: [
+            Icon(Icons.event_available_outlined, color: AppColors.primary),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'هذا التصنيف يُحجز عبر تنظيم مناسبة مع منظّم فقط، وليس بالحجز المباشر.',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     if (!isBookable) {
       return Container(
@@ -1357,7 +1393,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       );
     }
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1899,7 +1935,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     final rating = _toDouble(_service?['rating']);
     final reviewsCount = _toInt(_service?['reviews_count']);
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

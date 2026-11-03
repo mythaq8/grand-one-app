@@ -12,9 +12,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// ملاحظة: على الويب أو بعد إعادة ضبط المصنع يمكن تجاوز الحد — الإنفاذ الحقيقي في قاعدة البيانات.
 class DeviceFingerprintService {
-  static const _prefsKey = 'mithaq_device_fingerprint_v2';
-  static const _legacyPrefsKey = 'mithaq_device_fingerprint_v1';
-  static const _channel = MethodChannel('com.goldenparty.app/device_id');
+  static const _prefsKey = 'grand_one_device_fingerprint_v2';
+  static const _legacyPrefsKey = 'grand_one_device_fingerprint_v1';
+  static const _channel = MethodChannel('com.grandone.app/device_id');
 
   static Future<String> getOrCreate() async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,7 +45,7 @@ class DeviceFingerprintService {
   static Future<String?> _fingerprintFromHardware() async {
     final hardwareId = await _readHardwareId();
     if (hardwareId == null || hardwareId.isEmpty) return null;
-    final digest = sha256.convert(utf8.encode('mithaq|$hardwareId'));
+    final digest = sha256.convert(utf8.encode('grand_one|$hardwareId'));
     return digest.toString();
   }
 

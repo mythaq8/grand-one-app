@@ -36,7 +36,7 @@
         <!-- قناة الإشعارات الافتراضية لـ FCM -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="golden_party_default" />
+            android:value="grand_one_default" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

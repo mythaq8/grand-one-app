@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/design/tokens.dart';
-import 'package:golden_party_app/ui/kit/kit.dart';
-import 'package:golden_party_app/ui/shell/app_shell.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/design/tokens.dart';
+import 'package:grand_one/ui/kit/kit.dart';
+import 'package:grand_one/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +23,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: AppTheme.mithaqTheme,
+        theme: AppTheme.grandOneTheme,
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: child,
@@ -81,10 +81,9 @@ void main() {
   });
 
   group('تبويبات الهيكل', () {
-    test('خمسة تبويبات بأسماء واضحة', () {
+    test('أربعة تبويبات بأسماء واضحة', () {
       expect(AppTab.values.map((t) => t.label).toList(), [
         'الرئيسية',
-        'الزواج',
         'الخدمات',
         'طلباتي',
         'المزيد',

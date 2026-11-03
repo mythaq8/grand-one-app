@@ -17,7 +17,7 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 import '../utils/service_category_icon.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
 import 'my_party_requests_screen.dart';
 
@@ -295,8 +295,8 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
-        appBar: IslamicAppBar(
+      child: BrandScaffold(
+        appBar: BrandAppBar(
           title: 'تنظيم حفلة',
           actions: [
             IconButton(
@@ -820,7 +820,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
     String? subtitle,
     required Widget child,
   }) {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

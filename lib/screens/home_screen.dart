@@ -18,16 +18,14 @@ import '../services/notifications_service.dart';
 import '../services/session_service.dart';
 import '../ui_copy.dart';
 import '../widgets/brand_mark.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import '../widgets/screen_fit.dart';
 import '../widgets/notification_badge_icon.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
-import 'my_party_requests_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool isGroomRole;
 
   /// عند العرض داخل تبويب الهيكل: بلا Drawer وبلا تكرار للعنوان.
   final bool embedded;
@@ -39,7 +37,6 @@ class HomeScreen extends StatefulWidget {
 
   const HomeScreen({
     Key? key,
-    required this.isGroomRole,
     this.embedded = false,
     this.onOpenServicesTab,
     this.onOpenRequestsTab,
@@ -137,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen>
   // ═══════════════════════════════════════════════════════════
 
   Widget _buildHomeTab() {
-    return IslamicBackground(
+    return BrandBackground(
       showPattern: true,
       child: SafeArea(
         child: Column(
@@ -199,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(width: 10),
           ],
-          const BrandMark(size: 46),
+          const BrandMark(size: 56),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -549,20 +546,6 @@ class _HomeScreenState extends State<HomeScreen>
                             MaterialPageRoute(
                               builder: (_) =>
                                   const MyOccasionRequestsScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      _DrawerItem(
-                        icon: Icons.history_outlined,
-                        title: 'طلبات الحفلات (قديم)',
-                        onTap: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  const MyPartyRequestsScreen(),
                             ),
                           );
                         },
@@ -959,7 +942,14 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
   }
 
   Future<void> _loadRemote() async {
-    final rows = await ApiService.getHomePromoCards();
+    List<Map<String, dynamic>> rows;
+    try {
+      rows = await ApiService.getHomePromoCards();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      return;
+    }
     if (!mounted) return;
     if (rows.isEmpty) {
       setState(() => _loading = false);

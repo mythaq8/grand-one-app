@@ -10,7 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'session_service.dart';
 
-const String _kAndroidChannelId = 'golden_party_default';
+const String _kAndroidChannelId = 'grand_one_default';
 const String _kAndroidChannelName = 'GRAND ONE';
 
 final FlutterLocalNotificationsPlugin _localNotifications =

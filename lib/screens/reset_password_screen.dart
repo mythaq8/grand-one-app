@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_colors.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({Key? key}) : super(key: key);
@@ -161,8 +161,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
-      appBar: const IslamicAppBar(
+    return BrandScaffold(
+      appBar: const BrandAppBar(
         title: 'استعادة كلمة المرور',
       ),
       body: Center(
@@ -185,7 +185,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   // ============================================================
 
   Widget _buildResetCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -244,7 +244,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
           const SizedBox(height: 24),
 
-          IslamicButton(
+          BrandButton(
             label: 'إرسال رابط الاستعادة',
             icon: const Icon(Icons.send_rounded),
             onPressed: _sendResetLink,
@@ -260,7 +260,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   // ============================================================
 
   Widget _buildSuccessCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -347,7 +347,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           const SizedBox(height: 20),
 
           // ═══ زر العودة ═══
-          IslamicButton(
+          BrandButton(
             label: 'العودة لتسجيل الدخول',
             icon: const Icon(
               Icons.arrow_back_rounded,

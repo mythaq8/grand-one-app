@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:golden_party_app/app_theme.dart';
-import 'package:golden_party_app/design/tokens.dart';
-import 'package:golden_party_app/ui/shell/app_shell.dart';
+import 'package:grand_one/app_theme.dart';
+import 'package:grand_one/design/tokens.dart';
+import 'package:grand_one/ui/shell/app_shell.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,7 @@ void main() {
     testWidgets('الشريط الجانبي معرّف بنفس ألوان الهوية', (tester) async {
       final theme = AppTheme.grandOneTheme;
       expect(theme.navigationRailTheme.selectedIconTheme?.color,
-          AppPalette.navy);
+          AppPalette.goldDeep);
       expect(theme.navigationRailTheme.unselectedIconTheme?.color,
           AppPalette.textTertiary);
     });

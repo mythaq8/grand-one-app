@@ -9,7 +9,7 @@ import '../services/api_service.dart';
 
 import '../app_colors.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({Key? key}) : super(key: key);
@@ -221,8 +221,8 @@ class _ChangePasswordScreenState
 
   @override
   Widget build(BuildContext context) {
-    return IslamicScaffold(
-      appBar: const IslamicAppBar(
+    return BrandScaffold(
+      appBar: const BrandAppBar(
         title: 'تغيير كلمة المرور',
       ),
       body: SingleChildScrollView(
@@ -232,7 +232,7 @@ class _ChangePasswordScreenState
             // --------------------------------------------------
             // العنوان
             // --------------------------------------------------
-            IslamicCard(
+            BrandCard(
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
@@ -282,7 +282,7 @@ class _ChangePasswordScreenState
             // --------------------------------------------------
             // نموذج كلمة المرور
             // --------------------------------------------------
-            IslamicCard(
+            BrandCard(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -422,7 +422,7 @@ class _ChangePasswordScreenState
                   const SizedBox(height: 16),
 
                   // ─── زر التغيير ───
-                  IslamicButton(
+                  BrandButton(
                     label: 'تغيير كلمة المرور',
                     onPressed: _isLoading
                         ? null

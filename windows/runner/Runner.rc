@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.mithaq.app" "\0"
-            VALUE "FileDescription", "mithaq" "\0"
+            VALUE "CompanyName", "com.grandone.app" "\0"
+            VALUE "FileDescription", "grand_one" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "mithaq" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.mithaq.app. All rights reserved." "\0"
-            VALUE "OriginalFilename", "mithaq.exe" "\0"
-            VALUE "ProductName", "mithaq" "\0"
+            VALUE "InternalName", "grand_one" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.grandone.app. All rights reserved." "\0"
+            VALUE "OriginalFilename", "grand_one.exe" "\0"
+            VALUE "ProductName", "grand_one" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

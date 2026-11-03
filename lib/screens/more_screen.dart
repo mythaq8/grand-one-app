@@ -14,14 +14,12 @@ import '../ui/shared/logout_action.dart';
 import '../widgets/brand_mark.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
-import 'my_party_requests_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 
 class MoreScreen extends StatefulWidget {
-  const MoreScreen({super.key, required this.isGroomRole});
+  const MoreScreen({super.key});
 
   /// بقي للتوافق مع الاستدعاءات القديمة؛ لا يُستخدم في مسار الخدمات.
-  final bool isGroomRole;
 
   @override
   State<MoreScreen> createState() => _MoreScreenState();
@@ -82,12 +80,6 @@ class _MoreScreenState extends State<MoreScreen> {
                           title: 'طلبات التخطيط',
                           subtitle: 'تنظيم الخدمات في طلب واحد',
                           onTap: () => _push(const MyOccasionRequestsScreen()),
-                        ),
-                        ActionTile(
-                          icon: Icons.history_outlined,
-                          title: 'الطلبات السابقة',
-                          subtitle: 'أرشيف المسار القديم',
-                          onTap: () => _push(const MyPartyRequestsScreen()),
                         ),
                       ],
                     ),
@@ -172,7 +164,7 @@ class _ProfileHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const BrandMark(size: 50, onDark: true),
+          const BrandMark(size: 64),
           const SizedBox(width: Space.md),
           Expanded(
             child: Column(

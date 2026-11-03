@@ -1,6 +1,5 @@
 // lib/services/api_service.dart
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -381,6 +380,7 @@ class ApiService {
     num? minRating,
     String? sort,
     String? subcategoryId,
+    bool forOccasion = false,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -396,6 +396,7 @@ class ApiService {
       if (maxPrice != null) 'max_price': maxPrice.toString(),
       if (minRating != null) 'min_rating': minRating.toString(),
       if (sort != null && sort.isNotEmpty) 'sort': sort,
+      if (forOccasion) 'for_occasion': '1',
     };
 
     final data = await _request(
@@ -823,11 +824,12 @@ static Future<Map<String, dynamic>> createOccasionRequest({
   required String occasionType,
   required String governorate,
   required String whatsapp,
+  required String organizerId,
   required List<Map<String, dynamic>> items,
   String? address,
   String? notes,
-  String? discountCode,
   String? occasionDate,
+  String? occasionDateEnd,
   String? clientRequestKey,
 }) async {
   final data = await _request(
@@ -837,14 +839,15 @@ static Future<Map<String, dynamic>> createOccasionRequest({
       'occasion_type': occasionType,
       'governorate': governorate.trim(),
       'whatsapp': whatsapp.trim(),
+      'organizer_id': organizerId.trim(),
       'items': items,
       if (address != null && address.trim().isNotEmpty)
         'address': address.trim(),
       if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
-      if (discountCode != null && discountCode.trim().isNotEmpty)
-        'discount_code': discountCode.trim(),
       if (occasionDate != null && occasionDate.trim().isNotEmpty)
         'occasion_date': occasionDate.trim(),
+      if (occasionDateEnd != null && occasionDateEnd.trim().isNotEmpty)
+        'occasion_date_end': occasionDateEnd.trim(),
       if (clientRequestKey != null && clientRequestKey.trim().isNotEmpty)
         'client_request_key': clientRequestKey.trim(),
     },
@@ -869,6 +872,267 @@ static Future<Map<String, dynamic>> decideOccasionQuote({
       'action': action,
       if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
     },
+  );
+  return _asMap(data);
+}
+
+// ═══════════════════════════════════════════════════════════
+// بوابة المزود (Grand One)
+// ═══════════════════════════════════════════════════════════
+
+static Future<Map<String, dynamic>> getProviderMe() async {
+  final data = await _request(method: 'GET', path: '/api/provider/me');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getProviderAvailability() async {
+  final data =
+      await _request(method: 'GET', path: '/api/provider/availability');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> saveProviderAvailability({
+  required List<Map<String, dynamic>> rules,
+  List<Map<String, dynamic>> exceptions = const [],
+}) async {
+  final data = await _request(
+    method: 'PUT',
+    path: '/api/provider/availability',
+    body: {
+      'rules': rules,
+      'exceptions': exceptions,
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<List<Map<String, dynamic>>> getProviderServices() async {
+  final data = await _request(method: 'GET', path: '/api/provider/services');
+  final map = _asMap(data);
+  final list = map['services'];
+  if (list is! List) return [];
+  return list
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
+}
+
+static Future<Map<String, dynamic>> createProviderService(
+  Map<String, dynamic> fields,
+) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/provider/services',
+    body: fields,
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateProviderService({
+  required String serviceId,
+  required Map<String, dynamic> fields,
+}) async {
+  final data = await _request(
+    method: 'PUT',
+    path: '/api/provider/services/${serviceId.trim()}',
+    body: fields,
+  );
+  return _asMap(data);
+}
+
+static Future<void> deleteProviderService(String serviceId) async {
+  final id = serviceId.trim();
+  if (id.isEmpty) {
+    throw ApiException.badRequest('معرّف الخدمة مطلوب');
+  }
+  await _request(method: 'DELETE', path: '/api/provider/services/$id');
+}
+
+static Future<Map<String, dynamic>> getProviderBookings({
+  String? status,
+  int limit = 30,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/provider/bookings',
+    query: {
+      if (status != null && status.isNotEmpty) 'status': status,
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> respondProviderBooking({
+  required String bookingId,
+  required String action, // confirm | reject
+  String? note,
+}) async {
+  final id = bookingId.trim();
+  final act = action.trim().toLowerCase();
+  if (id.isEmpty || (act != 'confirm' && act != 'reject')) return {};
+  final data = await _request(
+    method: 'POST',
+    path: '/api/provider/bookings/$id/$act',
+    body: {
+      if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+// ═══════════════════════════════════════════════════════════
+// منظّمون (عام + بوابة المنظّم)
+// ═══════════════════════════════════════════════════════════
+
+static Future<Map<String, dynamic>> getOrganizers({
+  String? q,
+  int limit = 30,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/organizers',
+    query: {
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+      if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getOrganizerMe() async {
+  final data = await _request(method: 'GET', path: '/api/organizer/me');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getOrganizerRequests({
+  String? status,
+  int limit = 30,
+  int offset = 0,
+}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/organizer/requests',
+    query: {
+      if (status != null && status.isNotEmpty) 'status': status,
+      'limit': limit.toString(),
+      'offset': offset.toString(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getOrganizerRequestDetails(
+  String requestId,
+) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/organizer/requests/${requestId.trim()}',
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> createOrganizerQuote({
+  required String requestId,
+  required List<Map<String, dynamic>> items,
+  double organizerFeePct = 0,
+  double extraFees = 0,
+  String? terms,
+  String? clientMessage,
+  bool send = false,
+  int validHours = 24,
+}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/organizer/requests/${requestId.trim()}/quotes',
+    body: {
+      'items': items,
+      'organizer_fee_pct': organizerFeePct,
+      'extra_fees': extraFees,
+      'send': send,
+      'valid_hours': validHours,
+      if (terms != null && terms.trim().isNotEmpty) 'terms': terms.trim(),
+      if (clientMessage != null && clientMessage.trim().isNotEmpty)
+        'client_message': clientMessage.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<List<Map<String, dynamic>>> getOrganizerOwnedServices() async {
+  final data =
+      await _request(method: 'GET', path: '/api/organizer/owned-services');
+  final map = _asMap(data);
+  final list = map['services'];
+  if (list is! List) return [];
+  return list
+      .whereType<Map>()
+      .map((e) => Map<String, dynamic>.from(e))
+      .toList();
+}
+
+static Future<Map<String, dynamic>> createOrganizerOwnedService(
+  Map<String, dynamic> fields,
+) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/organizer/owned-services',
+    body: fields,
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateOrganizerOwnedService({
+  required String serviceId,
+  required Map<String, dynamic> fields,
+}) async {
+  final data = await _request(
+    method: 'PUT',
+    path: '/api/organizer/owned-services/${serviceId.trim()}',
+    body: fields,
+  );
+  return _asMap(data);
+}
+
+static Future<void> deleteOrganizerOwnedService(String serviceId) async {
+  final id = serviceId.trim();
+  if (id.isEmpty) {
+    throw ApiException.badRequest('معرّف الخدمة مطلوب');
+  }
+  await _request(method: 'DELETE', path: '/api/organizer/owned-services/$id');
+}
+
+static Future<Map<String, dynamic>> getOrganizerAvailability() async {
+  final data =
+      await _request(method: 'GET', path: '/api/organizer/availability');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> saveOrganizerAvailability({
+  required List<Map<String, dynamic>> rules,
+}) async {
+  final data = await _request(
+    method: 'PUT',
+    path: '/api/organizer/availability',
+    body: {'rules': rules},
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> uploadOccasionDeposit({
+  required String requestId,
+  required String proofPath,
+}) async {
+  final id = requestId.trim();
+  if (id.isEmpty || proofPath.trim().isEmpty) return {};
+  final data = await _request(
+    method: 'POST',
+    path: '/api/occasion/requests/$id/deposit',
+    body: {'proof_path': proofPath.trim()},
   );
   return _asMap(data);
 }

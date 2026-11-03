@@ -21,7 +21,7 @@ import '../services/api_service.dart';
 import '../services/api_exceptions.dart';
 import '../utils/service_category_icon.dart';
 import '../utils/service_price_label.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import 'service_detail_screen.dart';
 
 class ProviderDetailsScreen extends StatefulWidget {
@@ -161,8 +161,8 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
-        appBar: IslamicAppBar(
+      child: BrandScaffold(
+        appBar: BrandAppBar(
           title: _provider?['name']?.toString() ?? 'تفاصيل المزود',
         ),
         body: _buildBody(),
@@ -246,7 +246,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
       coverUrl = _provider?['logo_url']?.toString();
     }
 
-    return IslamicCard(
+    return BrandCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
@@ -404,7 +404,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
     final governorate = _provider?['governorate']?.toString() ?? '';
     final address = _provider?['address']?.toString() ?? '';
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,7 +503,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
   // ─── الفئات ───
 
   Widget _buildCategoriesCard() {
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -682,7 +682,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
 
     if (visible.isEmpty) return const SizedBox.shrink();
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -841,7 +841,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
 
   Widget _buildServicesList() {
     if (_services.isEmpty) {
-      return IslamicCard(
+      return BrandCard(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
@@ -1081,7 +1081,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
     final rating = _toDouble(_provider?['rating']);
     final reviewsCount = _toInt(_provider?['reviews_count']);
 
-    return IslamicCard(
+    return BrandCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

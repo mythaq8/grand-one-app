@@ -51,16 +51,12 @@ enum AppTab {
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
-    this.isGroomRole = false,
     this.initialTab = AppTab.home,
   });
 
-  /// بقي للتوافق مع المسارات القديمة؛ تطبيق الخدمات لا يستخدم دور الزواج.
-  final bool isGroomRole;
   final AppTab initialTab;
 
   static const String routeGroom = '/shell';
-  static const String routeBride = '/shell-bride';
 
   @override
   State<AppShell> createState() => _AppShellState();
@@ -82,7 +78,6 @@ class _AppShellState extends State<AppShell> {
     switch (tab) {
       case AppTab.home:
         return HomeScreen(
-          isGroomRole: false,
           embedded: true,
           onOpenServicesTab: () => _select(AppTab.services),
           onOpenRequestsTab: () => _select(AppTab.requests),
@@ -92,7 +87,7 @@ class _AppShellState extends State<AppShell> {
       case AppTab.requests:
         return const MyRequestsScreen();
       case AppTab.more:
-        return const MoreScreen(isGroomRole: false);
+        return const MoreScreen();
     }
   }
 
@@ -172,7 +167,7 @@ class _AppShellState extends State<AppShell> {
       backgroundColor: AppPalette.surface,
       leading: Padding(
         padding: const EdgeInsets.symmetric(vertical: Space.lg),
-        child: const BrandMark(size: 48),
+        child: const BrandMark(size: 56),
       ),
       destinations: [
         for (final tab in AppTab.values)

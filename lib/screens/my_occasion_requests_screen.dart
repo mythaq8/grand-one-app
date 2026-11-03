@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import 'occasion_organize_screen.dart';
 import 'occasion_request_detail_screen.dart';
 
@@ -76,6 +76,8 @@ class _MyOccasionRequestsScreenState extends State<MyOccasionRequestsScreen> {
         return 'قيد المراجعة';
       case 'awaiting_client':
         return 'بانتظار موافقتك';
+      case 'awaiting_deposit':
+        return 'بانتظار العربون';
       case 'confirmed':
         return 'مؤكد';
       case 'closed':
@@ -104,10 +106,10 @@ class _MyOccasionRequestsScreenState extends State<MyOccasionRequestsScreen> {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
+      child: BrandScaffold(
         appBar: widget.embedded
             ? null
-            : IslamicAppBar(
+            : BrandAppBar(
                 title: 'طلبات تنظيم المناسبة',
                 actions: [
                   IconButton(
@@ -217,7 +219,7 @@ class _MyOccasionRequestsScreenState extends State<MyOccasionRequestsScreen> {
                                         ),
                                       ).then((_) => _load());
                                     },
-                              child: IslamicCard(
+                              child: BrandCard(
                               padding: const EdgeInsets.all(14),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.stretch,

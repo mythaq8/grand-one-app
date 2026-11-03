@@ -2,13 +2,16 @@
 
 import 'dart:ui' as ui;
 
+import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
-import '../widgets/islamic_decorations.dart';
+import '../widgets/brand_decorations.dart';
 import 'contact_admin_screen.dart';
 
 class OccasionRequestDetailScreen extends StatefulWidget {
@@ -25,6 +28,7 @@ class _OccasionRequestDetailScreenState
     extends State<OccasionRequestDetailScreen> {
   bool _loading = true;
   bool _busy = false;
+  bool _uploadingDeposit = false;
   String? _error;
   Map<String, dynamic>? _request;
   List<Map<String, dynamic>> _items = [];
@@ -34,6 +38,55 @@ class _OccasionRequestDetailScreenState
   void initState() {
     super.initState();
     _load();
+  }
+
+  Future<void> _uploadDepositProof() async {
+    if (_uploadingDeposit || _busy) return;
+    try {
+      final files = await fp.FilePicker.pickFiles(type: fp.FileType.image);
+      if (files.isEmpty) return;
+      final file = files.first;
+      setState(() => _uploadingDeposit = true);
+
+      var bytes = await file.xFile.readAsBytes();
+      try {
+        final compressed = await FlutterImageCompress.compressWithList(
+          bytes,
+          minWidth: 800,
+          minHeight: 800,
+          quality: 70,
+        );
+        if (compressed.isNotEmpty) bytes = compressed;
+      } catch (_) {}
+
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) throw Exception('يجب تسجيل الدخول');
+
+      final path =
+          '$userId/occasion_deposit_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      await Supabase.instance.client.storage
+          .from('booking_deposits')
+          .uploadBinary(path, bytes);
+
+      await ApiService.uploadOccasionDeposit(
+        requestId: widget.requestId,
+        proofPath: path,
+      );
+      if (!mounted) return;
+      ErrorHandler.showSuccess(
+        context,
+        'تم رفع إثبات العربون. بانتظار تحقق الإدارة.',
+      );
+      await _load();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ErrorHandler.showError(context, e, customMessage: e.userMessage);
+    } catch (e) {
+      if (!mounted) return;
+      ErrorHandler.showError(context, e, customMessage: 'تعذر رفع الإثبات');
+    } finally {
+      if (mounted) setState(() => _uploadingDeposit = false);
+    }
   }
 
   Future<void> _load() async {
@@ -86,6 +139,8 @@ class _OccasionRequestDetailScreenState
         return 'قيد المراجعة';
       case 'awaiting_client':
         return 'بانتظار موافقتك';
+      case 'awaiting_deposit':
+        return 'بانتظار دفع العربون';
       case 'confirmed':
         return 'مؤكد';
       case 'closed':
@@ -172,8 +227,8 @@ class _OccasionRequestDetailScreenState
 
     return Directionality(
       textDirection: ui.TextDirection.rtl,
-      child: IslamicScaffold(
-        appBar: IslamicAppBar(
+      child: BrandScaffold(
+        appBar: BrandAppBar(
           title: 'تفاصيل طلب المناسبة',
           actions: [
             IconButton(
@@ -207,7 +262,7 @@ class _OccasionRequestDetailScreenState
                 : ListView(
                     padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
                     children: [
-                      IslamicCard(
+                      BrandCard(
                         padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -232,9 +287,63 @@ class _OccasionRequestDetailScreenState
                               'تكلفة تقديرية أولية: ${_request?['estimated_priced_subtotal'] ?? 0} \$',
                               style: const TextStyle(color: AppColors.goldDark),
                             ),
+                            if (_request?['deposit_amount'] != null)
+                              Text(
+                                'العربون المطلوب: ${_request?['deposit_amount']} \$',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            if (status == 'awaiting_deposit') ...[
+                              const SizedBox(height: 8),
+                              Text(
+                                _request?['deposit_due_at'] != null
+                                    ? 'ادفع العربون قبل: ${_request?['deposit_due_at']}'
+                                    : 'ادفع العربون خلال المهلة المحددة لتثبيت الحجز.',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.warning,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              if (_request?['deposit_submitted_at'] != null)
+                                const Text(
+                                  'تم استلام إثبات العربون — بانتظار تحقق الإدارة.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.success,
+                                  ),
+                                )
+                              else
+                                ElevatedButton.icon(
+                                  onPressed: (_busy || _uploadingDeposit)
+                                      ? null
+                                      : _uploadDepositProof,
+                                  icon: _uploadingDeposit
+                                      ? const SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : const Icon(Icons.upload_file),
+                                  label: Text(
+                                    _uploadingDeposit
+                                        ? 'جاري الرفع...'
+                                        : 'رفع إثبات العربون',
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                            ],
                             const SizedBox(height: 8),
                             const Text(
-                              'الأسعار والتوافر يخضعان لمراجعة الإدارة قبل التأكيد.',
+                              'الأسعار والتوافر يخضعان لمراجعة المنظّم قبل التأكيد. بعد الموافقة يُطلب عربون 20٪.',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.textSecondary,
@@ -253,7 +362,7 @@ class _OccasionRequestDetailScreenState
                       ..._items.map(
                         (it) => Padding(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: IslamicCard(
+                          child: BrandCard(
                             padding: const EdgeInsets.all(12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -294,7 +403,7 @@ class _OccasionRequestDetailScreenState
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
-                        IslamicCard(
+                        BrandCard(
                           padding: const EdgeInsets.all(14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -306,9 +415,17 @@ class _OccasionRequestDetailScreenState
                                   color: AppColors.primary,
                                 ),
                               ),
+                              if (quote['deposit_amount'] != null)
+                                Text(
+                                  'العربون (20٪): ${quote['deposit_amount']} \$',
+                                ),
+                              if (quote['organizer_fee_amount'] != null)
+                                Text(
+                                  'رسوم المنظّم: ${quote['organizer_fee_amount']} \$',
+                                ),
                               if ((quote['client_message']?.toString() ?? '')
                                   .isNotEmpty)
-                                Text('رسالة الإدارة: ${quote['client_message']}'),
+                                Text('رسالة المنظّم: ${quote['client_message']}'),
                               if ((quote['terms']?.toString() ?? '').isNotEmpty)
                                 Text('الشروط: ${quote['terms']}'),
                               if (quote['valid_until'] != null)

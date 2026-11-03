@@ -13,16 +13,16 @@ import 'package:flutter/material.dart';
 // 1. الألوان — GRAND ONE
 // ============================================================
 
-/// Navy مهيمن + ذهب للتمييز + كريمي للتنفّس + رمادي فاخر.
+/// Navy مهيمن + ذهب خفيف للتمييز + خلفية باردة نظيفة.
 abstract final class AppPalette {
   // ── Navy (اللون الأساسي) ──
   static const Color navy = Color(0xFF0B1E44);
-  static const Color navyLight = Color(0xFF16325F);
-  static const Color navyLighter = Color(0xFF234575);
-  static const Color navyDark = Color(0xFF132033);
-  static const Color navyDeep = Color(0xFF0A1528);
-  static const Color navySoft = Color(0xFFE8ECF3);
-  static const Color navyMuted = Color(0xFF9AA8C0);
+  static const Color navyLight = Color(0xFF1A335F);
+  static const Color navyLighter = Color(0xFF2A4570);
+  static const Color navyDark = Color(0xFF08162F);
+  static const Color navyDeep = Color(0xFF060F20);
+  static const Color navySoft = Color(0xFFEEF2F7);
+  static const Color navyMuted = Color(0xFF8B9BB3);
 
   // توافق أسماء قديمة (كانت green) → navy
   static const Color green = navy;
@@ -33,44 +33,44 @@ abstract final class AppPalette {
   static const Color greenSoft = navySoft;
   static const Color greenMuted = navyMuted;
 
-  // ── الذهبي الملكي (تمييز فقط) ──
-  static const Color gold = Color(0xFFD4AF37);
-  static const Color goldLight = Color(0xFFE5C96A);
-  static const Color goldLighter = Color(0xFFF0DF9A);
-  static const Color goldDark = Color(0xFFB8942D);
-  static const Color goldDeep = Color(0xFF8A6F1F);
-  static const Color goldSoft = Color(0xFFF8F1DC);
+  // ── الذهبي (لمسات رفيعة فقط — ليس لوناً كبيراً) ──
+  static const Color gold = Color(0xFFC6A35A);
+  static const Color goldLight = Color(0xFFD8BC7E);
+  static const Color goldLighter = Color(0xFFE8D7AE);
+  static const Color goldDark = Color(0xFFA8863F);
+  static const Color goldDeep = Color(0xFF7D6430);
+  static const Color goldSoft = Color(0xFFF7F2E8);
 
-  // ── الخلفيات والأسطح ──
-  static const Color cream = Color(0xFFF8F5ED);
-  static const Color background = cream;
-  static const Color backgroundAlt = Color(0xFFF3EFE6);
+  // ── الخلفيات والأسطح (باردة ونظيفة، بلا اصفرار) ──
+  static const Color cream = Color(0xFFF7F2E8);
+  static const Color background = Color(0xFFF5F7FA);
+  static const Color backgroundAlt = Color(0xFFEEF1F5);
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceTint = Color(0xFFF1EEE6);
-  static const Color surfaceNavy = Color(0xFFF0F3F8);
+  static const Color surfaceTint = Color(0xFFF0F3F7);
+  static const Color surfaceNavy = Color(0xFFE9EEF5);
   static const Color surfaceGreen = surfaceNavy;
-  static const Color surfaceGold = Color(0xFFFBF7EC);
+  static const Color surfaceGold = Color(0xFFF8F4EC);
 
   // ── رمادي فاخر ──
-  static const Color luxuryGray = Color(0xFF9FA3A8);
-  static const Color luxuryGrayDark = Color(0xFF6E737A);
-  static const Color luxuryGrayLight = Color(0xFFD5D8DC);
+  static const Color luxuryGray = Color(0xFF8B929C);
+  static const Color luxuryGrayDark = Color(0xFF5C6470);
+  static const Color luxuryGrayLight = Color(0xFFD0D5DC);
 
   // ── النصوص ──
-  static const Color textPrimary = Color(0xFF132033);
-  static const Color textSecondary = Color(0xFF4A5563);
-  static const Color textTertiary = Color(0xFF7A8490);
+  static const Color textPrimary = Color(0xFF121A2A);
+  static const Color textSecondary = Color(0xFF5A6575);
+  static const Color textTertiary = Color(0xFF8791A0);
   static const Color textMuted = luxuryGray;
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onGold = Color(0xFF1A1508);
-  static const Color onNavy = Color(0xFFF8F5ED);
+  static const Color onNavy = Color(0xFFF5F7FA);
 
   // ── الحدود والفواصل ──
-  static const Color border = Color(0xFFE0DCD3);
-  static const Color borderStrong = Color(0xFFCFCABF);
-  static const Color borderLight = Color(0xFFEBE7DE);
-  static const Color borderSubtle = Color(0xFFF3F0E9);
-  static const Color divider = Color(0xFFE6E2D9);
+  static const Color border = Color(0xFFD8DEE6);
+  static const Color borderStrong = Color(0xFFC2CAD6);
+  static const Color borderLight = Color(0xFFE6EBF1);
+  static const Color borderSubtle = Color(0xFFF0F3F7);
+  static const Color divider = Color(0xFFE2E7EE);
 
   // ── الحالات ──
   static const Color success = Color(0xFF2F6B4F);
@@ -90,13 +90,13 @@ abstract final class AppPalette {
   static const Color infoDark = Color(0xFF274358);
 
   // ── الزخارف ──
-  static const Color patternGold = Color(0x14D4AF37);
-  static const Color patternGoldStrong = Color(0x28D4AF37);
-  static const Color patternNavy = Color(0x0D0B1E44);
-  static const Color patternNavyStrong = Color(0x1F0B1E44);
+  static const Color patternGold = Color(0x0FC6A35A);
+  static const Color patternGoldStrong = Color(0x1AC6A35A);
+  static const Color patternNavy = Color(0x080B1E44);
+  static const Color patternNavyStrong = Color(0x120B1E44);
   static const Color patternGreen = patternNavy;
   static const Color patternGreenStrong = patternNavyStrong;
-  static const Color patternBackground = Color(0xFFF5F1E8);
+  static const Color patternBackground = Color(0xFFF5F7FA);
 }
 
 // ============================================================
@@ -104,46 +104,74 @@ abstract final class AppPalette {
 // ============================================================
 
 abstract final class AppGradients {
-  static const LinearGradient primary = LinearGradient(
-    colors: [AppPalette.navy, AppPalette.navyLight],
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-  );
-
-  static const LinearGradient primaryDeep = LinearGradient(
-    colors: [AppPalette.navyDeep, AppPalette.navy],
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-  );
-
-  static const LinearGradient header = LinearGradient(
-    colors: [AppPalette.navyDark, AppPalette.navy, AppPalette.navyLight],
-    begin: Alignment.topRight,
-    end: Alignment.bottomLeft,
-  );
-
-  static const LinearGradient gold = LinearGradient(
-    colors: [AppPalette.goldDark, AppPalette.gold, AppPalette.goldLight],
+  /// لمعان معدني على الأسطح الداكنة.
+  static const LinearGradient sheen = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF2A5694),
+      Color(0xFF0B1E44),
+      Color(0xFF1A3A6E),
+      Color(0xFF071428),
+    ],
+    stops: [0.0, 0.38, 0.72, 1.0],
+  );
+
+  static const LinearGradient primary = sheen;
+
+  static const LinearGradient primaryDeep = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF16325F), AppPalette.navyDeep, Color(0xFF0B1E44)],
+    stops: [0.0, 0.55, 1.0],
+  );
+
+  static const LinearGradient header = sheen;
+
+  /// ذهب مصقول: ظل، لمعة، ثم ظل.
+  static const LinearGradient gold = LinearGradient(
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+    colors: [
+      Color(0xFF8A682C),
+      Color(0xFFE8D5A3),
+      Color(0xFFC6A35A),
+      Color(0xFFFFF1CC),
+      Color(0xFFA8863F),
+    ],
+    stops: [0.0, 0.22, 0.48, 0.68, 1.0],
   );
 
   static const LinearGradient goldSoft = LinearGradient(
-    colors: [AppPalette.goldSoft, AppPalette.goldLighter],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+    colors: [Color(0xFFFFFBF2), Color(0xFFF4E6C4), Color(0xFFFFF8EA)],
   );
 
+  /// صفحة فاتحة مع دفء ذهبي في الأعلى.
   static const LinearGradient primarySoft = LinearGradient(
-    colors: [AppPalette.navySoft, AppPalette.background],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFFFFF6E4),
+      Color(0xFFF8F4EC),
+      Color(0xFFF4F7FB),
+    ],
+    stops: [0.0, 0.32, 1.0],
+  );
+
+  static const RadialGradient glowGold = RadialGradient(
+    colors: [Color(0x66E8D5A3), Color(0x00E8D5A3)],
+  );
+
+  static const RadialGradient glowNavy = RadialGradient(
+    colors: [Color(0x261A335F), Color(0x001A335F)],
   );
 
   static const LinearGradient splash = LinearGradient(
-    colors: [AppPalette.navyDeep, AppPalette.navy, AppPalette.navyDark],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF1A3A6E), AppPalette.navyDeep, Color(0xFF0B1E44)],
   );
 }
 
@@ -231,9 +259,9 @@ abstract final class AppShadows {
 
   static const List<BoxShadow> goldGlow = [
     BoxShadow(
-      color: Color(0x33D4AF37),
-      blurRadius: 16,
-      offset: Offset(0, 4),
+      color: Color(0x40C6A35A),
+      blurRadius: 18,
+      offset: Offset(0, 6),
     ),
   ];
 }
@@ -290,15 +318,7 @@ abstract final class AppAssets {
   /// المسار الافتراضي للشعار في الواجهة.
   static const String logo = monogram;
 
-  /// شعار ميثاق القديم — لا تستخدمه في واجهة GRAND ONE.
-  static const String legacyMithaqLogo = 'assets/images/brand/logo.png';
-
-  static const String introCovenant =
-      'assets/images/brand/intro-covenant.jpg';
-  static const String introPath = 'assets/images/brand/intro-path.jpg';
-  static const String introHall = 'assets/images/brand/intro-hall.jpg';
-  static const String introDamascus = 'assets/images/brand/intro-damascus.jpg';
-
+  /// بطاقات ترويجية للرئيسية (fallback عند غياب الـ API).
   static const List<String> homePromo = [
     'assets/images/brand/promo/promo-01.jpg',
     'assets/images/brand/promo/promo-02.jpg',
