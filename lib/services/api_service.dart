@@ -89,6 +89,11 @@ class ApiService {
               .put(uri, headers: headers, body: jsonEncode(body ?? {}))
               .timeout(_defaultTimeout);
           break;
+        case 'PATCH':
+          response = await http
+              .patch(uri, headers: headers, body: jsonEncode(body ?? {}))
+              .timeout(_defaultTimeout);
+          break;
         case 'DELETE':
           response = await http
               .delete(uri, headers: headers, body: body != null ? jsonEncode(body) : null)
@@ -879,6 +884,61 @@ static Future<Map<String, dynamic>> decideOccasionQuote({
 // ═══════════════════════════════════════════════════════════
 // بوابة المزود (Grand One)
 // ═══════════════════════════════════════════════════════════
+
+// ── أداة تنظيم العمل (مزوّد ومنظّم) ──
+
+static Future<Map<String, dynamic>> getWorkBookings({String? from, String? to}) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/work/bookings',
+    query: {if (from != null) 'from': from, if (to != null) 'to': to},
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> createWorkBooking(Map<String, dynamic> body) async {
+  final data = await _request(method: 'POST', path: '/api/work/bookings', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateWorkBooking(String id, Map<String, dynamic> body) async {
+  final data = await _request(method: 'PATCH', path: '/api/work/bookings/$id', body: body);
+  return _asMap(data);
+}
+
+static Future<void> deleteWorkBooking(String id) async {
+  await _request(method: 'DELETE', path: '/api/work/bookings/$id');
+}
+
+static Future<List<Map<String, dynamic>>> getWorkChecklist(String kind, String id) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/work/checklist',
+    query: {'kind': kind, 'id': id},
+  );
+  final items = _asMap(data)['items'];
+  return items is List
+      ? items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
+      : <Map<String, dynamic>>[];
+}
+
+static Future<Map<String, dynamic>> addWorkChecklistItem(String kind, String id, String title) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/work/checklist',
+    body: {'kind': kind, 'id': id, 'title': title},
+  );
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateWorkChecklistItem(String itemId, Map<String, dynamic> body) async {
+  final data = await _request(method: 'PATCH', path: '/api/work/checklist/$itemId', body: body);
+  return _asMap(data);
+}
+
+static Future<void> deleteWorkChecklistItem(String itemId) async {
+  await _request(method: 'DELETE', path: '/api/work/checklist/$itemId');
+}
 
 static Future<Map<String, dynamic>> getProviderMe() async {
   final data = await _request(method: 'GET', path: '/api/provider/me');

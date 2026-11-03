@@ -7,6 +7,7 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import 'work/work_dashboard_tab.dart';
 
 /// لوحة المنظّم — طلبات المناسبات / عروض / خدمات خاصة
 class OrganizerShellScreen extends StatefulWidget {
@@ -96,10 +97,11 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
                 )
               : IndexedStack(
                   index: _tab,
-                  children: const [
-                    _OrganizerRequestsTab(),
-                    _OrganizerOwnedServicesTab(),
-                    _OrganizerAvailabilityTab(),
+                  children: [
+                    const WorkDashboardTab(isProvider: false),
+                    const _OrganizerRequestsTab(),
+                    const _OrganizerOwnedServicesTab(),
+                    const _OrganizerAvailabilityTab(),
                   ],
                 ),
       bottomNavigationBar: _bootError != null
@@ -108,6 +110,11 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
               selectedIndex: _tab,
               onDestinationSelected: (i) => setState(() => _tab = i),
               destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard),
+                  label: 'لوحتي',
+                ),
                 NavigationDestination(
                   icon: Icon(Icons.inbox_outlined),
                   selectedIcon: Icon(Icons.inbox),

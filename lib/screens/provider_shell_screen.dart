@@ -7,6 +7,7 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import 'work/work_dashboard_tab.dart';
 
 /// لوحة المزود — طلبات / خدمات / تقويم
 class ProviderShellScreen extends StatefulWidget {
@@ -95,10 +96,11 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
                 )
               : IndexedStack(
                   index: _tab,
-                  children: const [
-                    _ProviderBookingsTab(),
-                    _ProviderServicesTab(),
-                    _ProviderAvailabilityTab(),
+                  children: [
+                    const WorkDashboardTab(isProvider: true),
+                    const _ProviderBookingsTab(),
+                    const _ProviderServicesTab(),
+                    const _ProviderAvailabilityTab(),
                   ],
                 ),
       bottomNavigationBar: _bootError != null
@@ -107,6 +109,11 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
               selectedIndex: _tab,
               onDestinationSelected: (i) => setState(() => _tab = i),
               destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard),
+                  label: 'لوحتي',
+                ),
                 NavigationDestination(
                   icon: Icon(Icons.inbox_outlined),
                   selectedIcon: Icon(Icons.inbox),
