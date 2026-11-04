@@ -1099,6 +1099,26 @@ static Future<Map<String, dynamic>> getProviderBookings({
   return _asMap(data);
 }
 
+/// أرقام المزوّد؛ تظهر بعد تحقق العربون فقط.
+static Future<Map<String, dynamic>> getBookingProviderContact(String bookingId) async {
+  final data = await _request(
+    method: 'GET',
+    path: '/api/bookings/provider-contact',
+    query: {'booking_id': bookingId},
+  );
+  return _asMap(data);
+}
+
+/// تأكيد العميل أن الخدمة تمت (يُحرَّر العربون للمزوّد بعد العمولة).
+static Future<Map<String, dynamic>> completeBooking(String bookingId) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/complete',
+    body: {'booking_id': bookingId},
+  );
+  return _asMap(data);
+}
+
 /// رد العميل على تعديل المزوّد (قبول يطبّق التاريخ/الوقت المقترحين).
 static Future<Map<String, dynamic>> respondBookingModification({
   required String bookingId,

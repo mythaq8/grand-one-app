@@ -10,6 +10,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -280,6 +281,134 @@ Future<void> _loadBookings() async {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showProviderContact(String bookingId) async {
+    try {
+      final res = await ApiService.getBookingProviderContact(bookingId);
+      if (!mounted) return;
+      if (res['revealed'] != true) {
+        _showMessage(res['message']?.toString() ?? 'الأرقام غير متاحة بعد');
+        return;
+      }
+      final provider = res['provider'] is Map
+          ? Map<String, dynamic>.from(res['provider'] as Map)
+          : <String, dynamic>{};
+      final phone = provider['phone']?.toString() ?? '';
+      final whatsapp = provider['whatsapp']?.toString() ?? '';
+      await showDialog<void>(
+        context: context,
+        builder: (ctx) => Directionality(
+          textDirection: ui.TextDirection.rtl,
+          child: AlertDialog(
+            title: Text(provider['name']?.toString() ?? 'المزوّد'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (phone.isNotEmpty) _contactRow(ctx, 'الهاتف', phone),
+                if (whatsapp.isNotEmpty) _contactRow(ctx, 'واتساب', whatsapp),
+                if (phone.isEmpty && whatsapp.isEmpty)
+                  const Text('لم يضف المزوّد رقماً بعد.'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('إغلاق'),
+              ),
+            ],
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.userMessage, isError: true);
+    }
+  }
+
+  Widget _contactRow(BuildContext ctx, String label, String value) {
+    return Row(
+      children: [
+        Expanded(child: Text('$label: $value')),
+        IconButton(
+          tooltip: 'نسخ',
+          icon: const Icon(Icons.copy, size: 18),
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: value));
+            if (ctx.mounted) {
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                const SnackBar(content: Text('تم النسخ')),
+              );
+            }
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _completeBooking(String bookingId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Directionality(
+        textDirection: ui.TextDirection.rtl,
+        child: AlertDialog(
+          title: const Text('تأكيد إتمام الخدمة'),
+          content: const Text(
+            'بتأكيدك يُحرَّر العربون للمزوّد بعد خصم العمولة. هل تمت الخدمة كما اتُّفق؟',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('رجوع'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('تمت الخدمة'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      await ApiService.completeBooking(bookingId);
+      if (!mounted) return;
+      _showMessage('شكراً، تم تأكيد إتمام الخدمة. يمكنك الآن تقييمها.');
+      await _loadBookings();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.userMessage, isError: true);
+    }
+  }
+
+  Widget _buildReadyActions(Map<String, dynamic> booking, String bookingId) {
+    final date = DateTime.tryParse(booking['booking_date']?.toString() ?? '');
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final due = date != null && !DateTime(date.year, date.month, date.day).isAfter(today);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: bookingId.isEmpty ? null : () => _showProviderContact(bookingId),
+              icon: const Icon(Icons.call_outlined, size: 18),
+              label: const Text('تواصل مع المزوّد'),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: FilledButton.icon(
+              onPressed: (!due || bookingId.isEmpty) ? null : () => _completeBooking(bookingId),
+              icon: const Icon(Icons.task_alt, size: 18),
+              label: Text(due ? 'تمت الخدمة' : 'بعد موعد الخدمة'),
+            ),
           ),
         ],
       ),
@@ -1213,6 +1342,7 @@ if (status == 'pending' || status == 'approved') ...[
                 ),
               ),
             ),
+            _buildReadyActions(booking, bookingId),
           ] else if (status == 'completed') ...[
             const Divider(height: 1),
             Padding(
