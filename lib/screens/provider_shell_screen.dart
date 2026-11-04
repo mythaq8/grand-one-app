@@ -195,9 +195,17 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     }
   }
 
-  Future<void> _proposeModification(String id) async {
+  Future<void> _proposeModification(Map<String, dynamic> booking) async {
+    final id = booking['id'].toString();
+    final pricingModel = booking['pricing_model']?.toString();
+    final qtyLabel = pricingModel == 'per_unit'
+        ? 'كمية بديلة (اختياري)'
+        : pricingModel == 'per_duration'
+            ? 'مدة بديلة (اختياري)'
+            : null;
     DateTime? date;
     TimeOfDay? time;
+    final qtyCtrl = TextEditingController();
     final noteCtrl = TextEditingController();
     final submitted = await showDialog<bool>(
       context: context,
@@ -239,6 +247,16 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                     if (t != null) setLocal(() => time = t);
                   },
                 ),
+                if (qtyLabel != null)
+                  TextField(
+                    controller: qtyCtrl,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: InputDecoration(
+                      labelText: qtyLabel,
+                      helperText: 'الحالية: ${pricingModel == 'per_unit' ? booking['quantity'] : booking['duration_value']} — يُعاد التسعير ويرى العميل السعر الجديد',
+                    ),
+                  ),
                 TextField(
                   controller: noteCtrl,
                   maxLength: 500,
@@ -257,8 +275,9 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
             ),
             FilledButton(
               onPressed: () {
+                final qtyValue = double.tryParse(qtyCtrl.text.trim());
                 if (noteCtrl.text.trim().length < 3 ||
-                    (date == null && time == null)) {
+                    (date == null && time == null && qtyValue == null)) {
                   ScaffoldMessenger.of(ctx).showSnackBar(
                     const SnackBar(
                       content: Text('اقترح تاريخاً أو وقتاً وأضف ملاحظة'),
@@ -275,7 +294,9 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
       ),
     );
     final note = noteCtrl.text.trim();
+    final qtyValue = double.tryParse(qtyCtrl.text.trim());
     noteCtrl.dispose();
+    qtyCtrl.dispose();
     if (submitted != true) return;
 
     try {
@@ -289,6 +310,8 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
         newTime: time == null
             ? null
             : '${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}',
+        newQuantity: pricingModel == 'per_unit' ? qtyValue : null,
+        newDurationValue: pricingModel == 'per_duration' ? qtyValue : null,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -313,6 +336,99 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     return hours >= 1 ? '$prefix: $hours ساعة' : '$prefix: أقل من ساعة';
   }
 
+  /// صفوف العرض: ترويسة لكل مجموعة (أكثر من طلب من فعالية واحدة) ثم أعضاؤها.
+  List<Map<String, dynamic>> _displayRows() {
+    final byGroup = <String, List<Map<String, dynamic>>>{};
+    for (final b in _items) {
+      final g = b['group_id']?.toString();
+      if (g != null && g.isNotEmpty) {
+        byGroup.putIfAbsent(g, () => []).add(b);
+      }
+    }
+    final rows = <Map<String, dynamic>>[];
+    final shown = <String>{};
+    for (final b in _items) {
+      final g = b['group_id']?.toString();
+      if (g != null && (byGroup[g]?.length ?? 0) > 1 && shown.add(g)) {
+        rows.add({'kind': 'group', 'id': g, 'members': byGroup[g]!});
+      }
+      rows.add({'kind': 'single', 'b': b});
+    }
+    return rows;
+  }
+
+  bool _isRespondable(String status) =>
+      const ['pending', 'quote_requested', 'quoted', 'deposit_rejected']
+          .contains(status);
+
+  Future<void> _respondGroup(String groupId, String action) async {
+    try {
+      final res = await ApiService.respondProviderBookingGroup(
+        groupId: groupId,
+        action: action,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            action == 'confirm'
+                ? 'تم تأكيد ${res['updated'] ?? 0} طلب'
+                : 'تم رفض ${res['updated'] ?? 0} طلب',
+          ),
+        ),
+      );
+      await _load();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  Widget _groupHeader(Map<String, dynamic> row) {
+    final members = (row['members'] as List).cast<Map<String, dynamic>>();
+    final open = members
+        .where((b) => _isRespondable(b['status']?.toString() ?? ''))
+        .length;
+    final due = members
+        .map((b) => b['provider_response_due_at'])
+        .whereType<String>()
+        .toList()
+      ..sort();
+    final dueLabel = due.isEmpty ? null : _dueLabel(due.first, 'المتبقي للرد');
+    return Card(
+      color: AppPalette.goldSoft,
+      child: Padding(
+        padding: const EdgeInsets.all(Space.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('طلب فعالية يضم ${members.length} خدمات', style: AppText.section),
+            if (dueLabel != null) Text(dueLabel, style: AppText.caption),
+            if (open > 0) ...[
+              const SizedBox(height: Space.sm),
+              Row(
+                children: [
+                  FilledButton(
+                    onPressed: () =>
+                        _respondGroup(row['id'].toString(), 'confirm'),
+                    child: Text('تأكيد الكل ($open)'),
+                  ),
+                  const SizedBox(width: Space.sm),
+                  OutlinedButton(
+                    onPressed: () =>
+                        _respondGroup(row['id'].toString(), 'reject'),
+                    child: const Text('رفض الكل'),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -333,14 +449,18 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
       );
     }
 
+    final rows = _displayRows();
+
     return RefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
         padding: const EdgeInsets.all(Space.md),
-        itemCount: _items.length,
+        itemCount: rows.length,
         separatorBuilder: (_, _) => const SizedBox(height: Space.sm),
         itemBuilder: (context, i) {
-          final b = _items[i];
+          final row = rows[i];
+          if (row['kind'] == 'group') return _groupHeader(row);
+          final b = row['b'] as Map<String, dynamic>;
           final service = b['services'];
           final serviceName = service is Map
               ? (service['name']?.toString() ?? 'خدمة')
@@ -393,7 +513,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                           const SizedBox(width: Space.sm),
                           TextButton(
                             onPressed: () =>
-                                _proposeModification(b['id'].toString()),
+                                _proposeModification(b),
                             child: const Text('اقتراح تعديل'),
                           ),
                         ],

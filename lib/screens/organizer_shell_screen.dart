@@ -870,6 +870,7 @@ class _OrganizerAvailabilityTab extends StatefulWidget {
 }
 
 class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
+  final List<Map<String, dynamic>> _exceptions = [];
   static const _dayNames = [
     'الأحد',
     'الإثنين',
@@ -916,6 +917,12 @@ class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
     });
     try {
       final res = await ApiService.getOrganizerAvailability();
+      final ex = res['exceptions'];
+      _exceptions
+        ..clear()
+        ..addAll(ex is List
+            ? ex.whereType<Map>().map((e) => Map<String, dynamic>.from(e))
+            : const <Map<String, dynamic>>[]);
       final rules = res['rules'];
       if (rules is List) {
         for (final r in rules.whereType<Map>()) {
@@ -932,6 +939,54 @@ class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
       _error = 'تعذر جلب التقويم';
     }
     if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _saveExceptions() async {
+    try {
+      await ApiService.saveOrganizerAvailability(
+        exceptions: [
+          for (final e in _exceptions)
+            {
+              'exception_date': e['exception_date'].toString().substring(0, 10),
+              'is_closed': true,
+              if (e['note'] != null) 'note': e['note'],
+            },
+        ],
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
+      await _load();
+    }
+  }
+
+  Future<void> _addClosedDay() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now.add(const Duration(days: 1)),
+      firstDate: now,
+      lastDate: DateTime(now.year + 2, now.month, now.day),
+      helpText: 'إغلاق تاريخ أمام العملاء',
+    );
+    if (picked == null) return;
+    final iso =
+        '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+    if (_exceptions.any((e) => e['exception_date'].toString().startsWith(iso))) {
+      return;
+    }
+    setState(() {
+      _exceptions.add({'exception_date': iso, 'is_closed': true});
+      _exceptions.sort((a, b) =>
+          a['exception_date'].toString().compareTo(b['exception_date'].toString()));
+    });
+    await _saveExceptions();
+  }
+
+  Future<void> _removeClosedDay(Map<String, dynamic> e) async {
+    setState(() => _exceptions.remove(e));
+    await _saveExceptions();
   }
 
   Future<void> _pick(int day, bool isStart) async {
@@ -1024,6 +1079,32 @@ class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
           onPressed: _saving ? null : _save,
           child: Text(_saving ? 'جاري الحفظ...' : 'حفظ التقويم'),
         ),
+        const SizedBox(height: Space.xl),
+        Row(
+          children: [
+            Expanded(child: Text('أيام مغلقة أمام العملاء', style: AppText.section)),
+            TextButton.icon(
+              onPressed: _addClosedDay,
+              icon: const Icon(Icons.event_busy),
+              label: const Text('إغلاق تاريخ'),
+            ),
+          ],
+        ),
+        if (_exceptions.isEmpty)
+          Text('لا أيام مغلقة.', style: AppText.caption),
+        for (final e in _exceptions)
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.block),
+              title: Text(e['exception_date'].toString().substring(0, 10)),
+              subtitle: e['note'] == null ? null : Text(e['note'].toString()),
+              trailing: IconButton(
+                tooltip: 'فتح التاريخ',
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => _removeClosedDay(e),
+              ),
+            ),
+          ),
       ],
     );
   }

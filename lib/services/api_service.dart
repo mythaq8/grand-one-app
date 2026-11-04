@@ -1027,14 +1027,14 @@ static Future<Map<String, dynamic>> getProviderAvailability() async {
 
 static Future<Map<String, dynamic>> saveProviderAvailability({
   required List<Map<String, dynamic>> rules,
-  List<Map<String, dynamic>> exceptions = const [],
+  List<Map<String, dynamic>>? exceptions, // null = لا تلمس الاستثناءات
 }) async {
   final data = await _request(
     method: 'PUT',
     path: '/api/provider/availability',
     body: {
       'rules': rules,
-      'exceptions': exceptions,
+      if (exceptions != null) 'exceptions': exceptions,
     },
   );
   return _asMap(data);
@@ -1112,6 +1112,24 @@ static Future<Map<String, dynamic>> respondBookingModification({
   return _asMap(data);
 }
 
+/// رد المزوّد على مجموعة طلبات فعالية واحدة دفعة واحدة.
+static Future<Map<String, dynamic>> respondProviderBookingGroup({
+  required String groupId,
+  required String action, // confirm | reject
+  String? note,
+}) async {
+  final act = action.trim().toLowerCase();
+  if (groupId.trim().isEmpty || (act != 'confirm' && act != 'reject')) {
+    return {};
+  }
+  final data = await _request(
+    method: 'POST',
+    path: '/api/provider/booking-groups/$groupId/$act',
+    body: {if (note != null && note.trim().isNotEmpty) 'note': note.trim()},
+  );
+  return _asMap(data);
+}
+
 static Future<Map<String, dynamic>> respondProviderBooking({
   required String bookingId,
   required String action, // confirm | reject | modify
@@ -1119,6 +1137,8 @@ static Future<Map<String, dynamic>> respondProviderBooking({
   String? newDate,
   String? newTime,
   String? alternativeServiceId,
+  num? newQuantity,
+  num? newDurationValue,
 }) async {
   final id = bookingId.trim();
   final act = action.trim().toLowerCase();
@@ -1135,6 +1155,8 @@ static Future<Map<String, dynamic>> respondProviderBooking({
       if (newTime != null) 'new_time': newTime,
       if (alternativeServiceId != null)
         'alternative_service_id': alternativeServiceId,
+      if (newQuantity != null) 'new_quantity': newQuantity,
+      if (newDurationValue != null) 'new_duration_value': newDurationValue,
     },
   );
   return _asMap(data);
@@ -1270,12 +1292,16 @@ static Future<Map<String, dynamic>> getOrganizerAvailability() async {
 }
 
 static Future<Map<String, dynamic>> saveOrganizerAvailability({
-  required List<Map<String, dynamic>> rules,
+  List<Map<String, dynamic>>? rules,
+  List<Map<String, dynamic>>? exceptions,
 }) async {
   final data = await _request(
     method: 'PUT',
     path: '/api/organizer/availability',
-    body: {'rules': rules},
+    body: {
+      if (rules != null) 'rules': rules,
+      if (exceptions != null) 'exceptions': exceptions,
+    },
   );
   return _asMap(data);
 }

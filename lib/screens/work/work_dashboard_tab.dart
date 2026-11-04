@@ -59,7 +59,7 @@ class _WorkDashboardTabState extends State<WorkDashboardTab> {
       MaterialPageRoute(
         builder: (_) => WorkBookingFormScreen(
           existing: existing,
-          canBlockCalendar: widget.isProvider,
+          canBlockCalendar: true,
         ),
       ),
     );

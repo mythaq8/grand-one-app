@@ -213,8 +213,14 @@ Future<void> _loadBookings() async {
     final newDate = mod['new_date']?.toString();
     final newTime = mod['new_time']?.toString();
     final note = mod['note']?.toString() ?? '';
+    final newQty = mod['new_quantity'];
+    final newDur = mod['new_duration_value'];
+    final repriced = mod['repriced_total'];
+    final original = mod['original_total'];
     final hasSchedule = (newDate != null && newDate.isNotEmpty) ||
-        (newTime != null && newTime.isNotEmpty);
+        (newTime != null && newTime.isNotEmpty) ||
+        newQty != null ||
+        newDur != null;
     final due = DateTime.tryParse(
       booking['customer_response_due_at']?.toString() ?? '',
     );
@@ -236,6 +242,14 @@ Future<void> _loadBookings() async {
           const SizedBox(height: 6),
           if (newDate != null && newDate.isNotEmpty) Text('التاريخ المقترح: $newDate'),
           if (newTime != null && newTime.isNotEmpty) Text('الوقت المقترح: $newTime'),
+          if (newQty != null) Text('الكمية المقترحة: $newQty'),
+          if (newDur != null) Text('المدة المقترحة: $newDur'),
+          if (repriced != null)
+            Text(
+              'السعر الجديد: $repriced \$'
+              '${original != null ? " (كان $original \$)" : ""}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           if (mod['alternative_service_id'] != null)
             const Text('اقترح أيضاً خدمة بديلة، يمكنك حجزها من قائمة الخدمات.'),
           if (note.isNotEmpty) Text('ملاحظة: $note'),
