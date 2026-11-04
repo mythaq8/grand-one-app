@@ -37,7 +37,7 @@ abstract final class AppPalette {
   static const Color gold = Color(0xFFC6A35A);
   static const Color goldLight = Color(0xFFD8BC7E);
   static const Color goldLighter = Color(0xFFE8D7AE);
-  static const Color goldDark = Color(0xFFA8863F);
+  static const Color goldDark = Color(0xFF86672A);
   static const Color goldDeep = Color(0xFF7D6430);
   static const Color goldSoft = Color(0xFFF7F2E8);
 
@@ -59,8 +59,8 @@ abstract final class AppPalette {
   // ── النصوص ──
   static const Color textPrimary = Color(0xFF121A2A);
   static const Color textSecondary = Color(0xFF5A6575);
-  static const Color textTertiary = Color(0xFF8791A0);
-  static const Color textMuted = luxuryGray;
+  static const Color textTertiary = Color(0xFF667082);
+  static const Color textMuted = Color(0xFF6B7686);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onGold = Color(0xFF1A1508);
   static const Color onNavy = Color(0xFFF5F7FA);

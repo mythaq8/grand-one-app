@@ -303,7 +303,7 @@ class _OccasionRequestDetailScreenState
                                     : 'ادفع العربون خلال المهلة المحددة لتثبيت الحجز.',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: AppColors.warning,
+                                  color: AppColors.warningDark,
                                   height: 1.4,
                                 ),
                               ),

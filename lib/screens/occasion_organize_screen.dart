@@ -1958,7 +1958,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
               if (_manualCount > 0)
                 Text(
                   '+$_manualCount خدمة بانتظار تسعير يدوي (غير مضافة للمجموع)',
-                  style: const TextStyle(fontSize: 11, color: AppColors.warning),
+                  style: const TextStyle(fontSize: 11, color: AppColors.warningDark),
                 ),
               const SizedBox(height: 6),
               const Text(

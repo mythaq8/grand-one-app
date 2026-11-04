@@ -891,7 +891,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   'غير متاح للحجز حالياً',
                   style: TextStyle(
                     fontSize: 11,
-                    color: AppColors.warning,
+                    color: AppColors.warningDark,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
