@@ -386,6 +386,8 @@ class ApiService {
     String? sort,
     String? subcategoryId,
     bool forOccasion = false,
+    String? date,
+    bool availableOnly = false,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -402,6 +404,8 @@ class ApiService {
       if (minRating != null) 'min_rating': minRating.toString(),
       if (sort != null && sort.isNotEmpty) 'sort': sort,
       if (forOccasion) 'for_occasion': '1',
+      if (date != null && date.isNotEmpty) 'date': date,
+      if (date != null && date.isNotEmpty && availableOnly) 'available_only': '1',
     };
 
     final data = await _request(
@@ -427,6 +431,8 @@ class ApiService {
     String? categoryId,
     num? minRating,
     String? sort,
+    String? date,
+    bool availableOnly = false,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -438,6 +444,8 @@ class ApiService {
       if (categoryId != null && categoryId.isNotEmpty) 'category_id': categoryId,
       if (minRating != null) 'min_rating': minRating.toString(),
       if (sort != null && sort.isNotEmpty) 'sort': sort,
+      if (date != null && date.isNotEmpty) 'date': date,
+      if (date != null && date.isNotEmpty && availableOnly) 'available_only': '1',
     };
 
     final data = await _request(

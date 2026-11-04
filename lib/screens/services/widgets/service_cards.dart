@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design/tokens.dart';
 import '../../../design/typography.dart';
+import 'availability_badges.dart';
 
 /// شارة التقييم بالنجوم — موحّدة للخدمة والمزود.
 class RatingBadge extends StatelessWidget {
@@ -153,6 +154,8 @@ class ServiceCard extends StatelessWidget {
     this.reviewsCount = 0,
     this.isBookable = true,
     this.compact = false,
+    this.badges = const [],
+    this.availableOnDate,
   });
 
   final String name;
@@ -165,6 +168,8 @@ class ServiceCard extends StatelessWidget {
   final int reviewsCount;
   final bool isBookable;
   final bool compact;
+  final List<String> badges;
+  final bool? availableOnDate;
 
   String get _place {
     if (governorate.isEmpty) return '';
@@ -173,7 +178,8 @@ class ServiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return _withBadges(
+      Material(
       color: AppPalette.surface,
       borderRadius: Radii.brLg,
       child: InkWell(
@@ -191,6 +197,25 @@ class ServiceCard extends StatelessWidget {
           child: compact ? _buildCompact(context) : _buildRow(context),
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _withBadges(Widget card) {
+    if (badges.isEmpty && availableOnDate == null) return card;
+    return Stack(
+      children: [
+        card,
+        PositionedDirectional(
+          top: 8,
+          start: 8,
+          end: 8,
+          child: AvailabilityBadges(
+            availableOnDate: availableOnDate,
+            badges: badges,
+          ),
+        ),
+      ],
     );
   }
 
@@ -371,6 +396,8 @@ class ProviderCard extends StatelessWidget {
     this.rating = 0,
     this.reviewsCount = 0,
     this.isVerified = false,
+    this.badges = const [],
+    this.availableOnDate,
   });
 
   final String name;
@@ -382,10 +409,13 @@ class ProviderCard extends StatelessWidget {
   final double rating;
   final int reviewsCount;
   final bool isVerified;
+  final List<String> badges;
+  final bool? availableOnDate;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return _withBadges(
+      Material(
       color: AppPalette.surface,
       borderRadius: Radii.brLg,
       child: InkWell(
@@ -482,6 +512,25 @@ class ProviderCard extends StatelessWidget {
           ),
         ),
       ),
+      ),
+    );
+  }
+
+  Widget _withBadges(Widget card) {
+    if (badges.isEmpty && availableOnDate == null) return card;
+    return Stack(
+      children: [
+        card,
+        PositionedDirectional(
+          top: 8,
+          start: 8,
+          end: 8,
+          child: AvailabilityBadges(
+            availableOnDate: availableOnDate,
+            badges: badges,
+          ),
+        ),
+      ],
     );
   }
 }

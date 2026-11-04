@@ -24,6 +24,7 @@ import '../widgets/notification_badge_icon.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
 import 'services_user_profile_setup_screen.dart';
+import '../services/search_date.dart';
 
 class HomeScreen extends StatefulWidget {
 
@@ -416,6 +417,17 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
           const SizedBox(height: Space.lg),
+          OutlinedButton.icon(
+            onPressed: _pickEventDate,
+            icon: const Icon(Icons.event),
+            label: ValueListenableBuilder<DateTime?>(
+              valueListenable: SearchDate.date,
+              builder: (_, d, __) => Text(
+                d == null ? 'متى مناسبتك؟ اختر التاريخ' : 'مناسبتك: ' + (SearchDate.iso ?? ''),
+              ),
+            ),
+          ),
+          const SizedBox(height: Space.sm),
           Row(
             children: [
               Expanded(
@@ -437,6 +449,20 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _pickEventDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: SearchDate.date.value ?? now.add(const Duration(days: 2)),
+      firstDate: now,
+      lastDate: DateTime(now.year + 1, now.month, now.day),
+      helpText: 'تاريخ مناسبتك',
+    );
+    if (picked == null) return;
+    SearchDate.date.value = picked;
+    widget.onOpenServicesTab?.call();
   }
 
   Widget _buildPersonAvatar({required double size}) {

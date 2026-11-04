@@ -28,6 +28,8 @@ import 'service_detail_screen.dart';
 import 'provider_details_screen.dart';
 import 'my_bookings_screen.dart';
 import 'intro_screen.dart';
+import '../services/search_date.dart';
+import 'services/widgets/availability_badges.dart';
 import 'occasion_organize_screen.dart';
 
 class ServicesScreen extends StatefulWidget {
@@ -76,6 +78,8 @@ final PageController _adsPageController = PageController();
   double? _maxPrice;
   double? _minRating;
   String? _selectedSort;
+  bool _availableOnly = false;
+  List<String> _suggestedDates = [];
 
   String? _providerCategoryId;
   String? _providerGovernorate;
@@ -94,11 +98,22 @@ final PageController _adsPageController = PageController();
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    SearchDate.date.addListener(_onSearchDateChanged);
     _loadAll();
+  }
+
+  void _onSearchDateChanged() {
+    if (!mounted) return;
+    if (_showProviders) {
+      _loadProviders();
+    } else {
+      _loadAll();
+    }
   }
 
   @override
   void dispose() {
+    SearchDate.date.removeListener(_onSearchDateChanged);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
@@ -143,6 +158,8 @@ final PageController _adsPageController = PageController();
       maxPrice: _maxPrice,
       minRating: _minRating,
       sort: _selectedSort,
+      date: SearchDate.iso,
+      availableOnly: _availableOnly,
     ),
   ]);
 
@@ -155,6 +172,9 @@ final PageController _adsPageController = PageController();
 
   var data = _extractList(resp['data']);
   final pagination = _extractMap(resp['pagination']);
+  _suggestedDates = (resp["suggested_dates"] is List)
+      ? (resp["suggested_dates"] as List).map((e) => e.toString()).toList()
+      : <String>[];
   final categoryId = _selectedCategoryId;
   List<Map<String, dynamic>> subs = [];
   Map<String, String> subMap = {};
@@ -219,6 +239,8 @@ final PageController _adsPageController = PageController();
         categoryId: _providerCategoryId,
         governorate: _providerGovernorate,
         minRating: _providerMinRating,
+        date: SearchDate.iso,
+        availableOnly: _availableOnly,
       );
 
       final data = _extractList(resp['data']);
@@ -270,6 +292,8 @@ final PageController _adsPageController = PageController();
         maxPrice: _maxPrice,
         minRating: _minRating,
         sort: _selectedSort,
+        date: SearchDate.iso,
+        availableOnly: _availableOnly,
       );
 
       var data = _extractList(resp['data']);
@@ -307,6 +331,8 @@ final PageController _adsPageController = PageController();
         categoryId: _providerCategoryId,
         governorate: _providerGovernorate,
         minRating: _providerMinRating,
+        date: SearchDate.iso,
+        availableOnly: _availableOnly,
       );
 
       final data = _extractList(resp['data']);
@@ -486,6 +512,7 @@ Widget build(BuildContext context) {
                         tone: InfoBannerTone.info,
                       ),
                     _buildAdsBanner(),
+                    _buildDateBar(),
                     _buildSearchBar(),
                     _buildTabs(),
                     Expanded(child: _buildBody()),
@@ -499,6 +526,93 @@ Widget build(BuildContext context) {
     ),
   );
 }
+
+  // ═══ شريط تاريخ المناسبة ═══
+  Future<void> _pickSearchDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: SearchDate.date.value ?? now.add(const Duration(days: 2)),
+      firstDate: now,
+      lastDate: DateTime(now.year + 1, now.month, now.day),
+      helpText: 'تاريخ مناسبتك',
+    );
+    if (picked != null) SearchDate.date.value = picked;
+  }
+
+  Widget _buildDateBar() {
+    final date = SearchDate.date.value;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _pickSearchDate,
+                  icon: const Icon(Icons.event, size: 18),
+                  label: Text(
+                    date == null
+                        ? 'اختر تاريخ مناسبتك'
+                        : 'المناسبة: ${SearchDate.iso}',
+                  ),
+                ),
+              ),
+              if (date != null)
+                IconButton(
+                  tooltip: 'إزالة التاريخ',
+                  icon: const Icon(Icons.close),
+                  onPressed: () => SearchDate.date.value = null,
+                ),
+            ],
+          ),
+          if (date != null)
+            SwitchListTile(
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: const Text('المتاحون في هذا التاريخ فقط'),
+              value: _availableOnly,
+              onChanged: (v) {
+                setState(() => _availableOnly = v);
+                _onSearchDateChanged();
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _suggestedDatesRow() {
+    if (_suggestedDates.isEmpty || SearchDate.date.value == null) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        children: [
+          const Text('جرّب أقرب تاريخ متاح:'),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final d in _suggestedDates)
+                ActionChip(
+                  label: Text(d),
+                  onPressed: () {
+                    final parsed = DateTime.tryParse(d);
+                    if (parsed != null) SearchDate.date.value = parsed;
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildDiscoveryHeader() {
     return Container(
@@ -896,6 +1010,11 @@ Widget _buildPartyTab() {
     );
   }
 
+  List<String> _badgesOf(Map<String, dynamic> row) {
+    final raw = row['badges'];
+    return raw is List ? raw.map((e) => e.toString()).toList() : const [];
+  }
+
   // ═══ قائمة الخدمات ═══
   bool get _showTypeBar => _subcategories.isNotEmpty && _typeChosen;
 
@@ -929,10 +1048,15 @@ Widget _buildPartyTab() {
         children: [
           if (_showTypeBar) _typeBar(),
           Expanded(
-            child: EmptyState(
+            child: ListView(
+              children: [
+                const EmptyState(
               icon: Icons.miscellaneous_services_outlined,
               title: 'لا توجد خدمات',
               body: 'لم نجد خدمات تطابق البحث الحالي. جرّب توسيع الفلاتر.',
+            ),
+                _suggestedDatesRow(),
+              ],
             ),
           ),
         ],
@@ -954,7 +1078,14 @@ Widget _buildPartyTab() {
           controller: _scrollController,
           onRefresh: _loadAll,
           isLoadingMore: _isLoadingMore,
-          header: _showTypeBar ? _typeBar() : null,
+          header: (_showTypeBar || _suggestedDates.isNotEmpty)
+              ? Column(
+                  children: [
+                    if (_showTypeBar) _typeBar(),
+                    _suggestedDatesRow(),
+                  ],
+                )
+              : null,
           itemCount: _services.length,
           itemBuilder: (context, index) {
             final service = _services[index];
@@ -970,6 +1101,8 @@ Widget _buildPartyTab() {
               rating: _toDouble(service['rating']),
               reviewsCount: _toInt(service['reviews_count']),
               isBookable: service['is_bookable'] == true,
+              badges: _badgesOf(service),
+              availableOnDate: service['available_on_date'] as bool?,
               coverUrl: _coverUrlOf(service),
               onTap: () => _openServiceDetails(service),
             );
@@ -1013,6 +1146,8 @@ Widget _buildPartyTab() {
           rating: _toDouble(provider['rating']),
           reviewsCount: _toInt(provider['reviews_count']),
           isVerified: provider['is_verified'] == true,
+          badges: _badgesOf(provider),
+          availableOnDate: provider['available_on_date'] as bool?,
           onTap: () {
             final id = provider['id']?.toString() ?? '';
             if (id.isEmpty) return;
