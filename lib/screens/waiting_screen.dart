@@ -299,7 +299,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                 height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.goldSoft,
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.verified_outlined,
@@ -353,7 +353,7 @@ class _WaitingScreenState extends State<WaitingScreen>
         ),
         decoration: BoxDecoration(
           color: AppColors.surfaceGreen,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: AppColors.borderLight,
           ),
@@ -511,7 +511,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                         padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
                           color: AppColors.goldSoft,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: AppColors.goldLight,
                           ),
@@ -532,7 +532,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                                 'لا حاجة لإغلاق التطبيق أو إعادة تسجيل الدخول.',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   height: 1.7,
                                   color: AppColors.textSecondary,
                                 ),
@@ -548,7 +548,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                         'GRAND ONE • خيارات أوضح وتجربة أفضل',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12,
                           color: AppColors.mutedText,
                         ),
                       ),

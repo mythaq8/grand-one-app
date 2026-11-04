@@ -153,8 +153,7 @@ class _InviteScreenState extends State<InviteScreen> {
           const SizedBox(height: Space.xs),
           SelectableText(_code, style: AppText.display),
           const SizedBox(height: Space.md),
-          Wrap(
-            spacing: Space.sm,
+          ActionRow(
             alignment: WrapAlignment.center,
             children: [
               OutlinedButton.icon(

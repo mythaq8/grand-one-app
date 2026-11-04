@@ -221,7 +221,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
                   height: 44,
                   decoration: BoxDecoration(
                     color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(13),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
                     Icons.celebration_outlined,
@@ -276,7 +276,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.infoLight,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,7 +291,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
                       child: Text(
                         'ملاحظة الإدارة: $adminNote',
                         style: const TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12,
                           height: 1.4,
                           color: AppColors.info,
                         ),
@@ -349,7 +349,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
             child: Text(
               value,
               style: const TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
@@ -452,7 +452,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
                   vertical: 12,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),

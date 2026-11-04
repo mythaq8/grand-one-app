@@ -26,9 +26,9 @@ class AvailabilityBadges extends StatelessWidget {
     final chips = <Widget>[];
 
     if (availableOnDate == true) {
-      chips.add(_chip('متاح في تاريخك', const Color(0xFF1E7B4F), Colors.white));
+      chips.add(_chip('متاح في تاريخك', AppPalette.success, Colors.white));
     } else if (availableOnDate == false) {
-      chips.add(_chip('غير متاح في تاريخك', const Color(0xFF8B929C), Colors.white));
+      chips.add(_chip('غير متاح في تاريخك', AppPalette.textMuted, Colors.white));
     }
     for (final key in ['featured', 'top_booked', 'verified']) {
       if (badges.contains(key)) {

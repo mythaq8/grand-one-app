@@ -236,7 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   vertical: 11,
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
               onPressed: () => Navigator.pop(dialogContext, true),
@@ -394,7 +394,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -419,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -444,7 +444,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(16),
         child: Opacity(
           opacity: isEnabled ? 1.0 : 0.6,
           child: Padding(
@@ -606,7 +606,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
                           color: AppColors.primarySoft,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: AppColors.gold.withValues(alpha: 0.3),
                           ),
@@ -645,7 +645,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontFamily: 'Tajawal',
-                          fontSize: 11.5,
+                          fontSize: 12,
                           letterSpacing: 1.1,
                           fontWeight: FontWeight.w600,
                           color: AppColors.mutedText,
@@ -708,7 +708,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   tr('settings'),
                   textAlign: TextAlign.right,
                   style: const TextStyle(
-                    fontSize: 21,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
@@ -719,7 +719,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 12.5,
+                    fontSize: 13,
                     height: 1.5,
                     color: Colors.white70,
                   ),
@@ -747,7 +747,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           height: 34,
           decoration: BoxDecoration(
             color: AppColors.goldSoft,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppColors.goldLight),
           ),
           child: Icon(
@@ -785,7 +785,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
@@ -796,7 +796,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(17),
+        borderRadius: BorderRadius.circular(16),
         child: Column(children: children),
       ),
     );

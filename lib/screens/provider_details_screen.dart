@@ -1,6 +1,6 @@
 // lib/screens/provider_details_screen.dart
 // ============================================================
-// ProviderDetailsScreen — تفاصيل المزود
+// ProviderDetailsScreen — تفاصيل المزوّد
 //
 // متوافق مع Deno:
 // - GET /api/provider-details?id=...
@@ -163,7 +163,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
       textDirection: ui.TextDirection.rtl,
       child: BrandScaffold(
         appBar: BrandAppBar(
-          title: _provider?['name']?.toString() ?? 'تفاصيل المزود',
+          title: _provider?['name']?.toString() ?? 'تفاصيل المزوّد',
         ),
         body: _buildBody(),
       ),
@@ -172,7 +172,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
 
   Widget _buildBody() {
     if (_isLoading && _provider == null) {
-      return const LoadingState(message: 'جارٍ تحميل بيانات المزود...');
+      return const LoadingState(message: 'جارٍ تحميل بيانات المزوّد...');
     }
     if (_errorMessage != null && _provider == null) {
       return ErrorState(
@@ -317,7 +317,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                       height: 54,
                       decoration: BoxDecoration(
                         gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
                         Icons.storefront_outlined,
@@ -338,7 +338,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
-                                    fontSize: 19,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.textPrimary,
                                   ),
@@ -416,7 +416,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.info_outline_rounded,
@@ -426,7 +426,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
               ),
               const SizedBox(width: 10),
               const Text(
-                'عن المزود',
+                'عن المزوّد',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
@@ -441,7 +441,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
             Text(
               description,
               style: const TextStyle(
-                fontSize: 13.5,
+                fontSize: 14,
                 height: 1.7,
                 color: AppColors.textSecondary,
               ),
@@ -472,7 +472,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
           height: 32,
           decoration: BoxDecoration(
             color: AppColors.surfaceGreen,
-            borderRadius: BorderRadius.circular(9),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(icon, size: 16, color: AppColors.primary),
         ),
@@ -480,7 +480,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 12.5,
+            fontSize: 13,
             color: AppColors.textSecondary,
           ),
         ),
@@ -515,7 +515,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.category_outlined,
@@ -572,7 +572,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                     Text(
                       name,
                       style: const TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.primary,
                       ),
@@ -606,7 +606,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.surfaceTint,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.borderLight),
             ),
             child: url.isEmpty
@@ -694,7 +694,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.checklist_outlined,
@@ -725,7 +725,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surfaceGreen,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -735,7 +735,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                     child: Text(
                       name,
                       style: const TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary,
                       ),
@@ -825,9 +825,9 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
         const SizedBox(width: 11),
         Expanded(
           child: Text(
-            'خدمات المزود (${_services.length})',
+            'خدمات المزوّد (${_services.length})',
             style: const TextStyle(
-              fontSize: 17,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.primary,
             ),
@@ -852,7 +852,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
             ),
             const SizedBox(height: 12),
             const Text(
-              'لا توجد خدمات لهذا المزود حالياً',
+              'لا توجد خدمات لهذا المزوّد حالياً',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -892,9 +892,9 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {
             final id = service['id']?.toString() ?? '';
             if (id.isEmpty) return;
@@ -912,7 +912,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(color: AppColors.borderLight),
               boxShadow: [
                 BoxShadow(
@@ -996,7 +996,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                             Text(
                               governorate,
                               style: const TextStyle(
-                                fontSize: 11.5,
+                                fontSize: 12,
                                 color: AppColors.textSecondary,
                               ),
                             ),
@@ -1037,7 +1037,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                                   Text(
                                     '($reviewsCount)',
                                     style: const TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 11,
                                       color: AppColors.goldDark,
                                     ),
                                   ),
@@ -1093,7 +1093,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.goldSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.star_rate_outlined,
@@ -1104,7 +1104,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
-                  'تقييمات المزود',
+                  'تقييمات المزوّد',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -1178,7 +1178,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'كن أول من يقيّم هذا المزود',
+                    'كن أول من يقيّم هذا المزوّد',
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -1249,7 +1249,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                       Text(
                         dateText,
                         style: const TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           color: AppColors.mutedText,
                         ),
                       ),

@@ -323,13 +323,13 @@ class _EventScreenState extends State<EventScreen> {
               Expanded(child: Text(label, style: AppText.bodySecondary)),
               Text(value,
                   style: AppText.body.copyWith(
-                    color: warn ? Colors.red : null,
+                    color: warn ? AppPalette.error : null,
                     fontWeight: FontWeight.w700,
                   )),
             ],
           ),
           if (note != null)
-            Text(note, style: AppText.caption.copyWith(color: Colors.red)),
+            Text(note, style: AppText.caption.copyWith(color: AppPalette.error)),
         ],
       ),
     );

@@ -681,7 +681,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -770,7 +770,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         height: 220,
         decoration: BoxDecoration(
           gradient: AppColors.primarySoftGradient,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: AppColors.borderLight),
         ),
         child: const Column(
@@ -811,7 +811,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.surfaceTint,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: AppPalette.gold.withValues(alpha: 0.35),
               ),
@@ -876,7 +876,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             ),
             decoration: BoxDecoration(
               color: AppColors.warningLight,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
@@ -997,7 +997,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               color: highlight
                   ? AppColors.goldSoft
                   : AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
@@ -1011,7 +1011,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           Text(
             label,
             style: const TextStyle(
-              fontSize: 12.5,
+              fontSize: 13,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
@@ -1035,7 +1035,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
     );
   }
 
-  // ─── بطاقة المزود ───
+  // ─── بطاقة المزوّد ───
 
   Widget _buildProviderCard() {
     final name = _provider?['name']?.toString() ?? '';
@@ -1052,7 +1052,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             height: 54,
             decoration: BoxDecoration(
               gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
               Icons.storefront_outlined,
@@ -1142,7 +1142,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.description_outlined,
@@ -1165,7 +1165,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           Text(
             _service?['description']?.toString() ?? '',
             style: const TextStyle(
-              fontSize: 13.5,
+              fontSize: 14,
               height: 1.7,
               color: AppColors.textSecondary,
             ),
@@ -1196,7 +1196,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.checklist_outlined,
@@ -1227,7 +1227,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
               decoration: BoxDecoration(
                 color: AppColors.surfaceGreen,
-                borderRadius: BorderRadius.circular(11),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1237,7 +1237,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     child: Text(
                       name,
                       style: const TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary,
                       ),
@@ -1398,7 +1398,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surfaceTint,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.borderLight),
         ),
         child: const Row(
@@ -1425,7 +1425,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.surfaceTint,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.borderLight),
         ),
         child: const Row(
@@ -1550,7 +1550,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   child: Text(
                     'عدد الضيوف',
                     style: TextStyle(
-                      fontSize: 13.5,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
@@ -1588,7 +1588,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       filled: true,
                       fillColor: AppColors.surfaceGreen,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -1644,7 +1644,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 minimumSize: const Size(double.infinity, 52),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
                     color: AppPalette.gold.withValues(alpha: 0.45),
                   ),
@@ -1681,7 +1681,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         'اختر الباقة',
         style: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 13.5,
+          fontSize: 14,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
@@ -1772,7 +1772,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               : 'الكمية ($unit)',
           style: const TextStyle(
             fontFamily: 'Tajawal',
-            fontSize: 13.5,
+            fontSize: 14,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -1833,7 +1833,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         'إضافات اختيارية',
         style: TextStyle(
           fontFamily: 'Tajawal',
-          fontSize: 13.5,
+          fontSize: 14,
           fontWeight: FontWeight.w700,
         ),
       ));
@@ -1931,14 +1931,14 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
           const SizedBox(height: 6),
           Text(
             'قبل الحسم: ${_formatPrice(subtotal)} \$',
-            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 12.5),
+            style: const TextStyle(fontFamily: 'Tajawal', fontSize: 13),
           ),
           if (_toDouble(discount) > 0)
             Text(
               'الحسم: -${_formatPrice(discount)} \$',
               style: const TextStyle(
                 fontFamily: 'Tajawal',
-                fontSize: 12.5,
+                fontSize: 13,
                 color: AppColors.success,
               ),
             ),
@@ -1981,7 +1981,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               child: Text(
                 label,
                 style: TextStyle(
-                  fontSize: 13.5,
+                  fontSize: 14,
                   color: isEmpty
                       ? AppColors.mutedText
                       : AppColors.textPrimary,
@@ -2019,7 +2019,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.goldSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.star_rate_outlined,
@@ -2175,7 +2175,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 Text(
                   dateText,
                   style: const TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     color: AppColors.mutedText,
                   ),
                 ),

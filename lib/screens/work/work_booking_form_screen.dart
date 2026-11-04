@@ -176,7 +176,7 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
                   ? 'تاريخ الفعالية *'
                   : workDate(workIsoDate(_date!))),
               subtitle: _dateMissing
-                  ? const Text('مطلوب', style: TextStyle(color: Colors.red))
+                  ? const Text('مطلوب', style: TextStyle(color: AppPalette.error))
                   : null,
               onTap: _pickDate,
             ),

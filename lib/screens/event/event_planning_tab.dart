@@ -434,7 +434,7 @@ class _EventPlanningTabState extends State<EventPlanningTab> {
       decoration: BoxDecoration(
         color: AppPalette.surface,
         borderRadius: BorderRadius.circular(Radii.md),
-        border: Border.all(color: over ? Colors.red : AppPalette.goldLighter),
+        border: Border.all(color: over ? AppPalette.error : AppPalette.goldLighter),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +448,7 @@ class _EventPlanningTabState extends State<EventPlanningTab> {
             _line(
               over ? 'تجاوز الميزانية' : 'المتبقي',
               workMoney((s['remaining'] as num?)?.abs() ?? 0),
-              color: over ? Colors.red : null,
+              color: over ? AppPalette.error : null,
               bold: true,
             ),
           ],

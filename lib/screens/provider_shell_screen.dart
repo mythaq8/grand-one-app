@@ -12,7 +12,7 @@ import 'work/work_dashboard_tab.dart';
 import 'work/work_formatters.dart';
 import '../ui/kit/status_pill.dart';
 
-/// لوحة المزود — طلبات / خدمات / تقويم
+/// لوحة المزوّد — طلبات / خدمات / تقويم
 class ProviderShellScreen extends StatefulWidget {
   const ProviderShellScreen({super.key});
 
@@ -47,7 +47,7 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
     } on ApiException catch (e) {
       _bootError = e.message;
     } catch (_) {
-      _bootError = 'تعذر تحميل حساب المزود. تأكد من ربط الحساب ونشر الـ API.';
+      _bootError = 'تعذر تحميل حساب المزوّد. تأكد من ربط الحساب ونشر الـ API.';
     }
     if (mounted) setState(() => _bootLoading = false);
     _refreshPending();
@@ -80,7 +80,7 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
       appBar: AppBar(
         title: Text(
           _providerName == null || _providerName!.isEmpty
-              ? '${AppConfig.appName} — مزود'
+              ? '${AppConfig.appName} — مزوّد'
               : _providerName!,
         ),
         actions: [

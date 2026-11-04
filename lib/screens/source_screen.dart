@@ -74,7 +74,7 @@ class _SourceScreenState extends State<SourceScreen> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -99,7 +99,7 @@ class _SourceScreenState extends State<SourceScreen> {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -354,7 +354,7 @@ class _SourceScreenState extends State<SourceScreen> {
           height: 82,
           decoration: BoxDecoration(
             gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(24),
             border: Border.all(
               color: AppColors.gold.withValues(alpha: 0.65),
               width: 1.5,
@@ -509,7 +509,7 @@ class _SourceScreenState extends State<SourceScreen> {
                     color: isSelected
                         ? AppColors.primary
                         : AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isSelected
                           ? AppColors.primary

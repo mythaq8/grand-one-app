@@ -258,7 +258,7 @@ class _ChangePasswordScreenState
                   const Text(
                     'تغيير كلمة المرور',
                     style: TextStyle(
-                      fontSize: 19,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
                     ),
@@ -389,7 +389,7 @@ class _ChangePasswordScreenState
                     padding: const EdgeInsets.all(11),
                     decoration: BoxDecoration(
                       color: AppColors.infoLight,
-                      borderRadius: BorderRadius.circular(11),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: AppColors.info
                             .withValues(alpha: 0.18),
@@ -409,7 +409,7 @@ class _ChangePasswordScreenState
                           child: Text(
                             'يجب أن تتكون كلمة المرور من 6 أحرف أو أرقام على الأقل.',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               height: 1.5,
                               color: AppColors.textSecondary,
                             ),
@@ -475,7 +475,7 @@ class _ChangePasswordScreenState
               Text(
                 'أدخل كلمة المرور الجديدة',
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 11,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -492,7 +492,7 @@ class _ChangePasswordScreenState
 
   OutlineInputBorder _inputBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(13),
+      borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(
         color: AppColors.border,
       ),
@@ -501,7 +501,7 @@ class _ChangePasswordScreenState
 
   OutlineInputBorder _focusedBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(13),
+      borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(
         color: AppColors.primary,
         width: 1.5,

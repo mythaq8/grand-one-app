@@ -256,12 +256,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       padding: const EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: () => _markRead(userNotif),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isRead
                   ? AppColors.borderLight
@@ -280,7 +280,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   color: isRead
                       ? AppColors.surfaceTint
                       : AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(13),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isRead
                         ? AppColors.borderLight
@@ -339,7 +339,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       body,
                       style: const TextStyle(
                         fontFamily: 'Tajawal',
-                        fontSize: 12.5,
+                        fontSize: 13,
                         height: 1.6,
                         color: AppColors.textSecondary,
                       ),
@@ -349,7 +349,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       _formatDateTime(createdAt),
                       style: const TextStyle(
                         fontFamily: 'Tajawal',
-                        fontSize: 10,
+                        fontSize: 11,
                         color: AppColors.mutedText,
                       ),
                     ),

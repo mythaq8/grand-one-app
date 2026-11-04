@@ -1,6 +1,6 @@
 // lib/screens/services/widgets/service_cards.dart
 // ============================================================
-// بطاقات الخدمات والمزودين
+// بطاقات الخدمات والمزوّدين
 // ------------------------------------------------------------
 // كانت هذه البطاقات دوالاً خاصة داخل services_screen (سطر
 // 918 و 1091) بلا إمكانية إعادة استخدام ولا اختبار.
@@ -16,7 +16,7 @@ import '../../../design/tokens.dart';
 import '../../../design/typography.dart';
 import 'availability_badges.dart';
 
-/// شارة التقييم بالنجوم — موحّدة للخدمة والمزود.
+/// شارة التقييم بالنجوم — موحّدة للخدمة والمزوّد.
 class RatingBadge extends StatelessWidget {
   const RatingBadge({
     super.key,
@@ -375,7 +375,7 @@ class ServiceCard extends StatelessWidget {
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
         style: AppText.micro.copyWith(
-          fontSize: 10,
+          fontSize: 11,
           color: AppPalette.warningDark,
         ),
       ),
@@ -383,7 +383,7 @@ class ServiceCard extends StatelessWidget {
   }
 }
 
-/// بطاقة مزود خدمة.
+/// بطاقة مزوّد خدمة.
 class ProviderCard extends StatelessWidget {
   const ProviderCard({
     super.key,
@@ -460,7 +460,7 @@ class ProviderCard extends StatelessWidget {
                           const Padding(
                             padding: EdgeInsets.only(right: 4),
                             child: Tooltip(
-                              message: 'مزود موثّق',
+                              message: 'مزوّد موثّق',
                               child: Icon(
                                 Icons.verified_rounded,
                                 size: 16,

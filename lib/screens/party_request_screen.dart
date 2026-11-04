@@ -379,7 +379,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
               'اطلب تنظيم حفلتك، وسيتواصل معك فريقنا لتنسيق كل التفاصيل.',
               style: TextStyle(
                 fontFamily: 'Tajawal',
-                fontSize: 12.5,
+                fontSize: 13,
                 height: 1.5,
                 color: AppColors.textPrimary,
               ),
@@ -527,7 +527,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
           showCheckmark: false,
           labelStyle: TextStyle(
             color: selected ? Colors.white : AppColors.textPrimary,
-            fontSize: 11.5,
+            fontSize: 12,
             fontWeight:
                 selected ? FontWeight.bold : FontWeight.w500,
           ),
@@ -680,7 +680,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
 
   return InkWell(
     onTap: _isUploading ? null : _pickPaymentProof,
-    borderRadius: BorderRadius.circular(14),
+    borderRadius: BorderRadius.circular(16),
     child: Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -688,7 +688,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
         color: hasFile
             ? AppColors.successLight
             : AppColors.surface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: hasFile
               ? AppColors.success
@@ -723,7 +723,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
           if (hasFile) ...[
             const SizedBox(height: 8),
             ClipRRect(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(12),
               child: FutureBuilder<Uint8List>(
                 future: _paymentProofFile!.xFile.readAsBytes(),
                 builder: (context, snapshot) {
@@ -802,7 +802,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
           elevation: 0,
           minimumSize: const Size.fromHeight(54),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
@@ -831,7 +831,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
                 height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,

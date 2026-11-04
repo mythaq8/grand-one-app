@@ -222,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 11.5,
+                    fontSize: 12,
                     height: 1.3,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.4,
@@ -255,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen>
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
           child: Container(
           width: 40,
           height: 40,
@@ -290,11 +290,11 @@ class _HomeScreenState extends State<HomeScreen>
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.headerGradient,
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: AppColors.shadowMedium,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(24),
         child: Stack(
           children: [
             // زخرفة هندسية خفيفة + الشعار كعلامة مائية على الطرف.
@@ -367,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen>
                             'حساب خدمات',
                             style: TextStyle(
                               fontFamily: 'Tajawal',
-                              fontSize: 11.5,
+                              fontSize: 12,
                               color: AppColors.goldLight,
                               fontWeight: FontWeight.w700,
                             ),
@@ -412,7 +412,7 @@ class _HomeScreenState extends State<HomeScreen>
             UiCopy.homeHeroBody,
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: 13.5,
+              fontSize: 14,
               height: 1.55,
               color: AppColors.textSecondary,
             ),
@@ -632,10 +632,10 @@ class _HomeScreenState extends State<HomeScreen>
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Material(
               color: AppColors.errorLight,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 onTap: _logout,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 child: const Padding(
                   padding: EdgeInsets.symmetric(vertical: 12),
                   child: Row(
@@ -670,7 +670,7 @@ class _HomeScreenState extends State<HomeScreen>
               '${AppConfig.appName} • v1.0.0',
               style: const TextStyle(
                 fontFamily: 'Tajawal',
-                fontSize: 10,
+                fontSize: 11,
                 color: AppColors.mutedText,
               ),
             ),
@@ -708,7 +708,7 @@ class _HomeScreenState extends State<HomeScreen>
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontFamily: 'Tajawal',
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
@@ -721,7 +721,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.gold.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
                         'حساب خدمات',
@@ -831,7 +831,7 @@ class _HomeScreenState extends State<HomeScreen>
                 height: 38,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(11),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(item.icon, size: 19, color: AppColors.primary),
               ),
@@ -841,7 +841,7 @@ class _HomeScreenState extends State<HomeScreen>
                   item.title,
                   style: TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 13.5,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -1073,7 +1073,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                 'لماذا GRAND ONE',
                 style: TextStyle(
                   fontFamily: 'Tajawal',
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
@@ -1094,7 +1094,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                   textDirection: ui.TextDirection.ltr,
                   style: const TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 11.5,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: AppColors.goldDeep,
                   ),
@@ -1109,7 +1109,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
             'بطاقات عن آلية الحجز والتحقق والدفع',
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: 12.5,
+              fontSize: 13,
               height: 1.35,
               fontWeight: FontWeight.w500,
               color: AppColors.textSecondary,
@@ -1165,7 +1165,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
   }
 
   Widget _buildSlide(_HeroSlide slide, int index) {
-    final radius = BorderRadius.circular(22);
+    final radius = BorderRadius.circular(24);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
       decoration: BoxDecoration(

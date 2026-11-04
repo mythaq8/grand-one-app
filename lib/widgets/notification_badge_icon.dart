@@ -70,7 +70,7 @@ class _NotificationBadgeIconState extends State<NotificationBadgeIcon> {
       color: Colors.transparent,
       child: InkWell(
         onTap: _openNotifications,
-        borderRadius: BorderRadius.circular(19),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           width: 40,
           height: 40,
@@ -104,7 +104,7 @@ class _NotificationBadgeIconState extends State<NotificationBadgeIcon> {
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.error,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: AppColors.surface,
                         width: 1.5,
@@ -116,7 +116,7 @@ class _NotificationBadgeIconState extends State<NotificationBadgeIcon> {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 9,
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                           height: 1,
                         ),

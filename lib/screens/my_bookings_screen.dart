@@ -421,7 +421,7 @@ Future<void> _loadBookings() async {
         textDirection: ui.TextDirection.rtl,
         child: AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
           ),
           title: const Text('إلغاء الحجز'),
           content: const Text(
@@ -572,12 +572,12 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
               textDirection: ui.TextDirection.rtl,
               child: AlertDialog(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 title: Text(
                   target == 'service'
                       ? 'تقييم الخدمة'
-                      : 'تقييم المزود',
+                      : 'تقييم المزوّد',
                   textAlign: TextAlign.center,
                 ),
                 content: SingleChildScrollView(
@@ -690,7 +690,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
     return;
   }
   if (target == 'provider' && providerId.isEmpty) {
-    _showMessage('معرّف المزود غير متوفر', isError: true);
+    _showMessage('معرّف المزوّد غير متوفر', isError: true);
     return;
   }
 
@@ -710,7 +710,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
 
     _showMessage(target == 'service'
         ? '✅ شكراً لتقييمك للخدمة'
-        : '✅ شكراً لتقييمك للمزود');
+        : '✅ شكراً لتقييمك للمزوّد');
 
     await _loadBookings();
   } on ApiException catch (e) {
@@ -762,7 +762,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
           behavior: SnackBarBehavior.floating,
           margin: const EdgeInsets.all(16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -1086,7 +1086,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
           BoxShadow(
@@ -1112,7 +1112,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: AppColors.surfaceTint,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: AppColors.borderLight),
                   ),
                   child: (coverUrl != null && coverUrl.isNotEmpty)
@@ -1216,7 +1216,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceTint,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       notes,
@@ -1235,7 +1235,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: AppColors.errorLight,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1296,7 +1296,7 @@ if (status == 'pending' || status == 'approved') ...[
                         side: const BorderSide(color: AppColors.error),
                         padding: const EdgeInsets.symmetric(vertical: 11),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(11),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
@@ -1330,7 +1330,7 @@ if (status == 'pending' || status == 'approved') ...[
                       child: Text(
                         'تم تأكيد العربون والحجز جاهز. تنفيذ الخدمة في موعدها.',
                         style: TextStyle(
-                          fontSize: 12.5,
+                          fontSize: 13,
                           height: 1.4,
                           color: AppColors.goldDark,
                           fontWeight: FontWeight.w600,
@@ -1361,7 +1361,7 @@ if (status == 'pending' || status == 'approved') ...[
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildReviewButton(
-                      label: 'قيّم المزود',
+                      label: 'قيّم المزوّد',
                       done: providerReviewed,
                       isBusy: _reviewingBookingId == bookingId,
                       onTap: providerReviewed
@@ -1498,7 +1498,7 @@ Widget _buildDepositSection(
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -1533,7 +1533,7 @@ Widget _buildDepositSection(
             child: Text(
               'تم رفع الإشعار. بانتظار تحقق الإدارة.',
               style: TextStyle(
-                fontSize: 12.5,
+                fontSize: 13,
                 color: AppColors.info,
                 fontWeight: FontWeight.w600,
               ),
@@ -1585,7 +1585,7 @@ Widget _buildDepositSection(
                       Text(
                         'السبب: $depositReason',
                         style: const TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12,
                           color: AppColors.error,
                           height: 1.5,
                         ),
@@ -1623,7 +1623,7 @@ Widget _buildDepositSection(
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 11),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
@@ -1647,7 +1647,7 @@ Widget _buildDepositSection(
         padding: const EdgeInsets.symmetric(vertical: 11),
         decoration: BoxDecoration(
           color: AppColors.successLight,
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: AppColors.success.withValues(alpha: 0.3),
           ),
@@ -1695,7 +1695,7 @@ Widget _buildDepositSection(
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 11),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(11),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
     );

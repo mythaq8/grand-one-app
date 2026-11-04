@@ -795,7 +795,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                       ),
                       decoration: BoxDecoration(
                         color: AppColors.gold,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '$count',
@@ -1011,7 +1011,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                       'أدخل التفاصيل الأساسية واختر المنظّم أولاً. اختيار الخدمات في الخطوة التالية، ثم يراجع المنظّم الطلب ويرسل عرضاً.',
                       style: TextStyle(
                         fontFamily: 'Tajawal',
-                        fontSize: 12.5,
+                        fontSize: 13,
                         height: 1.55,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -1077,7 +1077,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                         style: TextStyle(
                           fontFamily: 'Tajawal',
                           fontWeight: FontWeight.w700,
-                          fontSize: 12.5,
+                          fontSize: 13,
                           color: selected
                               ? Colors.white
                               : AppColors.textPrimary,
@@ -1438,9 +1438,9 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                     : null,
                 filled: true,
                 fillColor: AppColors.surface,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: AppColors.borderLight),
                 ),
               ),
@@ -1449,16 +1449,16 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
           const SizedBox(width: 8),
           Material(
             color: _activeServiceFilters > 0 ? AppColors.primary : AppColors.surface,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
             child: InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               onTap: _openServiceFilters,
               child: Container(
                 width: 48,
                 height: 48,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _activeServiceFilters > 0
                         ? AppColors.primary

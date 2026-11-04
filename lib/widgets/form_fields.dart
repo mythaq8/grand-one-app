@@ -44,7 +44,7 @@ const TextStyle _fieldOptionTextStyle = TextStyle(
 
 const TextStyle _fieldHintStyle = TextStyle(
   fontFamily: 'Tajawal',
-  fontSize: 12.5,
+  fontSize: 13,
   height: 1.45,
   fontWeight: FontWeight.w600,
   color: AppColors.goldDeep,
@@ -58,7 +58,7 @@ Widget? _fieldHintWidget(String? hint) {
     child: DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.goldSoft,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: AppColors.gold.withValues(alpha: 0.28),
         ),

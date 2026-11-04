@@ -290,7 +290,7 @@ class BrandAppBar extends StatelessWidget implements PreferredSizeWidget {
                     overflow: TextOverflow.ellipsis,
                     style: AppText.title.copyWith(
                       color: Colors.white,
-                      fontSize: 17,
+                      fontSize: 16,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -674,7 +674,7 @@ class BrandGatewayCard extends StatelessWidget {
                     begin: Alignment.topRight,
                     end: Alignment.bottomLeft,
                   ),
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color: accentColor.withValues(alpha: 0.25),
@@ -722,7 +722,7 @@ class BrandGatewayCard extends StatelessWidget {
                               badge!,
                               style: const TextStyle(
                                 fontFamily: 'Tajawal',
-                                fontSize: 10,
+                                fontSize: 11,
                                 fontWeight: FontWeight.w700,
                                 color: AppColors.error,
                               ),
@@ -751,7 +751,7 @@ class BrandGatewayCard extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.arrow_back_ios_new,

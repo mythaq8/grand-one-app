@@ -72,7 +72,7 @@ class InfoBanner extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: _bg,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: _fg.withValues(alpha: 0.18)),
         ),
         child: Padding(
@@ -87,7 +87,7 @@ class InfoBanner extends StatelessWidget {
                   message,
                   style: TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 13.5,
+                    fontSize: 14,
                     height: 1.45,
                     fontWeight: FontWeight.w500,
                     color: _fg,
@@ -237,7 +237,7 @@ Future<void> showHelpSheet(
                     body,
                     style: const TextStyle(
                       fontFamily: 'Tajawal',
-                      fontSize: 14.5,
+                      fontSize: 15,
                       height: 1.55,
                       fontWeight: FontWeight.w500,
                       color: AppColors.textSecondary,
@@ -281,13 +281,13 @@ class JourneyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: Ink(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(color: AppColors.borderLight),
             boxShadow: AppColors.shadowSubtle,
           ),
@@ -300,7 +300,7 @@ class JourneyCard extends StatelessWidget {
                   height: 52,
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(icon, color: accent, size: 26),
                 ),

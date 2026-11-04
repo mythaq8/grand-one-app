@@ -194,7 +194,7 @@ class _SummaryCard extends StatelessWidget {
             Row(
               children: [
                 const Icon(Icons.warning_amber_rounded,
-                    color: Colors.orange, size: 20),
+                    color: AppPalette.warning, size: 20),
                 const SizedBox(width: Space.sm),
                 Expanded(
                   child: Text(
@@ -277,7 +277,7 @@ class _BookingCard extends StatelessWidget {
                     const Tooltip(
                       message: 'تعارض: أكثر من حجز في هذا اليوم',
                       child: Icon(Icons.warning_amber_rounded,
-                          color: Colors.orange, size: 20),
+                          color: AppPalette.warning, size: 20),
                     ),
                   _SourceChip(isExternal: isExternal),
                   if (onEdit != null || onDelete != null)

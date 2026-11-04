@@ -216,7 +216,7 @@ bool _validateSignupType() => true;
           elevation: 4,
           duration: const Duration(seconds: 4),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       );
@@ -563,7 +563,7 @@ bool _validateSignupType() => true;
                   color: selected
                       ? AppColors.primary
                       : AppColors.surface,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: selected
                         ? AppColors.primary
@@ -794,7 +794,7 @@ Widget _buildInputFields() {
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontFamily: 'Tajawal',
-            fontSize: 12.5,
+            fontSize: 13,
             height: 1.8,
             color: AppColors.textSecondary,
           ),
@@ -820,7 +820,7 @@ Widget _buildInputFields() {
       ),
       decoration: BoxDecoration(
         color: AppColors.goldSoft,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.gold.withValues(alpha: 0.25),
         ),

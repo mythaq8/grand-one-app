@@ -171,7 +171,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
                   ? 'تاريخ الفعالية *'
                   : workDate(workIsoDate(_date!))),
               subtitle: _dateMissing
-                  ? const Text('مطلوب', style: TextStyle(color: Colors.red))
+                  ? const Text('مطلوب', style: TextStyle(color: AppPalette.error))
                   : dateLocked
                       ? const Text('لا يمكن تغيير التاريخ بعد وجود حجوزات نشطة')
                       : null,

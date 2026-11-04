@@ -644,7 +644,7 @@ Widget build(BuildContext context) {
             'خيارات متنوعة في مكان واحد — اختر خدماتك بكل سهولة.',
             style: TextStyle(
               fontFamily: 'Tajawal',
-              fontSize: 12.5,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
               color: Color(0xFFE8ECF3),
               height: 1.45,
@@ -669,7 +669,7 @@ Widget build(BuildContext context) {
               onChanged: (v) => setState(() => _searchQuery = v),
               decoration: InputDecoration(
                 hintText: _showProviders
-                    ? 'ابحث عن مزود...'
+                    ? 'ابحث عن مزوّد...'
                     : 'ابحث عن خدمة...',
                 prefixIcon: const Icon(
                   Icons.search_rounded,
@@ -713,15 +713,15 @@ Widget build(BuildContext context) {
           const SizedBox(width: 8),
           Material(
             color: _hasActiveFilters ? AppColors.primary : AppColors.surface,
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(16),
             child: InkWell(
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(16),
               onTap: _openFiltersSheet,
               child: Container(
                 width: 52,
                 height: 52,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _hasActiveFilters
                         ? AppColors.primary
@@ -750,7 +750,7 @@ Widget build(BuildContext context) {
                           child: Text(
                             '$_activeFiltersCount',
                             style: const TextStyle(
-                              fontSize: 9,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -789,7 +789,7 @@ Widget build(BuildContext context) {
         ),
         Expanded(
           child: _buildTab(
-            title: 'المزودون',
+            title: 'المزوّدون',
             icon: Icons.storefront_rounded,
             selected: _showProviders,
             onTap: () => _switchTab(true),
@@ -808,10 +808,10 @@ Widget _buildPartyTab() {
     duration: const Duration(milliseconds: 200),
     decoration: BoxDecoration(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(13),
+      borderRadius: BorderRadius.circular(12),
     ),
     child: InkWell(
-      borderRadius: BorderRadius.circular(13),
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
         Navigator.push(
           context,
@@ -845,10 +845,10 @@ Widget _buildPartyTab() {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: selected ? AppColors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(13),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(13),
+        borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
@@ -1111,13 +1111,13 @@ Widget _buildPartyTab() {
     );
   }
 
-  // ═══ قائمة المزودين ═══
+  // ═══ قائمة المزوّدين ═══
   Widget _buildProvidersList() {
     if (_providers.isEmpty) {
       return EmptyState(
         icon: Icons.storefront_outlined,
-        title: 'لا يوجد مزودون',
-        body: 'لم نجد مزودين يطابقون البحث الحالي.',
+        title: 'لا يوجد مزوّدون',
+        body: 'لم نجد مزوّدين يطابقون البحث الحالي.',
       );
     }
 
@@ -1137,7 +1137,7 @@ Widget _buildPartyTab() {
         }
 
         return ProviderCard(
-          name: provider['name']?.toString() ?? 'مزود',
+          name: provider['name']?.toString() ?? 'مزوّد',
           governorate: provider['governorate']?.toString() ?? '',
           description: provider['description']?.toString() ?? '',
           coverUrl: coverUrl,
@@ -1210,10 +1210,10 @@ Widget _buildPartyTab() {
                           Expanded(
                             child: Text(
                               _showProviders
-                                  ? 'فلاتر المزودين'
+                                  ? 'فلاتر المزوّدين'
                                   : 'فلاتر الخدمات',
                               style: const TextStyle(
-                                fontSize: 17,
+                                fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
                               ),
@@ -1575,9 +1575,9 @@ Widget _buildPartyTab() {
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           onTap: () => _handleAdTap(
             targetType: targetType,
             serviceId: serviceId,
@@ -1587,7 +1587,7 @@ Widget _buildPartyTab() {
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: AppColors.gold.withValues(alpha: 0.4),
               ),
@@ -1699,7 +1699,7 @@ Widget _buildPartyTab() {
                     child: const Text(
                       'إعلان',
                       style: TextStyle(
-                        fontSize: 9,
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),

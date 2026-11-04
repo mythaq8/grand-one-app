@@ -294,7 +294,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppColors.success,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           content: const Row(
             children: [
@@ -451,7 +451,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
             'تم إرسال رمز التحقق',
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 19,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
             ),
@@ -519,7 +519,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                 height: 36,
                 decoration: BoxDecoration(
                   color: AppColors.goldSoft,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
                   Icons.lock_outline_rounded,
@@ -533,7 +533,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
               const Text(
                 'أدخل رمز التحقق',
                 style: TextStyle(
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -574,32 +574,32 @@ class _VerifyScreenState extends State<VerifyScreen> {
                 vertical: 18,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
                   color: AppColors.border,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
                   color: AppColors.border,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
                   color: AppColors.primary,
                   width: 2,
                 ),
               ),
               errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
                   color: AppColors.error,
                 ),
               ),
               focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(
                   color: AppColors.error,
                   width: 2,
@@ -632,7 +632,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
       ),
       decoration: BoxDecoration(
         color: AppColors.surfaceTint,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.borderLight,
         ),
@@ -822,7 +822,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: AppColors.primarySoft,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: AppColors.borderLight,
                           ),
@@ -842,7 +842,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                                 'نحرص في GRAND ONE على حماية بياناتك وخصوصيتك.',
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  fontSize: 12.5,
+                                  fontSize: 13,
                                   height: 1.6,
                                   color: AppColors.textSecondary,
                                 ),
@@ -858,7 +858,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                         'GRAND ONE • كل ما تحتاجه، في وجهة واحدة',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12,
                           color: AppColors.mutedText,
                         ),
                       ),

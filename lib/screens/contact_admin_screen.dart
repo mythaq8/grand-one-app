@@ -251,7 +251,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                     Text(
                       tr('contact_admin'),
                       style: const TextStyle(
-                        fontSize: 19,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),
@@ -320,7 +320,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                               Text(
                                 'يرجى توضيح طلبك أو استفسارك قدر الإمكان.',
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 11,
                                   color: AppColors.textSecondary,
                                 ),
                               ),
@@ -352,19 +352,19 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                         filled: true,
                         fillColor: AppColors.background,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(13),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: AppColors.border,
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(13),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: AppColors.border,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(13),
+                          borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
                             color: AppColors.primary,
                             width: 1.5,
@@ -456,7 +456,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                       child: Text(
                         'تأكد من كتابة المعلومات المهمة في رسالتك حتى تتمكن الإدارة من مساعدتك بشكل أفضل.',
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 11,
                           height: 1.6,
                           color: AppColors.textSecondary,
                         ),

@@ -186,7 +186,7 @@ class _ServicesUserProfileSetupScreenState
                               minimumSize: const Size.fromHeight(52),
                               elevation: 0,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                           ),
@@ -284,15 +284,15 @@ class _ServicesUserProfileSetupScreenState
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: AppColors.primary,
             width: 1.5,
@@ -321,15 +321,15 @@ class _ServicesUserProfileSetupScreenState
           vertical: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(
             color: AppColors.primary,
             width: 1.5,
@@ -351,7 +351,7 @@ class _ServicesUserProfileSetupScreenState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.goldSoft,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.gold.withValues(alpha: 0.25),
         ),
@@ -369,7 +369,7 @@ class _ServicesUserProfileSetupScreenState
               'رقم الواتساب سيُستخدم للتواصل معك بخصوص الطلبات والحجوزات.',
               style: TextStyle(
                 fontFamily: 'Tajawal',
-                fontSize: 11.5,
+                fontSize: 12,
                 height: 1.6,
                 color: AppColors.textSecondary,
               ),
