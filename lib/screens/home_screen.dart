@@ -25,6 +25,7 @@ import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 import '../services/search_date.dart';
+import 'event/event_screen.dart';
 
 class HomeScreen extends StatefulWidget {
 
@@ -439,8 +440,9 @@ class _HomeScreenState extends State<HomeScreen>
               const SizedBox(width: Space.sm),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: widget.onOpenRequestsTab ??
-                      widget.onOpenServicesTab,
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const EventScreen()),
+                  ),
                   child: const Text(UiCopy.homeSecondaryCta),
                 ),
               ),

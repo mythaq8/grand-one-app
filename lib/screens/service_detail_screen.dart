@@ -24,6 +24,7 @@ import '../utils/service_category_icon.dart';
 import '../utils/service_price_label.dart';
 import '../widgets/brand_decorations.dart';
 import '../widgets/ux_helpers.dart';
+import 'event/event_form_screen.dart';
 
 class ServiceDetailScreen extends StatefulWidget {
   /// id الخدمة (نمرره من قائمة الخدمات)
@@ -450,6 +451,62 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         _quote = null;
         _isQuoting = false;
       });
+    }
+  }
+
+  // ============================================================
+  // إضافة إلى سلة الفعالية
+  // ============================================================
+
+  Future<void> _addToEventCart() async {
+    if (!mounted || _isBooking) return;
+    if (_service == null) return;
+    if (_supabase.auth.currentUser == null) {
+      _showMessage('يجب تسجيل الدخول أولاً', isError: true);
+      return;
+    }
+
+    try {
+      var res = await ApiService.getActiveEvent();
+      var event = res['event'];
+      if (event is! Map) {
+        // الفعالية إجبارية قبل الإضافة للسلة
+        final created = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(builder: (_) => const EventFormScreen()),
+        );
+        if (created != true || !mounted) return;
+        res = await ApiService.getActiveEvent();
+        event = res['event'];
+        if (event is! Map) return;
+      }
+
+      final time = _selectedTime != null
+          ? '${_selectedTime!.hour.toString().padLeft(2, '0')}:'
+              '${_selectedTime!.minute.toString().padLeft(2, '0')}:00'
+          : null;
+      final guestsForBooking = _pricingModel == 'per_unit'
+          ? _quantity.round().clamp(0, _maxGuests)
+          : _guestsCount;
+
+      await ApiService.addToEventCart(
+        event['id'].toString(),
+        serviceId: widget.serviceId,
+        packageId: _pricingModel == 'fixed_package' ? _selectedPackageId : null,
+        quantity: _pricingModel == 'per_unit' ? _quantity : null,
+        durationValue: _pricingModel == 'per_duration' ? _durationValue : null,
+        addonIds: _selectedAddonIds.toList(),
+        guestsCount: guestsForBooking,
+        bookingTime: time,
+        notes: _notesController.text.trim(),
+      );
+      if (!mounted) return;
+      _showMessage('أُضيفت الخدمة إلى فعاليتك');
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.userMessage, isError: true);
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage(_extractError(e), isError: true);
     }
   }
 
@@ -1596,6 +1653,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
             ),
           ),
+          if (!widget.forOccasionCart &&
+              _category?['requires_organizer'] != true) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _isBooking ? null : _addToEventCart,
+                icon: const Icon(Icons.add_shopping_cart_rounded, size: 18),
+                label: const Text('أضف إلى فعاليتي'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

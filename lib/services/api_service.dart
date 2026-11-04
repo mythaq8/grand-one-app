@@ -893,6 +893,72 @@ static Future<Map<String, dynamic>> decideOccasionQuote({
 // بوابة المزود (Grand One)
 // ═══════════════════════════════════════════════════════════
 
+// ── الفعالية والسلة ──
+
+/// الفعالية النشطة مع ملخصها؛ `event` فارغة إن لم توجد.
+static Future<Map<String, dynamic>> getActiveEvent() async {
+  final data = await _request(method: 'GET', path: '/api/events/active');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> createEvent(Map<String, dynamic> body) async {
+  final data = await _request(method: 'POST', path: '/api/events', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateEvent(
+    String id, Map<String, dynamic> body) async {
+  final data = await _request(method: 'PATCH', path: '/api/events/$id', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> closeEvent(String id) async {
+  final data = await _request(method: 'POST', path: '/api/events/$id/close');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> addToEventCart(
+  String eventId, {
+  required String serviceId,
+  String? packageId,
+  num? quantity,
+  num? durationValue,
+  List<String> addonIds = const [],
+  int? guestsCount,
+  String? bookingTime,
+  String? notes,
+}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/events/$eventId/cart',
+    body: {
+      'service_id': serviceId,
+      if (packageId != null) 'package_id': packageId,
+      if (quantity != null) 'quantity': quantity,
+      if (durationValue != null) 'duration_value': durationValue,
+      'addon_ids': addonIds,
+      if (guestsCount != null) 'guests_count': guestsCount,
+      if (bookingTime != null) 'booking_time': bookingTime,
+      if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+    },
+  );
+  return _asMap(data);
+}
+
+static Future<void> removeEventCartItem(String eventId, String itemId) async {
+  await _request(method: 'DELETE', path: '/api/events/$eventId/cart/$itemId');
+}
+
+static Future<Map<String, dynamic>> sendEventCart(String eventId,
+    {List<String>? itemIds}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/events/$eventId/send',
+    body: {if (itemIds != null) 'item_ids': itemIds},
+  );
+  return _asMap(data);
+}
+
 // ── أداة تنظيم العمل (مزوّد ومنظّم) ──
 
 static Future<Map<String, dynamic>> getWorkBookings({String? from, String? to}) async {
