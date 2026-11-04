@@ -25,6 +25,7 @@ class ProviderShellScreen extends StatefulWidget {
 
 class _ProviderShellScreenState extends State<ProviderShellScreen> {
   int _tab = 0;
+  final Set<int> _visited = {0};
   int _pendingCount = 0;
   String? _providerName;
   bool _missingContact = false;
@@ -133,12 +134,18 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
                           _tab == 0
                               ? ProviderHomeTab(onNavigate: _go)
                               : const SizedBox.shrink(),
-                          const _ProviderBookingsTab(),
-                          const WorkDashboardTab(isProvider: true),
+                          _visited.contains(1)
+                              ? const _ProviderBookingsTab()
+                              : const SizedBox.shrink(),
+                          _visited.contains(2)
+                              ? const WorkDashboardTab(isProvider: true)
+                              : const SizedBox.shrink(),
                           _tab == 3
                               ? const ProviderFinanceTab()
                               : const SizedBox.shrink(),
-                          const _ProviderManageTab(),
+                          _visited.contains(4)
+                              ? const _ProviderManageTab()
+                              : const SizedBox.shrink(),
                         ],
                       ),
                     ),
@@ -189,7 +196,10 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
   }
 
   void _go(int i) {
-    setState(() => _tab = i);
+    setState(() {
+      _tab = i;
+      _visited.add(i);
+    });
     _refreshPending();
   }
 }

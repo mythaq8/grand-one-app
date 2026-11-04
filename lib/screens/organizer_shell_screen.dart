@@ -25,6 +25,7 @@ class OrganizerShellScreen extends StatefulWidget {
 
 class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
   int _tab = 0;
+  final Set<int> _visited = {0};
   String? _organizerName;
   bool _bootLoading = true;
   String? _bootError;
@@ -110,12 +111,18 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
                     _tab == 0
                         ? OrganizerHomeTab(onNavigate: _go)
                         : const SizedBox.shrink(),
-                    const _OrganizerRequestsTab(),
-                    const WorkDashboardTab(isProvider: false),
+                    _visited.contains(1)
+                        ? const _OrganizerRequestsTab()
+                        : const SizedBox.shrink(),
+                    _visited.contains(2)
+                        ? const WorkDashboardTab(isProvider: false)
+                        : const SizedBox.shrink(),
                     _tab == 3
                         ? const OrganizerFinanceTab()
                         : const SizedBox.shrink(),
-                    const _OrganizerManageTab(),
+                    _visited.contains(4)
+                        ? const _OrganizerManageTab()
+                        : const SizedBox.shrink(),
                   ],
                 ),
       bottomNavigationBar: _bootError != null
@@ -154,7 +161,10 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
     );
   }
 
-  void _go(int i) => setState(() => _tab = i);
+  void _go(int i) => setState(() {
+        _tab = i;
+        _visited.add(i);
+      });
 }
 
 /// الإدارة: أصول المنظّم (خدماته الخاصة) + أيام الإتاحة + التأجير

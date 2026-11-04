@@ -137,10 +137,14 @@ class ProviderHomeTab extends StatelessWidget {
         final k = d['kpis'] is Map ? Map<String, dynamic>.from(d['kpis']) : <String, dynamic>{};
         final upcoming = d['upcoming'] is List ? (d['upcoming'] as List).whereType<Map>().toList() : <Map>[];
         final awaiting = _n(k['awaiting_response']).toInt();
+        // تنبيه الرقم الناقص يظهر أصلاً أعلى كل تبويبات المزوّد
+        final alerts = (d['alerts'] is List ? d['alerts'] as List : const [])
+            .where((a) => a is Map && a['code'] != 'missing_contact')
+            .toList();
         return ListView(
           padding: const EdgeInsets.all(Space.lg),
           children: [
-            _alerts(d['alerts']),
+            _alerts(alerts),
             if (awaiting > 0)
               AppCard(
                 accent: AppPalette.gold,
@@ -245,10 +249,21 @@ class ProviderFinanceTab extends StatelessWidget {
               StatTile(value: workMoney(s['released']), label: 'حُوِّل لك', icon: Icons.check_circle_outline_rounded, accent: AppPalette.success),
             ]),
             const SizedBox(height: Space.md),
-            const InfoRow(
-              icon: Icons.info_outline_rounded,
-              label: 'كيف تُحسب',
-              value: 'يدفع العميل العربون للمنصة، وبعد إتمام الخدمة يُحوَّل لك العربون مخصوماً منه عمولة المنصة. باقي المبلغ يدفعه العميل لك مباشرة.',
+            AppCard(
+              padding: const EdgeInsets.all(Space.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.info_outline_rounded, color: AppPalette.info),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Text(
+                      'يدفع العميل العربون للمنصة، وبعد إتمام الخدمة يُحوَّل لك العربون مخصوماً منه عمولة المنصة. باقي المبلغ يدفعه العميل لك مباشرة.',
+                      style: AppText.bodySecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SectionHeader(title: 'سجل التسويات', icon: Icons.receipt_long_rounded),
             if (rows.isEmpty)
