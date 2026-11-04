@@ -1,3 +1,4 @@
+import '../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -226,17 +227,11 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     try {
       await ApiService.respondProviderBooking(bookingId: id, action: action);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(action == 'confirm' ? 'تم التأكيد' : 'تم الرفض'),
-        ),
-      );
+      showAppSnack(context, action == 'confirm' ? 'تم التأكيد' : 'تم الرفض', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -323,11 +318,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                 final qtyValue = double.tryParse(qtyCtrl.text.trim());
                 if (noteCtrl.text.trim().length < 3 ||
                     (date == null && time == null && qtyValue == null)) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(
-                      content: Text('اقترح تاريخاً أو وقتاً وأضف ملاحظة'),
-                    ),
-                  );
+                  showAppSnack(ctx, 'اقترح تاريخاً أو وقتاً وأضف ملاحظة');
                   return;
                 }
                 Navigator.pop(ctx, true);
@@ -359,15 +350,11 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
         newDurationValue: pricingModel == 'per_duration' ? qtyValue : null,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('أُرسل اقتراح التعديل للعميل')),
-      );
+      showAppSnack(context, 'أُرسل اقتراح التعديل للعميل', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -413,20 +400,13 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
         action: action,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            action == 'confirm'
+      showAppSnack(context, action == 'confirm'
                 ? 'تم تأكيد ${res['updated'] ?? 0} طلب'
-                : 'تم رفض ${res['updated'] ?? 0} طلب',
-          ),
-        ),
-      );
+                : 'تم رفض ${res['updated'] ?? 0} طلب', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -725,9 +705,7 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
 
     if (name.isEmpty || categoryId == null || categoryId!.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الاسم والتصنيف مطلوبان')),
-      );
+      showAppSnack(context, 'الاسم والتصنيف مطلوبان');
       return;
     }
 
@@ -753,9 +731,7 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -783,9 +759,7 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -971,14 +945,10 @@ class _ProviderAvailabilityTabState extends State<_ProviderAvailabilityTab> {
       }
       await ApiService.saveProviderAvailability(rules: rules);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ ساعات العمل')),
-      );
+      showAppSnack(context, 'تم حفظ ساعات العمل', tone: FeedbackTone.success);
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

@@ -140,8 +140,7 @@ class _CatalogTabState extends State<_CatalogTab> {
             FilledButton(
               onPressed: () {
                 if (from == null) {
-                  ScaffoldMessenger.of(ctx)
-                      .showSnackBar(const SnackBar(content: Text('اختر تاريخ البداية')));
+                  showAppSnack(ctx, 'اختر تاريخ البداية');
                   return;
                 }
                 Navigator.pop(ctx, true);

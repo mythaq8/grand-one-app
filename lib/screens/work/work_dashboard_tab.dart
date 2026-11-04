@@ -1,3 +1,4 @@
+import '../../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
@@ -103,8 +104,7 @@ class _WorkDashboardTabState extends State<WorkDashboardTab> {
       _load();
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        showAppSnack(context, e.message, tone: FeedbackTone.error);
       }
     }
   }

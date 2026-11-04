@@ -1,3 +1,4 @@
+import '../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -352,9 +353,7 @@ class _OrganizerRequestDetailScreenState
     final feePct = double.tryParse(_feePctCtrl.text.trim()) ?? -1;
     final extra = double.tryParse(_extraCtrl.text.trim()) ?? -1;
     if (feePct < 0 || feePct > 100 || extra < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تحقق من نسبة الرسوم والرسوم الإضافية')),
-      );
+      showAppSnack(context, 'تحقق من نسبة الرسوم والرسوم الإضافية');
       return;
     }
 
@@ -369,9 +368,7 @@ class _OrganizerRequestDetailScreenState
       final priceText = _priceCtrls[id]?.text.trim() ?? '';
       final unit = double.tryParse(priceText);
       if (unit == null || unit < 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('سعر غير صالح لـ $title')),
-        );
+        showAppSnack(context, 'سعر غير صالح لـ $title');
         return;
       }
       quoteItems.add({
@@ -385,9 +382,7 @@ class _OrganizerRequestDetailScreenState
       });
     }
     if (quoteItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا توجد بنود')),
-      );
+      showAppSnack(context, 'لا توجد بنود');
       return;
     }
 
@@ -402,22 +397,14 @@ class _OrganizerRequestDetailScreenState
         send: send,
       );
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(send ? 'تم إرسال العرض للعميل' : 'تم حفظ مسودة العرض'),
-        ),
-      );
+      showAppSnack(context, send ? 'تم إرسال العرض للعميل' : 'تم حفظ مسودة العرض', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر حفظ العرض')),
-      );
+      showAppSnack(context, 'تعذر حفظ العرض', tone: FeedbackTone.error);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -762,9 +749,7 @@ class _OrganizerOwnedServicesTabState
 
     if (name.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('اسم الخدمة مطلوب')),
-      );
+      showAppSnack(context, 'اسم الخدمة مطلوب');
       return;
     }
 
@@ -792,9 +777,7 @@ class _OrganizerOwnedServicesTabState
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -822,9 +805,7 @@ class _OrganizerOwnedServicesTabState
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
   }
 
@@ -999,8 +980,7 @@ class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
       );
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message)));
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
       await _load();
     }
   }
@@ -1061,19 +1041,13 @@ class _OrganizerAvailabilityTabState extends State<_OrganizerAvailabilityTab> {
       }
       await ApiService.saveOrganizerAvailability(rules: rules);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم حفظ التقويم')),
-      );
+      showAppSnack(context, 'تم حفظ التقويم', tone: FeedbackTone.success);
     } on ApiException catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
-      );
+      showAppSnack(context, e.message, tone: FeedbackTone.error);
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر الحفظ')),
-      );
+      showAppSnack(context, 'تعذر الحفظ', tone: FeedbackTone.error);
     } finally {
       if (mounted) setState(() => _saving = false);
     }

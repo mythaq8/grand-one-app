@@ -240,9 +240,7 @@ class _EventPlanningTabState extends State<EventPlanningTab> {
                   (f) => f.required && controllers[f.name]!.text.trim().isEmpty,
                 );
                 if (missing) {
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    const SnackBar(content: Text('أكمل الحقول الإلزامية')),
-                  );
+                  showAppSnack(ctx, 'أكمل الحقول الإلزامية');
                   return;
                 }
                 Navigator.pop(ctx, true);

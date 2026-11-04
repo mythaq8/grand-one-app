@@ -1,3 +1,4 @@
+import '../../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
@@ -131,8 +132,7 @@ class _EventFormScreenState extends State<EventFormScreen> {
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(e.message)));
+        showAppSnack(context, e.message, tone: FeedbackTone.error);
       }
     }
     if (mounted) setState(() => _saving = false);

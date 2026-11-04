@@ -7,6 +7,7 @@
 // - اسم وصورة الخدمة: Deno /api/service-details
 // ============================================================
 
+import '../ui/kit/kit.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -341,9 +342,7 @@ Future<void> _loadBookings() async {
           onPressed: () async {
             await Clipboard.setData(ClipboardData(text: value));
             if (ctx.mounted) {
-              ScaffoldMessenger.of(ctx).showSnackBar(
-                const SnackBar(content: Text('تم النسخ')),
-              );
+              showAppSnack(ctx, 'تم النسخ', tone: FeedbackTone.success);
             }
           },
         ),
