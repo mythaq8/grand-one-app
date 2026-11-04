@@ -86,21 +86,31 @@ class ResultsGrid extends StatelessWidget {
                   Space.screenH,
                   Space.xxl,
                 ),
-                sliver: SliverGrid(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: columns,
-                    crossAxisSpacing: Space.md,
-                    mainAxisSpacing: Space.md,
-                    // البطاقة الشبكية تحتاج نسبة تسمح بسطرين للاسم
-                    // وشريط سعر. في العمود الواحد نتركها تتمدّد.
-                    mainAxisExtent: single ? null : cellExtent,
-                    childAspectRatio: single ? 2.4 : 1,
-                  ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) => itemBuilder(context, index),
-                    childCount: itemCount,
-                  ),
-                ),
+                // عمود واحد (الهاتف): قائمة بارتفاع المحتوى بلا فراغات.
+                // الشبكة للشاشات العريضة فقط.
+                sliver: single
+                    ? SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => Padding(
+                            padding: const EdgeInsets.only(bottom: Space.md),
+                            child: itemBuilder(context, index),
+                          ),
+                          childCount: itemCount,
+                        ),
+                      )
+                    : SliverGrid(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          crossAxisSpacing: Space.md,
+                          mainAxisSpacing: Space.md,
+                          // البطاقة الشبكية تحتاج ارتفاعاً يسمح بسطرين للاسم وشريط سعر
+                          mainAxisExtent: cellExtent,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => itemBuilder(context, index),
+                          childCount: itemCount,
+                        ),
+                      ),
               ),
               if (footerCount == 1)
                 const SliverToBoxAdapter(

@@ -38,8 +38,10 @@ class RoleAccountButton extends StatelessWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      // بلا هذا يُقصّ آخر بند (الخروج) على الشاشات القصيرة
+      isScrollControlled: true,
       builder: (sheet) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.only(bottom: Space.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,
