@@ -202,6 +202,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                         ),
                       ),
                       FilledButton(
+                        style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                         onPressed: () => launchUrl(
                           Uri.parse('https://wa.me/${AppConfig.supportWhatsapp}'),
                           mode: LaunchMode.externalApplication,

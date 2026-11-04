@@ -8,6 +8,8 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'work/work_dashboard_tab.dart';
+import 'work/work_formatters.dart';
+import '../ui/kit/status_pill.dart';
 
 /// لوحة المزود — طلبات / خدمات / تقويم
 class ProviderShellScreen extends StatefulWidget {
@@ -159,13 +161,32 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
       _error = null;
     });
     try {
-      final res = await ApiService.getProviderBookings(limit: 50);
+      final res = await ApiService.getProviderBookings(limit: 50, excludeClosed: true);
       final data = res['data'];
       if (data is List) {
         _items = data
             .whereType<Map>()
             .map((e) => Map<String, dynamic>.from(e))
             .toList();
+        // الطلبات التي تنتظر ردّك أولاً، ثم الأقرب موعداً
+        int rank(Map<String, dynamic> b) {
+          switch (b['status']?.toString()) {
+            case 'pending':
+            case 'quote_requested':
+              return 0;
+            case 'modification_proposed':
+              return 1;
+            default:
+              return 2;
+          }
+        }
+        _items.sort((a, b) {
+          final r = rank(a).compareTo(rank(b));
+          return r != 0
+              ? r
+              : (a['booking_date']?.toString() ?? '')
+                  .compareTo(b['booking_date']?.toString() ?? '');
+        });
       } else {
         _items = [];
       }
@@ -410,12 +431,14 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
               Row(
                 children: [
                   FilledButton(
+                    style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                     onPressed: () =>
                         _respondGroup(row['id'].toString(), 'confirm'),
                     child: Text('تأكيد الكل ($open)'),
                   ),
                   const SizedBox(width: Space.sm),
                   OutlinedButton(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                     onPressed: () =>
                         _respondGroup(row['id'].toString(), 'reject'),
                     child: const Text('رفض الكل'),
@@ -482,7 +505,9 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                   Text(serviceName, style: AppText.section),
                   const SizedBox(height: 4),
                   Text('$date  ${time.isEmpty ? '' : time}'),
-                  Text('الحالة: $status'),
+                  Text('الحالة: ${StatusPillFromCode.describe(status).label}'),
+                  if (b['total_price'] != null)
+                    Text('السعر: ${workMoney(b['total_price'])}'),
                   if (status == 'pending' || status == 'quote_requested')
                     if (_dueLabel(b['provider_response_due_at'], 'المتبقي للرد') case final l?)
                       Text(l, style: AppText.caption),
@@ -499,12 +524,14 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                     Row(
                       children: [
                         FilledButton(
+                          style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                           onPressed: () =>
                               _respond(b['id'].toString(), 'confirm'),
                           child: const Text('تأكيد'),
                         ),
                         const SizedBox(width: Space.sm),
                         OutlinedButton(
+                          style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                           onPressed: () =>
                               _respond(b['id'].toString(), 'reject'),
                           child: const Text('رفض'),

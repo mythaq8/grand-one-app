@@ -111,6 +111,7 @@ class _InviteScreenState extends State<InviteScreen> {
                           ),
                           const SizedBox(width: Space.sm),
                           FilledButton(
+                            style: FilledButton.styleFrom(minimumSize: const Size(0, 52)),
                             onPressed: _redeeming ? null : _useCode,
                             child: _redeeming
                                 ? const SizedBox(

@@ -200,6 +200,7 @@ class _CatalogTabState extends State<_CatalogTab> {
                   ' • ${workMoney(it['rental_price'])} لليوم',
                 ),
                 trailing: FilledButton(
+                  style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
                   onPressed: () => _request(it),
                   child: const Text('استأجر'),
                 ),
@@ -314,14 +315,17 @@ class _RentalsBoxState extends State<_RentalsBox> {
                         children: [
                           if (_incoming) ...[
                             FilledButton(
+                                style: FilledButton.styleFrom(minimumSize: const Size(0, 40)),
                                 onPressed: () => _act(r, 'accept'),
                                 child: const Text('قبول')),
                             const SizedBox(width: Space.sm),
                             OutlinedButton(
+                                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 40)),
                                 onPressed: () => _act(r, 'reject'),
                                 child: const Text('رفض')),
                           ] else
                             OutlinedButton(
+                                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 40)),
                                 onPressed: () => _act(r, 'cancel'),
                                 child: const Text('إلغاء الطلب')),
                         ],

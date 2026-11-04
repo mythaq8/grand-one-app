@@ -1184,6 +1184,7 @@ static Future<void> deleteProviderService(String serviceId) async {
 
 static Future<Map<String, dynamic>> getProviderBookings({
   String? status,
+  bool excludeClosed = false,
   int limit = 30,
   int offset = 0,
 }) async {
@@ -1192,6 +1193,7 @@ static Future<Map<String, dynamic>> getProviderBookings({
     path: '/api/provider/bookings',
     query: {
       if (status != null && status.isNotEmpty) 'status': status,
+      if (excludeClosed) 'exclude_closed': '1',
       'limit': limit.toString(),
       'offset': offset.toString(),
     },
