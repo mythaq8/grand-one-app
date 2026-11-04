@@ -8,6 +8,8 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'work/work_dashboard_tab.dart';
+import 'organizer_rentals_screen.dart';
+import 'organizer_request_providers_screen.dart';
 
 /// لوحة المنظّم — طلبات المناسبات / عروض / خدمات خاصة
 class OrganizerShellScreen extends StatefulWidget {
@@ -69,6 +71,13 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
               : _organizerName!,
         ),
         actions: [
+          IconButton(
+            tooltip: 'التأجير بين المنظّمين',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const OrganizerRentalsScreen()),
+            ),
+            icon: const Icon(Icons.swap_horiz_rounded),
+          ),
           IconButton(
             tooltip: 'تسجيل الخروج',
             onPressed: _signOut,
@@ -427,6 +436,17 @@ class _OrganizerRequestDetailScreenState
         title: const Text('تفاصيل الطلب'),
         actions: [
           IconButton(
+            tooltip: 'المزوّدون',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => OrganizerRequestProvidersScreen(
+                  requestId: widget.requestId,
+                ),
+              ),
+            ),
+            icon: const Icon(Icons.groups_2_outlined),
+          ),
+          IconButton(
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh),
           ),
@@ -621,6 +641,10 @@ class _OrganizerOwnedServicesTabState
     );
     String? categoryId = existing?['category_id']?.toString();
     var isActive = existing?['is_active'] != false;
+    var rentable = existing?['rentable'] == true;
+    final rentalCtrl = TextEditingController(
+      text: existing?['rental_price']?.toString() ?? '',
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -692,6 +716,22 @@ class _OrganizerOwnedServicesTabState
                     value: isActive,
                     onChanged: (v) => setLocal(() => isActive = v),
                   ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('متاحة للتأجير لمنظّمين آخرين'),
+                    value: rentable,
+                    onChanged: (v) => setLocal(() => rentable = v),
+                  ),
+                  if (rentable)
+                    TextField(
+                      controller: rentalCtrl,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                        labelText: 'سعر التأجير لليوم (\$) *',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -713,6 +753,8 @@ class _OrganizerOwnedServicesTabState
     final name = nameCtrl.text.trim();
     final desc = descCtrl.text.trim();
     final price = num.tryParse(priceCtrl.text.trim());
+    final rentalPrice = num.tryParse(rentalCtrl.text.trim());
+    rentalCtrl.dispose();
     nameCtrl.dispose();
     descCtrl.dispose();
     priceCtrl.dispose();
@@ -732,6 +774,8 @@ class _OrganizerOwnedServicesTabState
       'base_price': price,
       'is_active': isActive,
       'capacity_mode': existing?['capacity_mode'] ?? 'exclusive',
+      'rentable': rentable,
+      'rental_price': rentable ? rentalPrice : null,
       if (categoryId != null && categoryId!.isNotEmpty)
         'category_id': categoryId,
     };

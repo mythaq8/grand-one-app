@@ -9,6 +9,7 @@ import '../../ui/kit/status_pill.dart';
 import '../my_bookings_screen.dart';
 import '../work/work_formatters.dart';
 import 'event_form_screen.dart';
+import 'event_planning_tab.dart';
 
 /// صفحة الفعالية: الملخص، السلة وتسعيرها، حالة طلب كل مزوّد، والمجاميع.
 class EventScreen extends StatefulWidget {
@@ -154,7 +155,10 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    final hasEvent = !_loading && _error == null && _event != null;
+    final eventId = _event?['id']?.toString();
+
+    final scaffold = Scaffold(
       backgroundColor: AppPalette.background,
       appBar: AppBar(
         title: const Text('فعاليتي'),
@@ -168,6 +172,18 @@ class _EventScreenState extends State<EventScreen> {
               ],
             ),
         ],
+        bottom: hasEvent
+            ? const TabBar(
+                isScrollable: true,
+                tabs: [
+                  Tab(text: 'الملخص'),
+                  Tab(text: 'المهام'),
+                  Tab(text: 'الجدول'),
+                  Tab(text: 'الميزانية'),
+                  Tab(text: 'الإلهام'),
+                ],
+              )
+            : null,
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -181,8 +197,18 @@ class _EventScreenState extends State<EventScreen> {
                       actionLabel: 'إنشاء فعالية',
                       onAction: _create,
                     )
-                  : RefreshIndicator(onRefresh: _load, child: _buildBody()),
+                  : TabBarView(
+                      children: [
+                        RefreshIndicator(onRefresh: _load, child: _buildBody()),
+                        EventPlanningTab(eventId: eventId!, kind: kTasksKind),
+                        EventPlanningTab(eventId: eventId, kind: kTimelineKind),
+                        EventPlanningTab(eventId: eventId, kind: kBudgetKind),
+                        EventPlanningTab(eventId: eventId, kind: kInspirationKind),
+                      ],
+                    ),
     );
+
+    return hasEvent ? DefaultTabController(length: 5, child: scaffold) : scaffold;
   }
 
   Widget _buildBody() {

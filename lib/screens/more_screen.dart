@@ -14,6 +14,7 @@ import '../ui/shared/logout_action.dart';
 import '../widgets/brand_mark.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
+import 'invite_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 
 class MoreScreen extends StatefulWidget {
@@ -80,6 +81,18 @@ class _MoreScreenState extends State<MoreScreen> {
                           title: 'طلبات التخطيط',
                           subtitle: 'تنظيم الخدمات في طلب واحد',
                           onTap: () => _push(const MyOccasionRequestsScreen()),
+                        ),
+                      ],
+                    ),
+
+                    const SectionHeader(title: 'ادعُ أصدقاءك', icon: Icons.card_giftcard_outlined),
+                    _Group(
+                      children: [
+                        ActionTile(
+                          icon: Icons.card_giftcard_outlined,
+                          title: 'كود الدعوة',
+                          subtitle: 'خصم لك ولصديقك',
+                          onTap: () => _push(const InviteScreen()),
                         ),
                       ],
                     ),

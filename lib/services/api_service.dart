@@ -893,6 +893,106 @@ static Future<Map<String, dynamic>> decideOccasionQuote({
 // بوابة المزود (Grand One)
 // ═══════════════════════════════════════════════════════════
 
+// ── التأجير بين المنظّمين ومتابعة المزوّدين ──
+
+static Future<List<Map<String, dynamic>>> _listOf(dynamic data, String key) async {
+  final v = _asMap(data)[key];
+  return v is List
+      ? v.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
+      : <Map<String, dynamic>>[];
+}
+
+static Future<List<Map<String, dynamic>>> getRentalCatalog() async =>
+    _listOf(await _request(method: 'GET', path: '/api/organizer/rentals/catalog'), 'data');
+
+static Future<List<Map<String, dynamic>>> getOrganizerRentals(String box) async =>
+    _listOf(
+      await _request(
+        method: 'GET',
+        path: '/api/organizer/rentals',
+        query: {'box': box},
+      ),
+      'data',
+    );
+
+static Future<Map<String, dynamic>> requestRental(Map<String, dynamic> body) async {
+  final data = await _request(method: 'POST', path: '/api/organizer/rentals', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> actOnRental(String id, String action) async {
+  final data = await _request(method: 'POST', path: '/api/organizer/rentals/$id/$action');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> getRequestProviders(String requestId) async {
+  final data = await _request(
+      method: 'GET', path: '/api/organizer/requests/$requestId/providers');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> addExternalProvider(
+    String requestId, Map<String, dynamic> body) async {
+  final data = await _request(
+      method: 'POST', path: '/api/organizer/requests/$requestId/external', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateExternalProvider(
+    String requestId, String id, Map<String, dynamic> body) async {
+  final data = await _request(
+      method: 'PATCH',
+      path: '/api/organizer/requests/$requestId/external/$id',
+      body: body);
+  return _asMap(data);
+}
+
+static Future<void> deleteExternalProvider(String requestId, String id) async {
+  await _request(
+      method: 'DELETE', path: '/api/organizer/requests/$requestId/external/$id');
+}
+
+// ── كود الدعوة ──
+
+static Future<Map<String, dynamic>> getInviteInfo() async {
+  final data = await _request(method: 'GET', path: '/api/invite/me');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> redeemInviteCode(String code) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/invite/redeem',
+    body: {'code': code},
+  );
+  return _asMap(data);
+}
+
+// ── أدوات تخطيط الفعالية (tasks | timeline | budget | inspiration) ──
+
+static Future<Map<String, dynamic>> listEventItems(String eventId, String kind) async {
+  final data = await _request(method: 'GET', path: '/api/events/$eventId/$kind');
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> createEventItem(
+    String eventId, String kind, Map<String, dynamic> body) async {
+  final data = await _request(
+      method: 'POST', path: '/api/events/$eventId/$kind', body: body);
+  return _asMap(data);
+}
+
+static Future<Map<String, dynamic>> updateEventItem(
+    String eventId, String kind, String itemId, Map<String, dynamic> body) async {
+  final data = await _request(
+      method: 'PATCH', path: '/api/events/$eventId/$kind/$itemId', body: body);
+  return _asMap(data);
+}
+
+static Future<void> deleteEventItem(String eventId, String kind, String itemId) async {
+  await _request(method: 'DELETE', path: '/api/events/$eventId/$kind/$itemId');
+}
+
 // ── الفعالية والسلة ──
 
 /// الفعالية النشطة مع ملخصها؛ `event` فارغة إن لم توجد.
