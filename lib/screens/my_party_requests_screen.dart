@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import '../app_colors.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
-import '../utils/error_handler.dart';
 import '../widgets/brand_decorations.dart';
 import 'party_request_screen.dart';
 

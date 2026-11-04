@@ -1,10 +1,10 @@
+import '../../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
 import '../../design/typography.dart';
 import '../../services/api_exceptions.dart';
 import '../../services/api_service.dart';
-import '../../ui/kit/states.dart';
 
 /// قائمة جاهزية حجز واحد: [kind] = external | booking | occasion.
 class WorkChecklistScreen extends StatefulWidget {
@@ -58,8 +58,7 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
   }
 
   void _toast(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    showAppSnack(context, message);
   }
 
   Future<void> _toggle(Map<String, dynamic> item, bool value) async {

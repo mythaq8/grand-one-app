@@ -1,3 +1,4 @@
+import '../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 
@@ -65,7 +66,7 @@ class _OrganizerRequestProvidersScreenState
   }
 
   void _toast(String m) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+      showAppSnack(context, m);
 
   Future<void> _editExternal([Map<String, dynamic>? existing]) async {
     final name = TextEditingController(text: existing?['name']?.toString() ?? '');

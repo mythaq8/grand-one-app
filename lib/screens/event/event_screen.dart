@@ -1,3 +1,4 @@
+import '../../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
@@ -62,7 +63,7 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   void _toast(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    showAppSnack(context, message);
   }
 
   Future<void> _create() async {

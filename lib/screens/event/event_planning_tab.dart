@@ -1,3 +1,4 @@
+import '../../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../../design/tokens.dart';
@@ -183,7 +184,7 @@ class _EventPlanningTabState extends State<EventPlanningTab> {
   }
 
   void _toast(String m) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+      showAppSnack(context, m);
 
   Future<void> _toggle(Map<String, dynamic> item, bool value) async {
     final field = _k.checkField!;

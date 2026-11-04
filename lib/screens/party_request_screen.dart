@@ -5,7 +5,6 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:io' show File;
 
 import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';

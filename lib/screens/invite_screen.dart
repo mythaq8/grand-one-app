@@ -1,3 +1,4 @@
+import '../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import 'package:url_launcher/url_launcher.dart';
@@ -52,7 +53,7 @@ class _InviteScreenState extends State<InviteScreen> {
   }
 
   void _toast(String m) =>
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
+      showAppSnack(context, m);
 
   String get _code => _info['code']?.toString() ?? '';
 

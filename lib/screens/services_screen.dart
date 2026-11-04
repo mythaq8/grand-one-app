@@ -29,7 +29,6 @@ import 'provider_details_screen.dart';
 import 'my_bookings_screen.dart';
 import 'intro_screen.dart';
 import '../services/search_date.dart';
-import 'services/widgets/availability_badges.dart';
 import 'occasion_organize_screen.dart';
 
 class ServicesScreen extends StatefulWidget {

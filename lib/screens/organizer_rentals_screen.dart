@@ -1,3 +1,4 @@
+import '../ui/kit/kit.dart';
 import 'package:flutter/material.dart';
 
 import '../design/tokens.dart';
@@ -41,7 +42,7 @@ class OrganizerRentalsScreen extends StatelessWidget {
 }
 
 void _toast(BuildContext c, String m) =>
-    ScaffoldMessenger.of(c).showSnackBar(SnackBar(content: Text(m)));
+    showAppSnack(c, m);
 
 class _CatalogTab extends StatefulWidget {
   const _CatalogTab();
