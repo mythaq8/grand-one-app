@@ -181,6 +181,12 @@ class StatusPillFromCode extends StatelessWidget {
           tone: PillTone.neutral,
           icon: Icons.block_rounded,
         );
+      case 'modification_proposed':
+        return (
+          label: 'تعديل مقترح',
+          tone: PillTone.gold,
+          icon: Icons.edit_calendar_outlined,
+        );
       case 'expired':
         return (
           label: 'انتهت المهلة',

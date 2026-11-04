@@ -195,6 +195,124 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     }
   }
 
+  Future<void> _proposeModification(String id) async {
+    DateTime? date;
+    TimeOfDay? time;
+    final noteCtrl = TextEditingController();
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
+          title: const Text('اقتراح تعديل'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.event),
+                  title: Text(date == null
+                      ? 'تاريخ بديل (اختياري)'
+                      : '${date!.year}-${date!.month.toString().padLeft(2, '0')}-${date!.day.toString().padLeft(2, '0')}'),
+                  onTap: () async {
+                    final now = DateTime.now();
+                    final d = await showDatePicker(
+                      context: ctx,
+                      initialDate: date ?? now,
+                      firstDate: now,
+                      lastDate: DateTime(now.year + 2),
+                    );
+                    if (d != null) setLocal(() => date = d);
+                  },
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.schedule),
+                  title: Text(time == null
+                      ? 'وقت بديل (اختياري)'
+                      : time!.format(ctx)),
+                  onTap: () async {
+                    final t = await showTimePicker(
+                      context: ctx,
+                      initialTime: time ?? const TimeOfDay(hour: 18, minute: 0),
+                    );
+                    if (t != null) setLocal(() => time = t);
+                  },
+                ),
+                TextField(
+                  controller: noteCtrl,
+                  maxLength: 500,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'ملاحظة للعميل *',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (noteCtrl.text.trim().length < 3 ||
+                    (date == null && time == null)) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(
+                      content: Text('اقترح تاريخاً أو وقتاً وأضف ملاحظة'),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(ctx, true);
+              },
+              child: const Text('إرسال'),
+            ),
+          ],
+        ),
+      ),
+    );
+    final note = noteCtrl.text.trim();
+    noteCtrl.dispose();
+    if (submitted != true) return;
+
+    try {
+      await ApiService.respondProviderBooking(
+        bookingId: id,
+        action: 'modify',
+        note: note,
+        newDate: date == null
+            ? null
+            : '${date!.year}-${date!.month.toString().padLeft(2, '0')}-${date!.day.toString().padLeft(2, '0')}',
+        newTime: time == null
+            ? null
+            : '${time!.hour.toString().padLeft(2, '0')}:${time!.minute.toString().padLeft(2, '0')}',
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('أُرسل اقتراح التعديل للعميل')),
+      );
+      await _load();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message)),
+      );
+    }
+  }
+
+  /// نص المهلة المتبقية (ساعات) أو null.
+  String? _dueLabel(dynamic raw, String prefix) {
+    final due = DateTime.tryParse(raw?.toString() ?? '');
+    if (due == null) return null;
+    final left = due.difference(DateTime.now());
+    if (left.isNegative) return '$prefix: انتهت المهلة';
+    final hours = left.inHours;
+    return hours >= 1 ? '$prefix: $hours ساعة' : '$prefix: أقل من ساعة';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Center(child: CircularProgressIndicator());
@@ -245,6 +363,12 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                   const SizedBox(height: 4),
                   Text('$date  ${time.isEmpty ? '' : time}'),
                   Text('الحالة: $status'),
+                  if (status == 'pending' || status == 'quote_requested')
+                    if (_dueLabel(b['provider_response_due_at'], 'المتبقي للرد') case final l?)
+                      Text(l, style: AppText.caption),
+                  if (status == 'modification_proposed')
+                    if (_dueLabel(b['customer_response_due_at'], 'بانتظار رد العميل') case final l?)
+                      Text(l, style: AppText.caption),
                   if (b['customer_contact_hidden'] == true)
                     Text(
                       'رقم العميل مخفي حتى تحقق العربون',
@@ -265,6 +389,14 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                               _respond(b['id'].toString(), 'reject'),
                           child: const Text('رفض'),
                         ),
+                        if (status == 'pending' || status == 'quote_requested') ...[
+                          const SizedBox(width: Space.sm),
+                          TextButton(
+                            onPressed: () =>
+                                _proposeModification(b['id'].toString()),
+                            child: const Text('اقتراح تعديل'),
+                          ),
+                        ],
                       ],
                     ),
                   ],

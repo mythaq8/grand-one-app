@@ -1025,19 +1025,42 @@ static Future<Map<String, dynamic>> getProviderBookings({
   return _asMap(data);
 }
 
+/// رد العميل على تعديل المزوّد (قبول يطبّق التاريخ/الوقت المقترحين).
+static Future<Map<String, dynamic>> respondBookingModification({
+  required String bookingId,
+  required bool accept,
+}) async {
+  final data = await _request(
+    method: 'POST',
+    path: '/api/bookings/modification',
+    body: {'booking_id': bookingId, 'action': accept ? 'accept' : 'decline'},
+  );
+  return _asMap(data);
+}
+
 static Future<Map<String, dynamic>> respondProviderBooking({
   required String bookingId,
-  required String action, // confirm | reject
+  required String action, // confirm | reject | modify
   String? note,
+  String? newDate,
+  String? newTime,
+  String? alternativeServiceId,
 }) async {
   final id = bookingId.trim();
   final act = action.trim().toLowerCase();
-  if (id.isEmpty || (act != 'confirm' && act != 'reject')) return {};
+  if (id.isEmpty ||
+      (act != 'confirm' && act != 'reject' && act != 'modify')) {
+    return {};
+  }
   final data = await _request(
     method: 'POST',
     path: '/api/provider/bookings/$id/$act',
     body: {
       if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      if (newDate != null) 'new_date': newDate,
+      if (newTime != null) 'new_time': newTime,
+      if (alternativeServiceId != null)
+        'alternative_service_id': alternativeServiceId,
     },
   );
   return _asMap(data);

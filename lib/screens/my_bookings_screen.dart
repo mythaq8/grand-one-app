@@ -185,6 +185,93 @@ Future<void> _loadBookings() async {
   // إلغاء الحجز
   // ═══════════════════════════════════════════════════════════
 
+  Future<void> _respondModification(String bookingId, bool accept) async {
+    try {
+      await ApiService.respondBookingModification(
+        bookingId: bookingId,
+        accept: accept,
+      );
+      if (!mounted) return;
+      _showMessage(accept ? 'تم قبول التعديل' : 'تم رفض التعديل وإلغاء الطلب');
+      await _loadBookings();
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      _showMessage(e.userMessage, isError: true);
+    } catch (e) {
+      if (!mounted) return;
+      _showMessage(_extractError(e), isError: true);
+    }
+  }
+
+  /// قسم التعديل المقترح من المزوّد: قبول يطبّق التاريخ/الوقت، رفض يلغي الطلب.
+  Widget _buildModificationSection(
+    Map<String, dynamic> booking,
+    String bookingId,
+  ) {
+    final raw = booking['proposed_modification'];
+    final mod = raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+    final newDate = mod['new_date']?.toString();
+    final newTime = mod['new_time']?.toString();
+    final note = mod['note']?.toString() ?? '';
+    final hasSchedule = (newDate != null && newDate.isNotEmpty) ||
+        (newTime != null && newTime.isNotEmpty);
+    final due = DateTime.tryParse(
+      booking['customer_response_due_at']?.toString() ?? '',
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.goldSoft,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'اقترح المزوّد تعديلاً على طلبك',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
+          if (newDate != null && newDate.isNotEmpty) Text('التاريخ المقترح: $newDate'),
+          if (newTime != null && newTime.isNotEmpty) Text('الوقت المقترح: $newTime'),
+          if (mod['alternative_service_id'] != null)
+            const Text('اقترح أيضاً خدمة بديلة، يمكنك حجزها من قائمة الخدمات.'),
+          if (note.isNotEmpty) Text('ملاحظة: $note'),
+          if (due != null)
+            Text(
+              'يجب الرد قبل ${due.toLocal().toString().substring(0, 16)} وإلا ينتهي الطلب.',
+              style: const TextStyle(fontSize: 12),
+            ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              if (hasSchedule)
+                Expanded(
+                  child: FilledButton(
+                    onPressed: bookingId.isEmpty
+                        ? null
+                        : () => _respondModification(bookingId, true),
+                    child: const Text('قبول التعديل'),
+                  ),
+                ),
+              if (hasSchedule) const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: bookingId.isEmpty
+                      ? null
+                      : () => _respondModification(bookingId, false),
+                  child: Text(hasSchedule ? 'رفض' : 'إغلاق الطلب'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _cancelBooking(String bookingId) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -586,6 +673,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
   ('pending', 'قيد المراجعة', Icons.schedule_rounded),
   ('quote_requested', 'طلب عرض سعر', Icons.request_quote_outlined),
   ('quoted', 'عرض سعر جاهز', Icons.price_change_outlined),
+  ('modification_proposed', 'تعديل مقترح', Icons.edit_calendar_outlined),
   ('approved', 'بانتظار الدفع', Icons.payment_outlined),
   ('paid_pending_verification', 'بانتظار التحقق', Icons.hourglass_top_rounded),
   ('ready', 'جاهز', Icons.event_available_rounded),
@@ -1043,6 +1131,9 @@ if ([
   'deposit_rejected',
 ].contains(status))
   _buildDepositSection(booking, status),
+
+if (status == 'modification_proposed')
+  _buildModificationSection(booking, bookingId),
 
 // الأزرار الأساسية
 if (status == 'pending' || status == 'approved') ...[
@@ -1539,6 +1630,12 @@ Widget _buildDepositSection(
       bg = AppColors.infoLight;
       icon = Icons.request_quote_outlined;
       label = 'طلب عرض سعر';
+      break;
+    case 'modification_proposed':
+      color = AppColors.goldDark;
+      bg = AppColors.goldSoft;
+      icon = Icons.edit_calendar_outlined;
+      label = 'تعديل مقترح';
       break;
     case 'quoted':
       color = AppColors.goldDark;
