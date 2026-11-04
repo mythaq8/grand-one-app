@@ -527,13 +527,16 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                     const SizedBox(height: Space.sm),
                     Row(
                       children: [
-                        FilledButton(
-                          style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
-                          onPressed: () =>
-                              _respond(b['id'].toString(), 'confirm'),
-                          child: const Text('تأكيد'),
-                        ),
-                        const SizedBox(width: Space.sm),
+                        // بعد رفض إشعار الدفع ينتظر الطلب إعادة رفع العميل؛ للمزوّد الاعتذار فقط
+                        if (status != 'deposit_rejected') ...[
+                          FilledButton(
+                            style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
+                            onPressed: () =>
+                                _respond(b['id'].toString(), 'confirm'),
+                            child: const Text('تأكيد'),
+                          ),
+                          const SizedBox(width: Space.sm),
+                        ],
                         OutlinedButton(
                           style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
                           onPressed: () =>
