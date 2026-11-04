@@ -518,9 +518,25 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                   if (status == 'modification_proposed')
                     if (_dueLabel(b['customer_response_due_at'], 'بانتظار رد العميل') case final l?)
                       Text(l, style: AppText.caption),
-                  if (b['customer_contact_hidden'] == true)
+                  if ((b['location']?.toString() ?? '').isNotEmpty)
+                    Text('المكان: ${b['location']}'),
+                  if ((b['notes']?.toString() ?? '').isNotEmpty)
+                    Text('ملاحظات العميل: ${b['notes']}', style: AppText.bodySecondary),
+                  if (b['customer'] is Map) ...[
+                    const SizedBox(height: Space.xs),
+                    SelectableText(
+                      [
+                        'العميل: ${(b['customer'] as Map)['name'] ?? '—'}',
+                        if ((b['customer'] as Map)['whatsapp'] != null)
+                          'واتساب: ${(b['customer'] as Map)['whatsapp']}',
+                        if ((b['customer'] as Map)['phone'] != null)
+                          'هاتف: ${(b['customer'] as Map)['phone']}',
+                      ].join(' • '),
+                      style: AppText.body.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ] else if (b['customer_contact_hidden'] == true)
                     Text(
-                      'رقم العميل مخفي حتى تحقق العربون',
+                      'بيانات العميل تظهر بعد تأكيد العربون',
                       style: AppText.caption,
                     ),
                   if (canRespond) ...[

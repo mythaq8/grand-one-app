@@ -314,7 +314,9 @@ Future<void> _loadBookings() async {
                 if (phone.isNotEmpty) _contactRow(ctx, 'الهاتف', phone),
                 if (whatsapp.isNotEmpty) _contactRow(ctx, 'واتساب', whatsapp),
                 if (phone.isEmpty && whatsapp.isEmpty)
-                  const Text('لم يضف المزوّد رقماً بعد.'),
+                  const Text(
+                    'لم يضف المزوّد رقماً بعد. تواصل مع الدعم من «تواصل مع الإدارة» وسنصلك به.',
+                  ),
               ],
             ),
             actions: [

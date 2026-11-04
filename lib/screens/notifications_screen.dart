@@ -363,6 +363,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     );
   }
 
+  /// عدد مع تمييز عربي صحيح: دقيقة / دقيقتين / 3 دقائق / 11 دقيقة
+  String _arCount(int n, String one, String two, String few) {
+    if (n == 1) return one;
+    if (n == 2) return two;
+    if (n >= 3 && n <= 10) return '$n $few';
+    return '$n $one';
+  }
+
   String _formatDateTime(dynamic value) {
     if (value == null) return '';
     try {
@@ -371,9 +379,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       final diff = now.difference(date);
 
       if (diff.inMinutes < 1) return 'الآن';
-      if (diff.inMinutes < 60) return 'منذ ${diff.inMinutes} دقيقة';
-      if (diff.inHours < 24) return 'منذ ${diff.inHours} ساعة';
-      if (diff.inDays < 7) return 'منذ ${diff.inDays} يوم';
+      if (diff.inMinutes < 60) {
+        return 'منذ ${_arCount(diff.inMinutes, 'دقيقة', 'دقيقتين', 'دقائق')}';
+      }
+      if (diff.inHours < 24) {
+        return 'منذ ${_arCount(diff.inHours, 'ساعة', 'ساعتين', 'ساعات')}';
+      }
+      if (diff.inDays < 7) {
+        return 'منذ ${_arCount(diff.inDays, 'يوم', 'يومين', 'أيام')}';
+      }
 
       final y = date.year;
       final m = date.month.toString().padLeft(2, '0');
