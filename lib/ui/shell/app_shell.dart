@@ -48,6 +48,9 @@ enum AppTab {
   final IconData selectedIcon;
 }
 
+/// يزداد كلما فُتح تبويب «طلباتي» لتعيد القوائم تحميل حالتها الحالية
+final ValueNotifier<int> requestsTabShown = ValueNotifier<int>(0);
+
 class AppShell extends StatefulWidget {
   const AppShell({
     super.key,
@@ -68,10 +71,13 @@ class _AppShellState extends State<AppShell> {
 
   void _select(AppTab tab) {
     if (tab == _current) return;
+    final firstVisit = !_visited.contains(tab);
     setState(() {
       _current = tab;
       _visited.add(tab);
     });
+    // أول زيارة تحمّل بنفسها؛ العودة إلى التبويب تحدّث البيانات
+    if (tab == AppTab.requests && !firstVisit) requestsTabShown.value++;
   }
 
   Widget _screenFor(AppTab tab) {

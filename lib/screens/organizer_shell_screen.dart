@@ -8,6 +8,8 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import 'event/event_form_screen.dart' show kEventTypeLabels;
+import '../widgets/role_account_menu.dart';
 import 'work/work_dashboard_tab.dart';
 import 'organizer_rentals_screen.dart';
 import 'organizer_request_providers_screen.dart';
@@ -79,11 +81,7 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
             ),
             icon: const Icon(Icons.swap_horiz_rounded),
           ),
-          IconButton(
-            tooltip: 'تسجيل الخروج',
-            onPressed: _signOut,
-            icon: const Icon(Icons.logout),
-          ),
+          RoleAccountButton(onSignOut: _signOut),
         ],
       ),
       body: _bootLoading
@@ -238,7 +236,8 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
         itemBuilder: (context, i) {
           final r = _items[i];
           final id = r['id']?.toString() ?? '';
-          final type = r['occasion_type']?.toString() ?? '';
+          final rawType = r['occasion_type']?.toString() ?? '';
+          final type = kEventTypeLabels[rawType] ?? rawType;
           final status = r['status']?.toString();
           final date = r['occasion_date']?.toString() ?? 'بدون تاريخ';
           final gov = r['governorate']?.toString() ?? '';

@@ -1119,6 +1119,12 @@ static Future<Map<String, dynamic>> getProviderMe() async {
   return _asMap(data);
 }
 
+/// تعديل بيانات التواصل والوصف للمزوّد
+static Future<Map<String, dynamic>> updateProviderMe(Map<String, dynamic> body) async {
+  final data = await _request(method: 'PUT', path: '/api/provider/me', body: body);
+  return _asMap(data);
+}
+
 static Future<Map<String, dynamic>> getProviderAvailability() async {
   final data =
       await _request(method: 'GET', path: '/api/provider/availability');

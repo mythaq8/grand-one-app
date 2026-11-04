@@ -7,6 +7,7 @@
 // - اسم وصورة الخدمة: Deno /api/service-details
 // ============================================================
 
+import '../ui/shell/app_shell.dart' show requestsTabShown;
 import '../ui/kit/kit.dart';
 import 'dart:ui' as ui;
 
@@ -58,11 +59,22 @@ String? _uploadingDepositForBookingId;
   void initState() {
     super.initState();
     _loadBookings();
+    requestsTabShown.addListener(_onTabShown);
   }
 
   // ═══════════════════════════════════════════════════════════
   // تحميل الحجوزات
   // ═══════════════════════════════════════════════════════════
+@override
+void dispose() {
+  requestsTabShown.removeListener(_onTabShown);
+  super.dispose();
+}
+
+void _onTabShown() {
+  if (mounted && !_isLoading) _loadBookings();
+}
+
 Future<void> _loadBookings() async {
   if (!mounted) return;
 

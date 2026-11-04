@@ -1784,11 +1784,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         enabled: !_isBooking,
         decoration: InputDecoration(
-          labelText: 'عدد ($unit)',
+          labelText: 'العدد',
           hintText: 'مثال: 1',
           prefixIcon: const Icon(Icons.numbers_rounded),
+          suffixText: unit,
           helperText: unitPrice != null
-              ? 'الإجمالي = الكمية × ${_formatPrice(unitPrice)} \$'
+              ? 'الإجمالي: ${_formatPrice((num.tryParse(unitPrice.toString()) ?? 0) * _quantity)} \$'
               : null,
         ),
         onChanged: (v) {
@@ -2072,7 +2073,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       const SizedBox(height: 4),
                       Text(
                         reviewsCount > 0
-                            ? 'بناءً على $reviewsCount تقييم'
+                            ? 'بناءً على ${reviewsCount == 1 ? 'تقييم واحد' : reviewsCount == 2 ? 'تقييمين' : reviewsCount <= 10 ? '$reviewsCount تقييمات' : '$reviewsCount تقييماً'}'
                             : 'لا توجد تقييمات بعد',
                         style: const TextStyle(
                           fontSize: 12,
@@ -2097,17 +2098,20 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 color: AppColors.surfaceTint,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Column(
+              child: Column(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.rate_review_outlined,
                     size: 36,
                     color: AppColors.mutedText,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'كن أول من يقيّم هذه الخدمة',
-                    style: TextStyle(
+                    // التقييم بالنجوم موجود لكن بلا تعليقات مكتوبة
+                    reviewsCount > 0
+                        ? 'لا توجد تعليقات مكتوبة بعد'
+                        : 'كن أول من يقيّم هذه الخدمة',
+                    style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,

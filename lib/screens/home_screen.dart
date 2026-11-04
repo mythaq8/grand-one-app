@@ -1211,7 +1211,8 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
+                          // خلفية داكنة لتبقى الشارة مقروءة فوق الصور الفاتحة
+                          color: AppPalette.navyDeep.withValues(alpha: 0.62),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: AppColors.goldLight.withValues(alpha: 0.55),

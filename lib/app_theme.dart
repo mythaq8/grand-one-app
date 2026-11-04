@@ -394,15 +394,20 @@ class AppTheme {
         }),
       ),
       switchTheme: SwitchThemeData(
+        // مفعّل: مسار كحلي ومقبض ذهبي واضح؛ معطّل: رمادي فاتح
         thumbColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) return AppPalette.gold;
-          return AppPalette.textMuted;
+          return AppPalette.surface;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color>((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppPalette.navySoft;
+            return AppPalette.navy;
           }
-          return AppPalette.borderLight;
+          return AppPalette.borderStrong;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith<Color>((states) {
+          if (states.contains(WidgetState.selected)) return AppPalette.navy;
+          return AppPalette.borderStrong;
         }),
       ),
       chipTheme: ChipThemeData(

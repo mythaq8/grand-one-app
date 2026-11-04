@@ -503,9 +503,8 @@ Widget build(BuildContext context) {
                 constraints: BoxConstraints(maxWidth: maxWidth),
                 child: Column(
                   children: [
-                    if (widget.embedded)
-                      _buildDiscoveryHeader()
-                    else
+                    // داخل التبويب لا بطاقة ترحيب: المساحة للقائمة
+                    if (!widget.embedded)
                       const InfoBanner(
                         message: UiCopy.servicesBrowseHint,
                         tone: InfoBannerTone.info,
@@ -607,48 +606,6 @@ Widget build(BuildContext context) {
                   },
                 ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDiscoveryHeader() {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: BoxDecoration(
-        gradient: AppGradients.header,
-        borderRadius: Radii.brLg,
-        border: Border.all(
-          color: AppPalette.gold.withValues(alpha: 0.28),
-        ),
-        boxShadow: AppShadows.soft,
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'اكتشف ما يناسب احتياجاتك',
-            style: TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: Colors.white,
-              height: 1.3,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            'خيارات متنوعة في مكان واحد — اختر خدماتك بكل سهولة.',
-            style: TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFFE8ECF3),
-              height: 1.45,
-            ),
           ),
         ],
       ),

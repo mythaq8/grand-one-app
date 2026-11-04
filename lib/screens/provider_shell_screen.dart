@@ -8,6 +8,8 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import '../widgets/role_account_menu.dart';
+import '../widgets/ux_helpers.dart';
 import 'work/work_dashboard_tab.dart';
 import 'work/work_formatters.dart';
 import '../ui/kit/status_pill.dart';
@@ -24,6 +26,7 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
   int _tab = 0;
   int _pendingCount = 0;
   String? _providerName;
+  bool _missingContact = false;
   bool _bootLoading = true;
   String? _bootError;
 
@@ -43,6 +46,9 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
       final provider = res['provider'];
       if (provider is Map) {
         _providerName = provider['name']?.toString();
+        _missingContact =
+            (provider['phone']?.toString() ?? '').trim().isEmpty &&
+                (provider['whatsapp']?.toString() ?? '').trim().isEmpty;
       }
     } on ApiException catch (e) {
       _bootError = e.message;
@@ -84,10 +90,10 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
               : _providerName!,
         ),
         actions: [
-          IconButton(
-            tooltip: 'تسجيل الخروج',
-            onPressed: _signOut,
-            icon: const Icon(Icons.logout),
+          RoleAccountButton(
+            isProvider: true,
+            onSignOut: _signOut,
+            onContactUpdated: _loadMe,
           ),
         ],
       ),
@@ -110,13 +116,25 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
                     ),
                   ),
                 )
-              : IndexedStack(
-                  index: _tab,
+              : Column(
                   children: [
-                    const WorkDashboardTab(isProvider: true),
-                    const _ProviderBookingsTab(),
-                    const _ProviderServicesTab(),
-                    const _ProviderAvailabilityTab(),
+                    if (_missingContact)
+                      const InfoBanner(
+                        message:
+                            'أضف رقم واتساب أو هاتف من «حسابي ← أرقام التواصل»؛ يحتاجه العميل بعد دفع العربون.',
+                        tone: InfoBannerTone.warning,
+                      ),
+                    Expanded(
+                      child: IndexedStack(
+                        index: _tab,
+                        children: [
+                          const WorkDashboardTab(isProvider: true),
+                          const _ProviderBookingsTab(),
+                          const _ProviderServicesTab(),
+                          const _ProviderAvailabilityTab(),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
       bottomNavigationBar: _bootError != null
@@ -472,7 +490,13 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     }
     if (_items.isEmpty) {
       return Center(
-        child: Text('لا طلبات حالياً', style: AppText.caption),
+        child: EmptyState(
+          icon: Icons.inbox_outlined,
+          title: 'لا طلبات حالياً',
+          body: 'تصلك طلبات العملاء هنا، وأمامك 24 ساعة للرد على كل طلب.',
+          actionLabel: 'تحديث',
+          onAction: _load,
+        ),
       );
     }
 
