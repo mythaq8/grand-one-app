@@ -323,13 +323,6 @@ abstract final class AppAssets {
     'assets/images/brand/promo/promo-01.jpg',
     'assets/images/brand/promo/promo-02.jpg',
     'assets/images/brand/promo/promo-03.jpg',
-    'assets/images/brand/promo/promo-04.jpg',
-    'assets/images/brand/promo/promo-05.jpg',
-    'assets/images/brand/promo/promo-06.jpg',
-    'assets/images/brand/promo/promo-07.jpg',
-    'assets/images/brand/promo/promo-08.jpg',
-    'assets/images/brand/promo/promo-09.jpg',
-    'assets/images/brand/promo/promo-10.jpg',
   ];
 }
 

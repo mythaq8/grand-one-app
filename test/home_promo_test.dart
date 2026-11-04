@@ -40,13 +40,13 @@ void main() {
     await pumpCarousel(tester);
 
     expect(find.text('عالم متكامل من الخدمات'), findsWidgets);
-    expect(find.text('1 / 6'), findsOneWidget);
+    expect(find.text('1 / 3'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
 
-    expect(find.text('2 / 6'), findsOneWidget);
+    expect(find.text('2 / 3'), findsOneWidget);
     expect(find.text('اختر خدماتك بكل سهولة'), findsWidgets);
     expect(tester.takeException(), isNull);
   });

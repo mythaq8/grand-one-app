@@ -1037,35 +1037,14 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
         tag: 'كيف يعمل',
         title: 'اختر خدماتك بكل سهولة',
         description:
-            'اختر الخدمة، أرسل الطلب، وتابع الخطوات من تبويب طلباتي.',
+            'اختر الخدمة وتاريخ مناسبتك، ويردّ المزوّد خلال 24 ساعة.',
       ),
       _HeroSlide(
         assetImage: AppAssets.homePromo[2],
         tag: 'الثقة',
-        title: 'خيارات واضحة وتواصل مباشر',
+        title: 'عربون واضح وتواصل بعد التأكيد',
         description:
-            'الإدارة تراجع الطلبات قبل التأكيد حتى تبقى التفاصيل واضحة.',
-      ),
-      _HeroSlide(
-        assetImage: AppAssets.homePromo[7],
-        tag: 'التنسيق',
-        title: 'نجمع لك التفاصيل لتستمتع بالتجربة',
-        description:
-            'أرسل طلبك وسنتابع معك الخطوات بهدوء ووضوح.',
-      ),
-      _HeroSlide(
-        assetImage: AppAssets.homePromo[8],
-        tag: 'الخدمات',
-        title: 'اكتشف ما يناسب احتياجاتك',
-        description:
-            'تصفّح المزودين والباقات واطلب ما يناسبك.',
-      ),
-      _HeroSlide(
-        assetImage: AppAssets.homePromo[9],
-        tag: 'البداية',
-        title: 'ابدأ من تبويب الخدمات',
-        description:
-            'أكمل بياناتك، ثم افتح الخدمات واطلب ما تحتاجه.',
+            'تدفع العربون بعد قبول المزوّد، وتصلك أرقام التواصل بعد تأكيده.',
       ),
     ];
   }

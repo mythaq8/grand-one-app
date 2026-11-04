@@ -21,6 +21,7 @@ class ProviderShellScreen extends StatefulWidget {
 
 class _ProviderShellScreenState extends State<ProviderShellScreen> {
   int _tab = 0;
+  int _pendingCount = 0;
   String? _providerName;
   bool _bootLoading = true;
   String? _bootError;
@@ -48,6 +49,18 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
       _bootError = 'تعذر تحميل حساب المزود. تأكد من ربط الحساب ونشر الـ API.';
     }
     if (mounted) setState(() => _bootLoading = false);
+    _refreshPending();
+  }
+
+  /// عدد الطلبات الجديدة التي تنتظر ردّ المزوّد (شارة على تبويب الطلبات)
+  Future<void> _refreshPending() async {
+    try {
+      final res = await ApiService.getProviderBookings(status: 'pending', limit: 50);
+      final data = res['data'];
+      if (mounted) setState(() => _pendingCount = data is List ? data.length : 0);
+    } catch (_) {
+      // الشارة اختيارية؛ نتجاهل الفشل
+    }
   }
 
   Future<void> _signOut() async {
@@ -109,24 +122,35 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
           ? null
           : NavigationBar(
               selectedIndex: _tab,
-              onDestinationSelected: (i) => setState(() => _tab = i),
-              destinations: const [
-                NavigationDestination(
+              onDestinationSelected: (i) {
+                setState(() => _tab = i);
+                _refreshPending();
+              },
+              destinations: [
+                const NavigationDestination(
                   icon: Icon(Icons.dashboard_outlined),
                   selectedIcon: Icon(Icons.dashboard),
                   label: 'لوحتي',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.inbox_outlined),
-                  selectedIcon: Icon(Icons.inbox),
+                  icon: Badge(
+                    isLabelVisible: _pendingCount > 0,
+                    label: Text('$_pendingCount'),
+                    child: const Icon(Icons.inbox_outlined),
+                  ),
+                  selectedIcon: Badge(
+                    isLabelVisible: _pendingCount > 0,
+                    label: Text('$_pendingCount'),
+                    child: const Icon(Icons.inbox),
+                  ),
                   label: 'الطلبات',
                 ),
-                NavigationDestination(
+                const NavigationDestination(
                   icon: Icon(Icons.miscellaneous_services_outlined),
                   selectedIcon: Icon(Icons.miscellaneous_services),
                   label: 'خدماتي',
                 ),
-                NavigationDestination(
+                const NavigationDestination(
                   icon: Icon(Icons.calendar_month_outlined),
                   selectedIcon: Icon(Icons.calendar_month),
                   label: 'التقويم',
