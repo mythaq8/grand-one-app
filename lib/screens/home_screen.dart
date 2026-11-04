@@ -364,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ),
                           child: const Text(
-                            'حساب خدمات',
+                            'حساب عميل',
                             style: TextStyle(
                               fontFamily: 'Tajawal',
                               fontSize: 12,
@@ -724,7 +724,7 @@ class _HomeScreenState extends State<HomeScreen>
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'حساب خدمات',
+                        'حساب عميل',
                         style: TextStyle(
                           fontFamily: 'Tajawal',
                           fontSize: 11,
@@ -1106,7 +1106,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
         const Padding(
           padding: EdgeInsets.only(right: 14),
           child: Text(
-            'بطاقات عن آلية الحجز والتحقق والدفع',
+            'من الحجز إلى الدفع، خطوات واضحة وموثوقة',
             style: TextStyle(
               fontFamily: 'Tajawal',
               fontSize: 13,

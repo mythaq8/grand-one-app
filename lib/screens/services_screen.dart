@@ -981,7 +981,7 @@ Widget _buildPartyTab() {
               ),
               const SizedBox(height: 15),
               Text(
-                _errorMessage ?? 'حدث خطأ',
+                _errorMessage ?? 'تعذّر تحميل الخدمات، حاول مرة أخرى',
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,
