@@ -1099,6 +1099,12 @@ static Future<Map<String, dynamic>> getProviderBookings({
   return _asMap(data);
 }
 
+/// ما يُحذف وما يُحتفظ به وما يمنع حذف الحساب.
+static Future<Map<String, dynamic>> getAccountDeletionPreview() async {
+  final data = await _request(method: 'GET', path: '/api/account/delete-preview');
+  return _asMap(data);
+}
+
 /// أرقام المزوّد؛ تظهر بعد تحقق العربون فقط.
 static Future<Map<String, dynamic>> getBookingProviderContact(String bookingId) async {
   final data = await _request(

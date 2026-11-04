@@ -11,6 +11,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../config.dart';
+import '../services/api_service.dart';
 import '../services/session_service.dart';
 import '../services/notifications_service.dart';
 import '../widgets/brand_decorations.dart';
@@ -100,6 +101,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_isDeleting) return;
     if (!mounted) return;
 
+    // ما يُحذف وما يُحتفظ به، والتزامات قائمة تمنع الحذف
+    List<String> deletedItems = const [];
+    List<String> retainedItems = const [];
+    try {
+      final preview = await ApiService.getAccountDeletionPreview();
+      List<String> strings(dynamic v) =>
+          v is List ? v.map((e) => e.toString()).toList() : <String>[];
+      deletedItems = strings(preview['deleted']);
+      retainedItems = strings(preview['retained']);
+      final blockers = preview['blockers'];
+      if (blockers is List && blockers.isNotEmpty) {
+        if (!mounted) return;
+        await showDialog<void>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('لا يمكن حذف الحساب الآن'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final b in blockers.whereType<Map>())
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text('• ${b['message']} (${b['count']})'),
+                  ),
+                const SizedBox(height: 8),
+                const Text(
+                  'أكمل هذه الطلبات أو تواصل مع الدعم، حتى لا تضيع أدلة العربون المدفوع.',
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('حسناً'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      // تعذر جلب المعاينة: نكمل بنص عام، والخادم يرفض الحذف عند وجود التزامات
+    }
+    if (!mounted) return;
+
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -140,15 +187,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          content: const Text(
-            'هل أنت متأكد من حذف حسابك؟\n\n'
-            'سيتم حذف جميع بياناتك نهائيًا: ملفك الشخصي، الطلبات، المحادثات، والصور. '
-            'لا يمكن التراجع عن هذا الإجراء.',
-            textAlign: TextAlign.right,
-            style: TextStyle(
-              fontSize: 13,
-              height: 1.7,
-              color: AppColors.textSecondary,
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.7,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                if (deletedItems.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Text('سيُحذف:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  for (final t in deletedItems) Text('• $t'),
+                ],
+                if (retainedItems.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Text('سيُحتفظ به:',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  for (final t in retainedItems) Text('• $t'),
+                ],
+              ],
             ),
           ),
           actions: [

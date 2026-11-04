@@ -63,8 +63,20 @@ class AppConfig {
   static String get denoApiBaseUrl =>
       (kDebugMode && useLocalApi) ? localApiUrl : _productionApiUrl;
 
+  /// رقم واتساب الدعم وساعاته من /api/bootstrap (فارغ إن لم يُضبط)
+  static String? supportWhatsapp;
+  static String? supportHours;
+
   /// تطبيق إعداد بعيد من `/api/bootstrap`
   static void applyRemoteBootstrap(Map<String, dynamic> map) {
+    final wa = map['support_whatsapp'];
+    if (wa is String && RegExp(r'^\d{8,15}$').hasMatch(wa)) {
+      supportWhatsapp = wa;
+    }
+    final hours = map['support_hours'];
+    if (hours is String && hours.trim().isNotEmpty) {
+      supportHours = hours.trim();
+    }
     final su = map['supabase_url'];
     final sk = map['supabase_anon_key'];
     final api = map['deno_api_base_url'];

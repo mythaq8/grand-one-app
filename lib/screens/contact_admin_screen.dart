@@ -8,8 +8,10 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../app_colors.dart';
+import '../config.dart';
 import '../services/api_service.dart';
 import '../utils/error_handler.dart';
 import '../widgets/brand_decorations.dart';
@@ -173,6 +175,50 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
           child: Column(
             children: [
+              // ------------------------------------------------
+              // واتساب الدعم (إن ضُبط الرقم من الخادم) بجانب نموذج الرسالة
+              // ------------------------------------------------
+              if (AppConfig.supportWhatsapp != null) ...[
+                BrandCard(
+                  padding: const EdgeInsets.all(14),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.chat_outlined, color: AppColors.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'تواصل سريع عبر واتساب',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            if (AppConfig.supportHours != null)
+                              Text(
+                                AppConfig.supportHours!,
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                          ],
+                        ),
+                      ),
+                      FilledButton(
+                        onPressed: () => launchUrl(
+                          Uri.parse('https://wa.me/${AppConfig.supportWhatsapp}'),
+                          mode: LaunchMode.externalApplication,
+                        ),
+                        child: const Text('فتح واتساب'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerRight,
+                  child: Text('أو اترك رسالة للإدارة:'),
+                ),
+                const SizedBox(height: 8),
+              ],
+
               // ------------------------------------------------
               // رأس الصفحة
               // ------------------------------------------------
