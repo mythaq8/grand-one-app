@@ -8,6 +8,7 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import 'role/role_panels.dart';
 import '../widgets/role_account_menu.dart';
 import '../widgets/ux_helpers.dart';
 import 'work/work_dashboard_tab.dart';
@@ -128,10 +129,16 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
                       child: IndexedStack(
                         index: _tab,
                         children: [
-                          const WorkDashboardTab(isProvider: true),
+                          // الرئيسية تُعاد بناؤها عند العودة إليها لتبقى أرقامها حديثة
+                          _tab == 0
+                              ? ProviderHomeTab(onNavigate: _go)
+                              : const SizedBox.shrink(),
                           const _ProviderBookingsTab(),
-                          const _ProviderServicesTab(),
-                          const _ProviderAvailabilityTab(),
+                          const WorkDashboardTab(isProvider: true),
+                          _tab == 3
+                              ? const ProviderFinanceTab()
+                              : const SizedBox.shrink(),
+                          const _ProviderManageTab(),
                         ],
                       ),
                     ),
@@ -141,15 +148,12 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
           ? null
           : NavigationBar(
               selectedIndex: _tab,
-              onDestinationSelected: (i) {
-                setState(() => _tab = i);
-                _refreshPending();
-              },
+              onDestinationSelected: _go,
               destinations: [
                 const NavigationDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard),
-                  label: 'لوحتي',
+                  icon: Icon(Icons.space_dashboard_outlined),
+                  selectedIcon: Icon(Icons.space_dashboard),
+                  label: 'الرئيسية',
                 ),
                 NavigationDestination(
                   icon: Badge(
@@ -165,17 +169,60 @@ class _ProviderShellScreenState extends State<ProviderShellScreen> {
                   label: 'الطلبات',
                 ),
                 const NavigationDestination(
-                  icon: Icon(Icons.miscellaneous_services_outlined),
-                  selectedIcon: Icon(Icons.miscellaneous_services),
-                  label: 'خدماتي',
+                  icon: Icon(Icons.work_outline_rounded),
+                  selectedIcon: Icon(Icons.work_rounded),
+                  label: 'أعمالي',
                 ),
                 const NavigationDestination(
-                  icon: Icon(Icons.calendar_month_outlined),
-                  selectedIcon: Icon(Icons.calendar_month),
-                  label: 'التقويم',
+                  icon: Icon(Icons.account_balance_wallet_outlined),
+                  selectedIcon: Icon(Icons.account_balance_wallet),
+                  label: 'المالية',
+                ),
+                const NavigationDestination(
+                  icon: Icon(Icons.tune_rounded),
+                  selectedIcon: Icon(Icons.tune),
+                  label: 'الإدارة',
                 ),
               ],
             ),
+    );
+  }
+
+  void _go(int i) {
+    setState(() => _tab = i);
+    _refreshPending();
+  }
+}
+
+/// الإدارة: الخدمات والأسعار + ساعات العمل والأيام المغلقة
+class _ProviderManageTab extends StatelessWidget {
+  const _ProviderManageTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Material(
+            color: AppPalette.surface,
+            child: const TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.storefront_outlined), text: 'خدماتي وأسعاري'),
+                Tab(icon: Icon(Icons.calendar_month_outlined), text: 'ساعات العمل'),
+              ],
+            ),
+          ),
+          const Expanded(
+            child: TabBarView(
+              children: [
+                _ProviderServicesTab(),
+                _ProviderAvailabilityTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

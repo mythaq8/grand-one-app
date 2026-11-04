@@ -1059,6 +1059,20 @@ static Future<Map<String, dynamic>> sendEventCart(String eventId,
   return _asMap(data);
 }
 
+// ── لوحات المزوّد والمنظّم ──
+
+static Future<Map<String, dynamic>> getProviderOverview() async =>
+    _asMap(await _request(method: 'GET', path: '/api/provider/overview'));
+
+static Future<Map<String, dynamic>> getProviderSettlements() async =>
+    _asMap(await _request(method: 'GET', path: '/api/provider/settlements'));
+
+static Future<Map<String, dynamic>> getOrganizerOverview() async =>
+    _asMap(await _request(method: 'GET', path: '/api/organizer/overview'));
+
+static Future<Map<String, dynamic>> getOrganizerEarnings() async =>
+    _asMap(await _request(method: 'GET', path: '/api/organizer/earnings'));
+
 // ── أداة تنظيم العمل (مزوّد ومنظّم) ──
 
 static Future<Map<String, dynamic>> getWorkBookings({String? from, String? to}) async {

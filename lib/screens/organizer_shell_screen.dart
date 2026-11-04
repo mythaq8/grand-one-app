@@ -8,6 +8,7 @@ import '../design/typography.dart';
 import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
+import 'role/role_panels.dart';
 import 'event/event_form_screen.dart' show kEventTypeLabels;
 import '../widgets/role_account_menu.dart';
 import 'work/work_dashboard_tab.dart';
@@ -106,40 +107,96 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
               : IndexedStack(
                   index: _tab,
                   children: [
-                    const WorkDashboardTab(isProvider: false),
+                    _tab == 0
+                        ? OrganizerHomeTab(onNavigate: _go)
+                        : const SizedBox.shrink(),
                     const _OrganizerRequestsTab(),
-                    const _OrganizerOwnedServicesTab(),
-                    const _OrganizerAvailabilityTab(),
+                    const WorkDashboardTab(isProvider: false),
+                    _tab == 3
+                        ? const OrganizerFinanceTab()
+                        : const SizedBox.shrink(),
+                    const _OrganizerManageTab(),
                   ],
                 ),
       bottomNavigationBar: _bootError != null
           ? null
           : NavigationBar(
               selectedIndex: _tab,
-              onDestinationSelected: (i) => setState(() => _tab = i),
+              onDestinationSelected: _go,
               destinations: const [
                 NavigationDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard),
-                  label: 'لوحتي',
+                  icon: Icon(Icons.space_dashboard_outlined),
+                  selectedIcon: Icon(Icons.space_dashboard),
+                  label: 'الرئيسية',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.inbox_outlined),
-                  selectedIcon: Icon(Icons.inbox),
-                  label: 'الطلبات',
+                  icon: Icon(Icons.celebration_outlined),
+                  selectedIcon: Icon(Icons.celebration),
+                  label: 'المناسبات',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.miscellaneous_services_outlined),
-                  selectedIcon: Icon(Icons.miscellaneous_services),
-                  label: 'خدماتي',
+                  icon: Icon(Icons.work_outline_rounded),
+                  selectedIcon: Icon(Icons.work_rounded),
+                  label: 'أعمالي',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.calendar_month_outlined),
-                  selectedIcon: Icon(Icons.calendar_month),
-                  label: 'التقويم',
+                  icon: Icon(Icons.account_balance_wallet_outlined),
+                  selectedIcon: Icon(Icons.account_balance_wallet),
+                  label: 'المالية',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.tune_rounded),
+                  selectedIcon: Icon(Icons.tune),
+                  label: 'الإدارة',
                 ),
               ],
             ),
+    );
+  }
+
+  void _go(int i) => setState(() => _tab = i);
+}
+
+/// الإدارة: أصول المنظّم (خدماته الخاصة) + أيام الإتاحة + التأجير
+class _OrganizerManageTab extends StatelessWidget {
+  const _OrganizerManageTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          Material(
+            color: AppPalette.surface,
+            child: const TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.inventory_2_outlined), text: 'أصولي وخدماتي'),
+                Tab(icon: Icon(Icons.calendar_month_outlined), text: 'أيام الإتاحة'),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+            child: ActionTile(
+              icon: Icons.swap_horiz_rounded,
+              title: 'التأجير بين المنظّمين',
+              subtitle: 'استأجر معدات من زملائك أو أجّرهم أصولك',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const OrganizerRentalsScreen()),
+              ),
+            ),
+          ),
+          const Expanded(
+            child: TabBarView(
+              children: [
+                _OrganizerOwnedServicesTab(),
+                _OrganizerAvailabilityTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -175,10 +232,53 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
   String? _error;
   List<Map<String, dynamic>> _items = [];
 
+  static const List<(String?, String)> _stages = [
+    (null, 'الكل'),
+    ('new', 'جديدة'),
+    ('in_review', 'قيد الإعداد'),
+    ('awaiting_client', 'بانتظار العميل'),
+    ('awaiting_deposit', 'بانتظار العربون'),
+    ('confirmed', 'مؤكدة'),
+    ('closed', 'مغلقة'),
+  ];
+
   @override
   void initState() {
     super.initState();
     _load();
+    organizerStageFilter.addListener(_onFilter);
+  }
+
+  @override
+  void dispose() {
+    organizerStageFilter.removeListener(_onFilter);
+    super.dispose();
+  }
+
+  void _onFilter() {
+    if (mounted) _load();
+  }
+
+  Widget _stageChips() {
+    final current = organizerStageFilter.value;
+    return SizedBox(
+      height: 52,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: Space.sm),
+        children: [
+          for (final stage in _stages)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(end: Space.xs),
+              child: ChoiceChip(
+                label: Text(stage.$2),
+                selected: current == stage.$1,
+                onSelected: (_) => organizerStageFilter.value = stage.$1,
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   Future<void> _load() async {
@@ -219,22 +319,40 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
         ),
       );
     }
-    if (_items.isEmpty) {
-      return Center(
-        child: Text(
-          'لا توجد طلبات مسندة بعد',
-          style: AppText.caption,
-        ),
+    final stage = organizerStageFilter.value;
+    final visible = stage == null
+        ? _items
+        : _items.where((r) => r['status']?.toString() == stage).toList();
+    if (visible.isEmpty) {
+      return Column(
+        children: [
+          _stageChips(),
+          Expanded(
+            child: Center(
+              child: EmptyState(
+                icon: Icons.celebration_outlined,
+                title: stage == null ? 'لا توجد طلبات بعد' : 'لا طلبات في هذه المرحلة',
+                body: 'تصلك طلبات العملاء الذين اختاروك لتنظيم مناسباتهم.',
+                actionLabel: 'تحديث',
+                onAction: _load,
+              ),
+            ),
+          ),
+        ],
       );
     }
-    return RefreshIndicator(
+    return Column(
+      children: [
+        _stageChips(),
+        Expanded(
+          child: RefreshIndicator(
       onRefresh: _load,
       child: ListView.separated(
         padding: const EdgeInsets.all(Space.md),
-        itemCount: _items.length,
+        itemCount: visible.length,
         separatorBuilder: (_, __) => const SizedBox(height: Space.sm),
         itemBuilder: (context, i) {
-          final r = _items[i];
+          final r = visible[i];
           final id = r['id']?.toString() ?? '';
           final rawType = r['occasion_type']?.toString() ?? '';
           final type = kEventTypeLabels[rawType] ?? rawType;
@@ -261,6 +379,9 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
           );
         },
       ),
+          ),
+        ),
+      ],
     );
   }
 }
