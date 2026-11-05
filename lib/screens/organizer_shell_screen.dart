@@ -9,6 +9,7 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'role/role_panels.dart';
+import 'role/occasion_workspace_screen.dart';
 import 'event/event_form_screen.dart' show kEventTypeLabels;
 import '../widgets/role_account_menu.dart';
 import 'work/work_dashboard_tab.dart';
@@ -380,7 +381,7 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
                       await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) =>
-                              _OrganizerRequestDetailScreen(requestId: id),
+                              OccasionWorkspaceScreen(requestId: id),
                         ),
                       );
                       if (mounted) _load();
@@ -396,18 +397,18 @@ class _OrganizerRequestsTabState extends State<_OrganizerRequestsTab> {
   }
 }
 
-class _OrganizerRequestDetailScreen extends StatefulWidget {
-  const _OrganizerRequestDetailScreen({required this.requestId});
+class OrganizerQuoteScreen extends StatefulWidget {
+  const OrganizerQuoteScreen({super.key, required this.requestId});
 
   final String requestId;
 
   @override
-  State<_OrganizerRequestDetailScreen> createState() =>
-      _OrganizerRequestDetailScreenState();
+  State<OrganizerQuoteScreen> createState() =>
+      _OrganizerQuoteScreenState();
 }
 
-class _OrganizerRequestDetailScreenState
-    extends State<_OrganizerRequestDetailScreen> {
+class _OrganizerQuoteScreenState
+    extends State<OrganizerQuoteScreen> {
   bool _loading = true;
   bool _busy = false;
   String? _error;
@@ -550,7 +551,7 @@ class _OrganizerRequestDetailScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تفاصيل الطلب'),
+        title: const Text('عرض السعر'),
         actions: [
           IconButton(
             tooltip: 'المزوّدون',

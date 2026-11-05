@@ -1073,6 +1073,27 @@ static Future<Map<String, dynamic>> getOrganizerOverview() async =>
 static Future<Map<String, dynamic>> getOrganizerEarnings() async =>
     _asMap(await _request(method: 'GET', path: '/api/organizer/earnings'));
 
+// ── مساحة عمل المناسبة (منظّم) ──
+static Future<Map<String, dynamic>> getOccasionWorkspace(String requestId) async =>
+    _asMap(await _request(method: 'GET', path: '/api/organizer/requests/$requestId/workspace'));
+
+static Future<void> saveOccasionNotes(String requestId, String notes) async {
+  await _request(method: 'PUT', path: '/api/organizer/requests/$requestId/notes', body: {'notes': notes});
+}
+
+static Future<Map<String, dynamic>> addOccasionTimelineItem(String requestId, Map<String, dynamic> body) async =>
+    _asMap(await _request(method: 'POST', path: '/api/organizer/requests/$requestId/timeline', body: body));
+
+static Future<Map<String, dynamic>> updateOccasionTimelineItem(String requestId, String itemId, Map<String, dynamic> body) async =>
+    _asMap(await _request(method: 'PATCH', path: '/api/organizer/requests/$requestId/timeline/$itemId', body: body));
+
+static Future<void> deleteOccasionTimelineItem(String requestId, String itemId) async {
+  await _request(method: 'DELETE', path: '/api/organizer/requests/$requestId/timeline/$itemId');
+}
+
+static Future<Map<String, dynamic>> completeOccasion(String requestId) async =>
+    _asMap(await _request(method: 'POST', path: '/api/organizer/requests/$requestId/complete', body: {}));
+
 // ── أداة تنظيم العمل (مزوّد ومنظّم) ──
 
 static Future<Map<String, dynamic>> getWorkBookings({String? from, String? to}) async {

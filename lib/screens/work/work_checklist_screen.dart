@@ -13,11 +13,15 @@ class WorkChecklistScreen extends StatefulWidget {
     required this.kind,
     required this.refId,
     required this.title,
+    this.embedded = false,
   });
 
   final String kind;
   final String refId;
   final String title;
+
+  /// داخل تبويب (مساحة عمل المناسبة): بلا شريط عنوان ولا اعتراض للرجوع
+  final bool embedded;
 
   @override
   State<WorkChecklistScreen> createState() => _WorkChecklistScreenState();
@@ -108,13 +112,13 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
     final percent = total == 0 ? 0.0 : done / total;
 
     return PopScope(
-      canPop: false,
+      canPop: widget.embedded,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) Navigator.of(context).pop(_changed);
+        if (!didPop && !widget.embedded) Navigator.of(context).pop(_changed);
       },
       child: Scaffold(
         backgroundColor: AppPalette.background,
-        appBar: AppBar(title: Text(widget.title)),
+        appBar: widget.embedded ? null : AppBar(title: Text(widget.title)),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
