@@ -525,7 +525,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
               for (final f in _fields)
                 Padding(padding: const EdgeInsets.only(bottom: Space.sm), child: _fieldInput(f)),
             ],
-            if (_model != 'quote_request')
+            if (_model == 'fixed_package')
               _listEditor(
                 title: 'الباقات (اختياري)',
                 icon: Icons.inventory_2_outlined,
