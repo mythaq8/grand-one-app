@@ -1083,7 +1083,9 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
     }
 
     final date = booking['booking_date']?.toString() ?? '';
-    final time = booking['booking_time']?.toString() ?? '';
+    final rawTime = booking['booking_time']?.toString() ?? '';
+    // 17:00:00 ← 17:00
+    final time = rawTime.length >= 5 ? rawTime.substring(0, 5) : rawTime;
     final guests = _toInt(booking['guests_count']);
     final price = booking['total_price'];
     final snapshot = booking['price_snapshot'];

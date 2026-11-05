@@ -126,6 +126,19 @@ class _MyOccasionRequestsScreenState extends State<MyOccasionRequestsScreen> {
                   ),
                 ],
               ),
+        // داخل تبويب «طلباتي» لا شريط علوي؛ زر عائم لطلب جديد
+        floatingActionButton: widget.embedded && _items.isNotEmpty
+            ? FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const OccasionOrganizeScreen()),
+                  ).then((_) => _load());
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('تنظيم مناسبة'),
+              )
+            : null,
         body: RefreshIndicator(
           color: AppColors.primary,
           onRefresh: _load,
