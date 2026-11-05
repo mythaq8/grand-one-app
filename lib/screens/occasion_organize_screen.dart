@@ -6,6 +6,7 @@
 // لا يغيّر تبويبي الخدمات/المزوّدين — شاشة مستقلة فقط
 // ============================================================
 
+import 'decor/decor_studio_screen.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -1343,6 +1344,69 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     );
   }
 
+  bool get _isDecorCategory {
+    final c = _categories.where((c) => c['id']?.toString() == _selectedCategoryId);
+    return c.isNotEmpty && (c.first['name']?.toString() ?? '').contains('ديكور');
+  }
+
+  Future<void> _openDecorStudio() async {
+    final categoryId = _selectedCategoryId;
+    if (categoryId == null) return;
+    final result = await Navigator.of(context).push<DecorStudioResult>(
+      MaterialPageRoute(builder: (_) => DecorStudioScreen(categoryId: categoryId)),
+    );
+    if (result == null || !mounted) return;
+    for (final svc in result.services) {
+      if (!_cart.containsKey(svc['id']?.toString())) _addToCart(svc);
+    }
+    // وصف التصميم يُرسَل مع الطلب ليراه المنظّم (يُستبدل إن أعيد التصميم)
+    final marker = '— تصميم الديكور —';
+    var notes = _notesCtrl.text;
+    final i = notes.indexOf(marker);
+    if (i >= 0) notes = notes.substring(0, i).trimRight();
+    _notesCtrl.text = [
+      if (notes.isNotEmpty) notes,
+      marker,
+      result.description,
+    ].join('\n');
+    setState(() {});
+    ErrorHandler.showSuccess(context, 'اعتُمد تصميم الديكور وأُرفق بطلبك');
+  }
+
+  Widget _decorBanner() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Material(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: _openDecorStudio,
+          child: const Padding(
+            padding: EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Icon(Icons.auto_awesome_rounded, color: AppColors.gold, size: 30),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('صمّم ديكورك وشاهده قبل الطلب', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
+                      SizedBox(height: 2),
+                      Text('اختر الكوشة والطاولات والكراسي ولون الورد والإضاءة وشاهد القاعة كاملة', style: TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_left_rounded, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildServicesStep() {
     if (!_typesReady) {
       return const Center(
@@ -1353,6 +1417,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (_isDecorCategory) _decorBanner(),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 2),
             child: Text(
@@ -1383,6 +1448,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     }
     return Column(
       children: [
+        if (_isDecorCategory) _decorBanner(),
         _buildServiceToolbar(),
         if (_subcategories.isNotEmpty)
           Padding(
