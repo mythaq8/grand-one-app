@@ -28,14 +28,57 @@ const Map<String, String> kDurationUnits = {'hour': 'ساعة', 'day': 'يوم',
 
 /// أنواع قطع الديكور التي يركّبها استوديو الديكور في مشهد القاعة.
 const Map<String, (String, IconData)> kDecorPieces = {
-  'kosha': ('كوشة', Icons.weekend_outlined),
+  'kosha': ('كوشة', Icons.filter_vintage_outlined),
+  'sofa': ('أريكة العروسين', Icons.weekend_outlined),
+  'backdrop': ('خلفية', Icons.wallpaper_outlined),
   'table': ('طاولة', Icons.table_restaurant_outlined),
   'chair': ('كرسي', Icons.chair_outlined),
   'flowers': ('تنسيق ورد', Icons.local_florist_outlined),
+  'candles': ('شموع وفوانيس', Icons.local_fire_department_outlined),
   'light': ('إضاءة / ثريا', Icons.light_outlined),
+  'drapes': ('أقمشة سقف', Icons.waves_outlined),
   'aisle': ('ممر', Icons.linear_scale_rounded),
-  'backdrop': ('خلفية', Icons.wallpaper_outlined),
+  'entrance': ('بوابة مدخل', Icons.door_sliding_outlined),
+  'balloons': ('بالونات', Icons.bubble_chart_outlined),
+  'plants': ('نباتات وأشجار', Icons.park_outlined),
+  'sign': ('لوحة ترحيب', Icons.signpost_outlined),
+  'photo_booth': ('ركن تصوير', Icons.photo_camera_outlined),
+  'cake': ('طاولة كيك', Icons.cake_outlined),
 };
+
+/// نوع القطعة المتوقع من اسم الفئة الفرعية (يُقترح تلقائياً ويمكن تغييره)
+String? decorPieceForSubcategory(String name) {
+  const map = <String, String>{
+    'كوش': 'kosha',
+    'أريك': 'sofa',
+    'خلفي': 'backdrop',
+    'ستائر': 'backdrop',
+    'طاولات كيك': 'cake',
+    'ضيافة': 'cake',
+    'طاول': 'table',
+    'مفارش': 'table',
+    'كراسي': 'chair',
+    'ورد': 'flowers',
+    'شموع': 'candles',
+    'فوانيس': 'candles',
+    'ثريات': 'light',
+    'إضاءة': 'light',
+    'أقمشة سقف': 'drapes',
+    'ممر': 'aisle',
+    'سجاد': 'aisle',
+    'بوابات': 'entrance',
+    'مداخل': 'entrance',
+    'بالون': 'balloons',
+    'نبات': 'plants',
+    'أشجار': 'plants',
+    'لوحات': 'sign',
+    'ركن': 'photo_booth',
+  };
+  for (final e in map.entries) {
+    if (name.contains(e.key)) return e.value;
+  }
+  return null;
+}
 
 String decorPieceUrl(String path) =>
     Supabase.instance.client.storage.from('decor-pieces').getPublicUrl(path);
@@ -647,7 +690,13 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
                 for (final s in _subs) DropdownMenuItem(value: s['id'].toString(), child: Text(s['name'].toString())),
               ],
               onChanged: (v) {
-                setState(() => _subId = v);
+                setState(() {
+                  _subId = v;
+                  if (_isDecor && _piece == null && v != null) {
+                    final sub = _subs.where((x) => x['id'].toString() == v).firstOrNull;
+                    _piece = decorPieceForSubcategory(sub?['name']?.toString() ?? '');
+                  }
+                });
                 _loadProfile();
               },
             ),

@@ -1,13 +1,14 @@
 // lib/screens/decor/decor_studio_screen.dart
 // ============================================================
-// «استوديو الديكور»: يختار المستخدم الكوشة والطاولات والكراسي والورد
-// والإضاءة والأرضية بألوانها، فيرى مشهد القاعة كاملاً يتغيّر مباشرة.
-// يعرض خدمات الديكور المطابقة لكل عنصر ليضيفها، ويُرسَل وصف التصميم
-// مع طلب التنظيم ليراه المنظّم.
+// «استوديو الديكور»: يضع المستخدم الديكور في مكان حفله الحقيقي (قاعة أو
+// مطعم أو مزرعة اختارها، أو صورة يرفعها)، أو في مشهد مرسوم يختار خلفيته.
+// يركّب قطع المزوّدين الحقيقية بصورها، ويكمل الباقي بالرسم، ويُرسل وصف
+// التصميم مع طلب التنظيم ليراه المنظّم.
 // ============================================================
 
-import 'dart:math' as math;
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,101 +16,10 @@ import '../../design/tokens.dart';
 import '../../design/typography.dart';
 import '../../services/api_service.dart';
 import '../../ui/kit/kit.dart';
+import 'decor_models.dart';
+import 'decor_painter.dart';
 
-class DecorPalette {
-  const DecorPalette(this.name, this.color);
-  final String name;
-  final Color color;
-}
-
-const kFlowerColors = [
-  DecorPalette('أبيض', Color(0xFFF8F5EF)),
-  DecorPalette('زهري فاتح', Color(0xFFF3B6C6)),
-  DecorPalette('أحمر', Color(0xFFC0263A)),
-  DecorPalette('عنابي', Color(0xFF7A1E2E)),
-  DecorPalette('بنفسجي', Color(0xFF8E6BB8)),
-  DecorPalette('خوخي', Color(0xFFF4B48C)),
-  DecorPalette('أصفر', Color(0xFFF2CF5B)),
-  DecorPalette('أزرق سماوي', Color(0xFF8EC5E8)),
-];
-const kClothColors = [
-  DecorPalette('أبيض', Color(0xFFFFFFFF)),
-  DecorPalette('عاجي', Color(0xFFF4ECD8)),
-  DecorPalette('ذهبي', Color(0xFFD7B56D)),
-  DecorPalette('فضي', Color(0xFFC9CED6)),
-  DecorPalette('زهري', Color(0xFFF2C9D4)),
-  DecorPalette('كحلي', Color(0xFF1F2F57)),
-  DecorPalette('أخضر زيتي', Color(0xFF6F7D4E)),
-  DecorPalette('عنابي', Color(0xFF7A1E2E)),
-];
-const kChairStyles = {
-  'gold': ('كرسي ذهبي (شيافاري)', Color(0xFFC9A35A)),
-  'white': ('كرسي أبيض', Color(0xFFF4F4F4)),
-  'clear': ('كرسي شفاف', Color(0x99D8E6F0)),
-  'wood': ('كرسي خشبي', Color(0xFF8B5E3C)),
-  'covered': ('كرسي بغطاء وفيونكة', Color(0xFFFFFFFF)),
-};
-const kKoshaStyles = {
-  'arch': 'قوس ورد',
-  'round': 'دائرة ذهبية',
-  'panel': 'جدار ورد كامل',
-  'drape': 'ستائر وأقمشة',
-};
-const kTableShapes = {'round': 'دائرية', 'long': 'طويلة (ملكية)'};
-const kLights = {
-  'warm': ('دافئة', Color(0xFFFFD58A)),
-  'cool': ('بيضاء', Color(0xFFEAF4FF)),
-  'pink': ('زهرية', Color(0xFFFFB3D1)),
-  'purple': ('بنفسجية', Color(0xFFC6A8FF)),
-};
-/// خلفيات المشهد: كلها تأخذ لونها من kWallColors
-const kBackdropStyles = {
-  'hall': 'قاعة',
-  'plain': 'لون سادة',
-  'curtain': 'ستائر',
-  'panels': 'جدار كلاسيكي',
-  'garden': 'حديقة',
-  'stars': 'سماء ليلية',
-};
-const kWallColors = [
-  DecorPalette('رمادي دافئ', Color(0xFF6B6459)),
-  DecorPalette('عاجي', Color(0xFFE8DFCB)),
-  DecorPalette('زهري غامق', Color(0xFFB9707F)),
-  DecorPalette('عنابي', Color(0xFF6A1F2E)),
-  DecorPalette('كحلي', Color(0xFF1F2F57)),
-  DecorPalette('أخضر زيتي', Color(0xFF55633E)),
-  DecorPalette('بنفسجي', Color(0xFF5B4A7E)),
-  DecorPalette('أسود', Color(0xFF1E1D22)),
-];
-const kFloors = [
-  DecorPalette('رخام أبيض', Color(0xFFF1EEE9)),
-  DecorPalette('سجاد أحمر', Color(0xFF9E2235)),
-  DecorPalette('خشب', Color(0xFFA8794F)),
-  DecorPalette('عشب صناعي', Color(0xFF6E9A4E)),
-];
-
-class DecorDesign {
-  String kosha = 'arch';
-  int flower = 2;
-  int cloth = 0;
-  String chair = 'gold';
-  String table = 'round';
-  String light = 'warm';
-  int floor = 0;
-  String backdrop = 'hall';
-  int wall = 0;
-  int tables = 6;
-
-  String describe() => [
-        'الكوشة: ${kKoshaStyles[kosha]} بورد ${kFlowerColors[flower].name}',
-        'الطاولات: $tables ${kTableShapes[table]} بمفارش ${kClothColors[cloth].name}',
-        'الكراسي: ${kChairStyles[chair]!.$1}',
-        'الورد على الطاولات: ${kFlowerColors[flower].name}',
-        'الإضاءة: ${kLights[light]!.$1}',
-        'الأرضية: ${kFloors[floor].name}',
-        'الخلفية: ${kBackdropStyles[backdrop]} بلون ${kWallColors[wall].name}',
-      ].join('\n');
-}
+export 'decor_models.dart';
 
 /// نتيجة الاستوديو: وصف التصميم والخدمات المختارة لإضافتها لطلب التنظيم
 class DecorStudioResult {
@@ -119,91 +29,90 @@ class DecorStudioResult {
 }
 
 class DecorStudioScreen extends StatefulWidget {
-  const DecorStudioScreen({super.key, required this.categoryId});
+  const DecorStudioScreen({
+    super.key,
+    required this.categoryId,
+    this.chosenServices = const [],
+  });
 
   final String categoryId;
+
+  /// خدمات اختارها المستخدم في طلبه؛ منها تُقترح قاعته تلقائياً
+  final List<Map<String, dynamic>> chosenServices;
 
   @override
   State<DecorStudioScreen> createState() => _DecorStudioScreenState();
 }
 
-/// أنواع القطع الحقيقية بترتيب العرض (المفتاح = services.preview_piece)
-const kRealPieces = <String, String>{
-  'kosha': 'الكوشة',
-  'backdrop': 'الخلفية',
-  'table': 'الطاولات',
-  'chair': 'الكراسي',
-  'flowers': 'تنسيق الورد',
-  'light': 'الإضاءة والثريات',
-  'aisle': 'الممر',
-};
-
 String _pieceUrl(String path) => Supabase.instance.client.storage.from('decor-pieces').getPublicUrl(path);
 
-/// مواضع الطاولات في المشهد (مركز الطاولة وحجمها) — مشتركة بين الرسم والصور
-List<(Offset, double)> tableSlots(DecorDesign d, double w, double h) {
-  // حتى 4 طاولات في الصف، موزّعة بالتساوي على جانبي الممر؛ الباقي للصف الخلفي
-  final n = d.tables;
-  final rows = math.min(3, (n / 4).ceil());
-  final counts = List<int>.filled(rows, 0);
-  var left = n;
-  for (var r = rows - 1; r >= 0; r--) {
-    counts[r] = r == 0 ? left : math.min(4, left);
-    left -= counts[r];
+String? _serviceImageUrl(Map<String, dynamic> service) {
+  String? fromMap(Object? raw) {
+    if (raw is! Map) return null;
+    final signed = raw['signed_url']?.toString().trim() ?? '';
+    if (signed.startsWith('http')) return signed;
+    final url = raw['image_url']?.toString().trim() ?? '';
+    return url.startsWith('http') ? url : null;
   }
-  const ys = {
-    1: [0.76],
-    2: [0.67, 0.83],
-    3: [0.63, 0.73, 0.86],
-  };
-  const scales = {
-    1: [1.0],
-    2: [0.8, 1.0],
-    3: [0.64, 0.8, 1.0],
-  };
-  const aisle = 0.1; // نصف عرض الممر من عرض المشهد
-  final out = <(Offset, double)>[];
-  for (var r = 0; r < rows; r++) {
-    final count = counts[r];
-    final leftSide = (count / 2).ceil();
-    final rightSide = count - leftSide;
-    final scale = scales[rows]![r];
-    final size = math.min(0.2, (0.5 - aisle) / math.max(leftSide, 1)) * w * scale * 1.05;
-    final y = h * ys[rows]![r];
-    // تضيق الصفوف الخلفية نحو نقطة التلاشي لتبدو بمنظور
-    final span = (0.5 - aisle) * (0.72 + 0.28 * scale);
-    for (var i = 0; i < leftSide; i++) {
-      final t = (i + 0.5) / leftSide;
-      out.add((Offset(w * (0.5 - aisle - span * (1 - t)), y), size));
-    }
-    for (var i = 0; i < rightSide; i++) {
-      final t = (i + 0.5) / rightSide;
-      out.add((Offset(w * (0.5 + aisle + span * t), y), size));
+
+  final cover = fromMap(service['cover_image']);
+  if (cover != null) return cover;
+  final images = service['images'];
+  if (images is List) {
+    for (final img in images) {
+      final url = fromMap(img);
+      if (url != null) return url;
     }
   }
-  return out;
+  return null;
+}
+
+/// مكان الحفل: صورة خدمة (قاعة/مطعم/مزرعة) أو صورة رفعها المستخدم
+class _Venue {
+  const _Venue({required this.name, this.url, this.bytes, this.inOrder = false});
+  final String name;
+  final String? url;
+  final Uint8List? bytes;
+  final bool inOrder;
+  bool get uploaded => bytes != null;
 }
 
 class _DecorStudioScreenState extends State<DecorStudioScreen> {
   final DecorDesign _d = DecorDesign();
   List<Map<String, dynamic>> _services = [];
+  bool _loading = true;
   final Set<String> _picked = {};
 
   /// القطعة الحقيقية المختارة لكل نوع (نوع ← خدمة)
   final Map<String, Map<String, dynamic>> _real = {};
 
-  static final _elements = <(String, String, RegExp)>[
-    ('kosha', 'الكوشة', RegExp('كوش|قوس|منصة')),
-    ('tables', 'الطاولات والمفارش', RegExp('طاول|مفرش|مفارش')),
-    ('chairs', 'الكراسي', RegExp('كرسي|كراسي')),
-    ('flowers', 'الورد', RegExp('ورد|زهور|زهر')),
-    ('light', 'الإضاءة', RegExp('إضاء|اضاء|ليد|إنارة')),
+  List<_Venue> _venues = [];
+  _Venue? _uploaded;
+  _Venue? _venue;
+
+  static const _venueCategoryNames = ['القاعات', 'المطاعم', 'المزارع'];
+
+  static final _elements = <(String, RegExp)>[
+    ('الكوشة والأرائك', RegExp('كوش|قوس|منصة|أريك')),
+    ('الطاولات والمفارش', RegExp('طاول|مفرش|مفارش')),
+    ('الكراسي', RegExp('كرسي|كراسي')),
+    ('الورد', RegExp('ورد|زهور|زهر')),
+    ('الإضاءة والشموع', RegExp('إضاء|اضاء|ليد|إنارة|ثري|شموع|فوانيس')),
+    ('الأقمشة والخلفيات', RegExp('قماش|أقمشة|ستائر|ستار|خلفي')),
+    ('الممرات والمداخل', RegExp('ممر|سجاد|مدخل|بوابة|بوابات')),
+    ('البالونات والنباتات', RegExp('بالون|نبات|أشجار|شجر')),
+    ('ركن التصوير والضيافة', RegExp('تصوير|لوح|ترحيب|كيك|ضيافة')),
   ];
 
   @override
   void initState() {
     super.initState();
-    _loadServices();
+    _load();
+  }
+
+  Future<void> _load() async {
+    await Future.wait([_loadServices(), _loadVenues()]);
+    if (mounted) setState(() => _loading = false);
   }
 
   Future<void> _loadServices() async {
@@ -211,8 +120,73 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
       final resp = await ApiService.getServices(categoryId: widget.categoryId, forOccasion: true, limit: 60, offset: 0);
       final raw = resp['data'];
       _services = raw is List ? raw.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList() : [];
-      if (mounted) setState(() {});
     } catch (_) {}
+  }
+
+  /// أماكن الحفل التي لها صور: ما اختاره المستخدم أولاً ثم بقية القاعات والمطاعم والمزارع
+  Future<void> _loadVenues() async {
+    try {
+      final cats = await ApiService.getServiceCategories();
+      final ids = cats
+          .where((c) => _venueCategoryNames.contains(c['name']?.toString()))
+          .map((c) => c['id'].toString())
+          .toSet();
+      final out = <String, _Venue>{};
+      for (final s in widget.chosenServices) {
+        final url = _serviceImageUrl(s);
+        if (url != null && ids.contains(s['category_id']?.toString())) {
+          out[s['id'].toString()] = _Venue(name: '${s['name']}', url: url, inOrder: true);
+        }
+      }
+      final lists = await Future.wait(
+        ids.map((id) => ApiService.getServices(categoryId: id, forOccasion: true, limit: 30, offset: 0)),
+      );
+      for (final resp in lists) {
+        final raw = resp['data'];
+        if (raw is! List) continue;
+        for (final s in raw.whereType<Map>()) {
+          final m = Map<String, dynamic>.from(s);
+          final url = _serviceImageUrl(m);
+          final id = m['id'].toString();
+          if (url != null && !out.containsKey(id)) out[id] = _Venue(name: '${m['name']}', url: url);
+        }
+      }
+      _venues = out.values.toList();
+      // قاعة الطلب تُعرض مباشرة
+      final inOrder = _venues.where((v) => v.inOrder).firstOrNull;
+      if (inOrder != null && _venue == null && mounted) _selectVenue(inOrder);
+    } catch (_) {}
+  }
+
+  void _selectVenue(_Venue? v) {
+    setState(() {
+      final wasNull = _venue == null;
+      _venue = v;
+      // صورة المكان فيها إضاءتها: لا نضيف ثريات مرسومة فوقها تلقائياً
+      if (v != null && wasNull) _d.fixture = 'none';
+      if (v == null) {
+        _d.horizon = 0.55;
+        if (_d.fixture == 'none') _d.fixture = 'chandelier';
+      }
+    });
+  }
+
+  Future<void> _uploadVenue() async {
+    try {
+      final files = await fp.FilePicker.pickFiles(type: fp.FileType.image);
+      if (files.isEmpty) return;
+      final bytes = await files.first.xFile.readAsBytes();
+      if (bytes.isEmpty) return;
+      if (bytes.length > 15 * 1024 * 1024) {
+        if (mounted) showAppSnack(context, 'حجم الصورة أكبر من 15 ميغابايت', tone: FeedbackTone.error);
+        return;
+      }
+      final v = _Venue(name: 'صورة مكاني', bytes: bytes);
+      _uploaded = v;
+      _selectVenue(v);
+    } catch (_) {
+      if (mounted) showAppSnack(context, 'تعذّرت قراءة الصورة', tone: FeedbackTone.error);
+    }
   }
 
   bool _hasPiece(Map<String, dynamic> s) =>
@@ -221,12 +195,10 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
   List<Map<String, dynamic>> _piecesOf(String type) =>
       _services.where((s) => _hasPiece(s) && s['preview_piece'] == type).toList();
 
-  /// الخدمات بلا صورة قطعة تُعرض كخيارات نصية كما سابقاً
-  List<Map<String, dynamic>> _matches(RegExp re) => _services.where((s) {
-        if (_hasPiece(s)) return false;
-        final text = '${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}';
-        return re.hasMatch(text);
-      }).toList();
+  /// الخدمات بلا صورة قطعة تُعرض كخيارات نصية
+  List<Map<String, dynamic>> _matches(RegExp re) => _services.where((s) => !_hasPiece(s) && re.hasMatch(_text(s))).toList();
+
+  String _text(Map<String, dynamic> s) => '${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}';
 
   void _toggleReal(String type, Map<String, dynamic> s) {
     setState(() {
@@ -244,6 +216,10 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
 
   String _describe() {
     final lines = <String>[];
+    final v = _venue;
+    if (v != null) {
+      lines.add(v.uploaded ? 'المكان: صورة رفعها العميل (للمعاينة عنده فقط، اطلبها منه عند الحاجة)' : 'المكان: ${v.name}');
+    }
     if (_real.isNotEmpty) {
       lines.add('قطع مختارة من المزوّدين:');
       for (final e in kRealPieces.entries) {
@@ -251,18 +227,18 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         if (s != null) lines.add('• ${e.value}: ${s['name']}');
       }
     }
-    final painted = _d.describe().split('\n');
-    // الأسطر المرسومة فقط للعناصر التي لم تُستبدل بقطعة حقيقية
-    final skip = <String>{
-      if (_real.containsKey('kosha')) 'الكوشة',
-      if (_real.containsKey('chair')) 'الكراسي',
-      if (_real.containsKey('flowers')) 'الورد على الطاولات',
-      if (_real.containsKey('light')) 'الإضاءة',
-      if (_real.containsKey('backdrop')) 'الخلفية',
-    };
-    lines.addAll(painted.where((l) => !skip.any((k) => l.startsWith('$k:'))));
+    for (final l in _d.describeLines(hasVenue: v != null)) {
+      if (l.$1 == null || !_real.containsKey(l.$1)) lines.add(l.$2);
+    }
+    final extras = [
+      for (final e in kExtras.entries)
+        if (_d.extras.contains(e.key) && !_real.containsKey(e.key)) e.value.$1,
+    ];
+    if (extras.isNotEmpty) lines.add('عناصر إضافية: ${extras.join('، ')}');
     return lines.join('\n');
   }
+
+  // ── أدوات الواجهة ─────────────────────────────────────
 
   Widget _swatches(List<DecorPalette> list, int selected, ValueChanged<int> onPick) {
     return Wrap(
@@ -319,6 +295,101 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         ),
       );
 
+  Widget _thumb({required Widget image, required String label, required bool selected, required VoidCallback onTap}) {
+    return InkWell(
+      borderRadius: Radii.brMd,
+      onTap: onTap,
+      child: Container(
+        width: 104,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: AppPalette.surface,
+          borderRadius: Radii.brMd,
+          border: Border.all(color: selected ? AppPalette.navy : AppPalette.borderStrong, width: selected ? 2.5 : 1),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(borderRadius: BorderRadius.circular(8), child: image),
+                  if (selected)
+                    const Align(
+                      alignment: AlignmentDirectional.topEnd,
+                      child: Icon(Icons.check_circle, color: AppPalette.navy, size: 20),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(label, maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: AppText.caption),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _strip(List<Widget> children) => SizedBox(
+        height: 128,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: children.length,
+          separatorBuilder: (_, _) => const SizedBox(width: Space.sm),
+          itemBuilder: (_, i) => children[i],
+        ),
+      );
+
+  /// مكان الحفل: مشهد مرسوم، أو صورة مرفوعة، أو قاعة/مطعم/مزرعة
+  Widget _venueSection() {
+    final all = [if (_uploaded != null) _uploaded!, ..._venues];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SectionHeader(
+          title: 'مكان الحفل',
+          subtitle: 'اختر قاعتك أو ارفع صورة المكان ليصبح هو الخلفية والأرضية',
+          icon: Icons.place_outlined,
+        ),
+        _strip([
+          _thumb(
+            image: const ColoredBox(color: AppPalette.background, child: Icon(Icons.add_a_photo_outlined, size: 34, color: AppPalette.navy)),
+            label: 'رفع صورة المكان',
+            selected: false,
+            onTap: _uploadVenue,
+          ),
+          _thumb(
+            image: const ColoredBox(color: AppPalette.background, child: Icon(Icons.brush_outlined, size: 34, color: AppPalette.navy)),
+            label: 'مشهد مرسوم',
+            selected: _venue == null,
+            onTap: () => _selectVenue(null),
+          ),
+          for (final v in all)
+            _thumb(
+              image: v.bytes != null
+                  ? Image.memory(v.bytes!, fit: BoxFit.cover)
+                  : Image.network(v.url!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
+              label: v.inOrder ? '${v.name} (في طلبك)' : v.name,
+              selected: identical(_venue, v),
+              onTap: () => _selectVenue(v),
+            ),
+        ]),
+        if (_venue != null) ...[
+          const SizedBox(height: Space.sm),
+          Text('طابق القطع مع صورتك: حرّك خط الأرضية إلى حيث يلتقي الجدار بالأرض، ثم اضبط الحجم.', style: AppText.caption),
+          _slider('خط الأرضية', _d.horizon, 0.3, 0.85, (v) => setState(() => _d.horizon = v)),
+        ],
+      ],
+    );
+  }
+
+  Widget _slider(String label, double value, double min, double max, ValueChanged<double> onChanged) => Row(
+        children: [
+          SizedBox(width: 88, child: Text(label, style: AppText.body)),
+          Expanded(child: Slider(value: value, min: min, max: max, onChanged: onChanged)),
+        ],
+      );
+
   /// شريط بطاقات القطع الحقيقية لنوع واحد
   Widget _pieceStrip(String type, String title) {
     final items = _piecesOf(type);
@@ -331,59 +402,25 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         children: [
           Text(title, style: AppText.subtitle),
           const SizedBox(height: Space.xs),
-          SizedBox(
-            height: 128,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: items.length,
-              separatorBuilder: (_, _) => const SizedBox(width: Space.sm),
-              itemBuilder: (_, i) {
-                final s = items[i];
-                final on = s['id'].toString() == sel;
-                return InkWell(
-                  borderRadius: Radii.brMd,
-                  onTap: () => _toggleReal(type, s),
-                  child: Container(
-                    width: 104,
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppPalette.surface,
-                      borderRadius: Radii.brMd,
-                      border: Border.all(color: on ? AppPalette.navy : AppPalette.borderStrong, width: on ? 2.5 : 1),
-                    ),
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.network(
-                                _pieceUrl(s['preview_image_path'].toString()),
-                                fit: BoxFit.contain,
-                                errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
-                              ),
-                              if (on)
-                                const Align(
-                                  alignment: AlignmentDirectional.topEnd,
-                                  child: Icon(Icons.check_circle, color: AppPalette.navy, size: 20),
-                                ),
-                            ],
-                          ),
-                        ),
-                        Text('${s['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: AppText.caption),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+          _strip([
+            for (final s in items)
+              _thumb(
+                image: Image.network(
+                  _pieceUrl(s['preview_image_path'].toString()),
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
+                ),
+                label: '${s['name']}',
+                selected: s['id'].toString() == sel,
+                onTap: () => _toggleReal(type, s),
+              ),
+          ]),
         ],
       ),
     );
   }
 
-  // ── تركيب المشهد ─────────────────────────────────────────
+  // ── تركيب المشهد ─────────────────────────────────────
 
   Widget _img(Map<String, dynamic>? s, {BoxFit fit = BoxFit.contain, Alignment align = Alignment.bottomCenter}) {
     if (s == null) return const SizedBox.shrink();
@@ -412,11 +449,20 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     );
   }
 
+  Widget _venueImage(_Venue v) => v.bytes != null
+      ? Image.memory(v.bytes!, fit: BoxFit.cover, gaplessPlayback: true)
+      : Image.network(v.url!, fit: BoxFit.cover, gaplessPlayback: true, errorBuilder: (_, _, _) => const ColoredBox(color: Colors.black12));
+
+  Widget _layer(String name, Set<String> realKeys) =>
+      Positioned.fill(child: CustomPaint(painter: DecorPainter(_d, layer: name, real: realKeys)));
+
   Widget _scene() {
     return LayoutBuilder(builder: (context, c) {
       final w = c.maxWidth, h = c.maxHeight;
       final realKeys = _real.keys.toSet();
-      final table = _real['table'], chair = _real['chair'], flowers = _real['flowers'];
+      final k = _d.scale;
+      final horizon = h * _d.horizon;
+      final table = _real['table'], chair = _real['chair'], flowers = _real['flowers'], candles = _real['candles'];
       final slots = tableSlots(_d, w, h);
       Positioned at(double cx, double bottom, double width, double height, Widget child) =>
           Positioned(left: cx - width / 2, top: bottom - height, width: width, height: height, child: child);
@@ -424,21 +470,38 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
       return Stack(
         clipBehavior: Clip.hardEdge,
         children: [
-          Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'bg', real: realKeys))),
-          if (_real['backdrop'] != null)
-            Positioned(left: 0, top: 0, width: w, height: h * 0.56, child: _img(_real['backdrop'], fit: BoxFit.cover, align: Alignment.center)),
+          // المكان: صورة حقيقية كاملة، أو خلفية وأرضية مرسومتان
+          if (_venue != null)
+            Positioned.fill(child: _venueImage(_venue!))
+          else ...[
+            _layer('bg', realKeys),
+            if (_real['backdrop'] != null)
+              Positioned(left: 0, top: 0, width: w, height: horizon + h * 0.01, child: _img(_real['backdrop'], fit: BoxFit.cover, align: Alignment.center)),
+          ],
+          _layer('ceiling', realKeys),
+          if (_real['drapes'] != null)
+            Positioned(left: 0, top: 0, width: w, height: h * 0.3, child: _img(_real['drapes'], fit: BoxFit.fill, align: Alignment.topCenter)),
           if (_real['light'] != null)
             for (final x in const [0.2, 0.5, 0.8])
-              Positioned(left: w * x - w * 0.1, top: 0, width: w * 0.2, height: h * 0.22, child: _img(_real['light'], align: Alignment.topCenter)),
+              Positioned(left: w * x - w * 0.1 * k, top: 0, width: w * 0.2 * k, height: h * 0.22 * k, child: _img(_real['light'], align: Alignment.topCenter)),
+          // عناصر خلفية بصورها الحقيقية أو مرسومة
+          _layer('back', realKeys),
+          if (_real['photo_booth'] != null) at(w * 0.1, horizon + h * 0.02, w * 0.18 * k, h * 0.42 * k, _img(_real['photo_booth'])),
+          if (_real['cake'] != null) at(w * 0.9, horizon + h * 0.05, w * 0.16 * k, h * 0.34 * k, _img(_real['cake'])),
+          if (_real['plants'] != null)
+            for (final x in const [0.2, 0.8]) at(w * x, horizon + h * 0.015, w * 0.14 * k, h * 0.36 * k, _img(_real['plants'])),
+          if (_real['balloons'] != null)
+            for (final x in const [0.27, 0.73]) at(w * x, horizon + h * 0.02, w * 0.16 * k, h * 0.44 * k, _img(_real['balloons'])),
+          _layer('aisle', realKeys),
           if (_real['aisle'] != null)
-            Positioned(left: w * 0.4, top: h * 0.55, width: w * 0.2, height: h * 0.45, child: _img(_real['aisle'], fit: BoxFit.fill)),
+            Positioned(left: w * 0.38, top: horizon, width: w * 0.24, height: h - horizon, child: _img(_real['aisle'], fit: BoxFit.fill)),
           if (_real['kosha'] != null)
-            at(w / 2, h * 0.6, w * 0.56, h * 0.54, _img(_real['kosha']))
-          else
-            Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'kosha', real: realKeys))),
-          // الأجزاء المرسومة من الطاولات (ما لم يُستبدل بصور)
-          Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'tables', real: realKeys))),
-          // الصور الحقيقية لكل طاولة بالعمق: كراسٍ خلفية ← طاولة ← ورد ← كراسٍ جانبية
+            at(w / 2, horizon + h * 0.05, w * 0.56 * k, h * 0.54 * k, _img(_real['kosha'])),
+          _layer('kosha', realKeys),
+          if (_real['sofa'] != null && _real['kosha'] == null)
+            at(w / 2, horizon, w * 0.26 * k, h * 0.2 * k, _img(_real['sofa'])),
+          // الأجزاء المرسومة من الطاولات، ثم الصور الحقيقية لكل طاولة بالعمق
+          _layer('tables', realKeys),
           for (final (p, size) in slots) ...[
             if (chair != null)
               for (final dx in const [-0.24, 0.24]) ...[
@@ -450,12 +513,18 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
               at(p.dx, p.dy + size * 0.24, size * 0.85, size * 0.56, _img(table)),
             ],
             if (flowers != null) at(p.dx, p.dy + (table != null ? -size * 0.1 : size * 0.01), size * 0.34, size * 0.34, _img(flowers)),
+            if (candles != null)
+              for (final dx in const [-0.18, 0.18]) at(p.dx + size * dx, p.dy + size * 0.01, size * 0.13, size * 0.24, _img(candles)),
             if (chair != null)
               for (final dx in const [-0.44, 0.44]) ...[
                 _contactShadow(p.dx + size * dx, p.dy + size * 0.27, size * 0.3),
                 at(p.dx + size * dx, p.dy + size * 0.28, size * 0.3, size * 0.52, _img(chair)),
               ],
           ],
+          _layer('front', realKeys),
+          if (_real['entrance'] != null)
+            for (final x in const [0.05, 0.95]) at(w * x, h * 0.99, w * 0.16 * k, h * 0.7 * k, _img(_real['entrance'])),
+          if (_real['sign'] != null) at(w * 0.62, h * 0.985, w * 0.14 * k, h * 0.3 * k, _img(_real['sign'])),
         ],
       );
     });
@@ -464,6 +533,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
   @override
   Widget build(BuildContext context) {
     final hasReal = kRealPieces.keys.any((k) => _piecesOf(k).isNotEmpty);
+    final others = _services.where((s) => !_hasPiece(s) && _elements.every((e) => !e.$2.hasMatch(_text(s)))).toList();
     return Scaffold(
       backgroundColor: AppPalette.background,
       appBar: AppBar(title: const Text('استوديو الديكور')),
@@ -474,28 +544,20 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
             aspectRatio: 16 / 10,
             child: ClipRRect(
               borderRadius: Radii.brLg,
-              child: TweenAnimationBuilder<double>(
-                key: ValueKey('${_d.describe()}|${_real.values.map((s) => s['id']).join(',')}'),
-                tween: Tween(begin: 0.6, end: 1),
-                duration: const Duration(milliseconds: 350),
-                builder: (_, t, child) => Opacity(opacity: t, child: child),
-                child: _scene(),
-              ),
+              child: _scene(),
             ),
           );
           final controls = ListView(
             padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 120),
             children: [
-              Text(
-                hasReal
-                    ? 'اختر قطعاً حقيقية من المزوّدين لتظهر في القاعة بصورها، وأكمل الباقي بالألوان.'
-                    : 'غيّر أي عنصر وشاهد القاعة تتغيّر مباشرة. المعاينة تقريبية لتصوّر الفكرة.',
-                style: AppText.caption,
-              ),
+              _venueSection(),
+              _slider('حجم القطع', _d.scale, 0.6, 1.5, (v) => setState(() => _d.scale = v)),
+              if (_loading) const LinearProgressIndicator(),
               if (hasReal) ...[
                 const SectionHeader(title: 'قطع حقيقية من المزوّدين', subtitle: 'اضغط القطعة لتركيبها في المشهد', icon: Icons.photo_library_outlined),
                 for (final e in kRealPieces.entries) _pieceStrip(e.key, e.value),
               ],
+              const SectionHeader(title: 'صمّم بنفسك', subtitle: 'تصوّر تقريبي لما لم تختر له قطعة حقيقية', icon: Icons.palette_outlined),
               if (!_real.containsKey('kosha'))
                 _group('شكل الكوشة', _choices(kKoshaStyles, _d.kosha, (v) => setState(() => _d.kosha = v))),
               _group('لون الورد', _swatches(kFlowerColors, _d.flower, (v) => setState(() => _d.flower = v))),
@@ -523,54 +585,50 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
                 _group('لون المفارش', _swatches(kClothColors, _d.cloth, (v) => setState(() => _d.cloth = v))),
               if (!_real.containsKey('chair'))
                 _group('الكراسي', _choices({for (final e in kChairStyles.entries) e.key: e.value.$1}, _d.chair, (v) => setState(() => _d.chair = v))),
-              _group('الإضاءة', _choices({for (final e in kLights.entries) e.key: e.value.$1}, _d.light, (v) => setState(() => _d.light = v))),
-              _group('الأرضية', _swatches(kFloors, _d.floor, (v) => setState(() => _d.floor = v))),
-              if (!_real.containsKey('backdrop')) ...[
-                _group('الخلفية', _choices(kBackdropStyles, _d.backdrop, (v) => setState(() => _d.backdrop = v))),
-                _group('لون الخلفية', _swatches(kWallColors, _d.wall, (v) => setState(() => _d.wall = v))),
+              if (!_real.containsKey('light')) _group('الثريات', _choices(kFixtures, _d.fixture, (v) => setState(() => _d.fixture = v))),
+              _group('لون الإضاءة', _choices({for (final e in kLights.entries) e.key: e.value.$1}, _d.light, (v) => setState(() => _d.light = v))),
+              _group('عناصر إضافية', Wrap(
+                spacing: Space.sm,
+                runSpacing: Space.sm,
+                children: [
+                  for (final e in kExtras.entries)
+                    if (!_real.containsKey(e.key))
+                      FilterChip(
+                        avatar: Icon(e.value.$2, size: 18),
+                        label: Text(e.value.$1),
+                        selected: _d.extras.contains(e.key),
+                        onSelected: (on) => setState(() => on ? _d.extras.add(e.key) : _d.extras.remove(e.key)),
+                      ),
+                ],
+              )),
+              if (_venue == null) ...[
+                _group('الأرضية', _swatches(kFloors, _d.floor, (v) => setState(() => _d.floor = v))),
+                if (!_real.containsKey('backdrop')) ...[
+                  _group('الخلفية', _choices(kBackdropStyles, _d.backdrop, (v) => setState(() => _d.backdrop = v))),
+                  _group('لون الخلفية', _swatches(kWallColors, _d.wall, (v) => setState(() => _d.wall = v))),
+                ],
               ],
               const SectionHeader(title: 'خدمات تحقق تصميمك', subtitle: 'اختر ما تريد إضافته لطلبك', icon: Icons.storefront_outlined),
               if (_services.isEmpty)
-                Text('لا خدمات ديكور منشورة بعد؛ سيُرسَل تصميمك للمنظّم ليجهّزه.', style: AppText.bodySecondary)
+                Text(
+                  _loading ? 'جارٍ تحميل الخدمات...' : 'لا خدمات ديكور منشورة بعد؛ سيُرسَل تصميمك للمنظّم ليجهّزه.',
+                  style: AppText.bodySecondary,
+                )
               else ...[
-                for (final el in _elements) ...[
-                  if (_matches(el.$3).isNotEmpty) ...[
+                for (final el in _elements)
+                  if (_matches(el.$2).isNotEmpty) ...[
                     Padding(
                       padding: const EdgeInsets.only(top: Space.sm, bottom: Space.xs),
-                      child: Text(el.$2, style: AppText.subtitle),
+                      child: Text(el.$1, style: AppText.subtitle),
                     ),
-                    Wrap(
-                      spacing: Space.sm,
-                      runSpacing: Space.sm,
-                      children: [
-                        for (final s in _matches(el.$3))
-                          FilterChip(
-                            label: Text('${s['name']}'),
-                            selected: _picked.contains(s['id'].toString()),
-                            onSelected: (on) => setState(() => on ? _picked.add(s['id'].toString()) : _picked.remove(s['id'].toString())),
-                          ),
-                      ],
-                    ),
+                    _serviceChips(_matches(el.$2)),
                   ],
-                ],
-                // خدمات لا تطابق أي عنصر ولا تملك صورة قطعة
-                if (_services.where((s) => !_hasPiece(s) && _elements.every((e) => !e.$3.hasMatch('${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}'))).isNotEmpty) ...[
+                if (others.isNotEmpty) ...[
                   Padding(
                     padding: const EdgeInsets.only(top: Space.sm, bottom: Space.xs),
                     child: Text('خدمات ديكور أخرى', style: AppText.subtitle),
                   ),
-                  Wrap(
-                    spacing: Space.sm,
-                    runSpacing: Space.sm,
-                    children: [
-                      for (final s in _services.where((s) => !_hasPiece(s) && _elements.every((e) => !e.$3.hasMatch('${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}'))))
-                        FilterChip(
-                          label: Text('${s['name']}'),
-                          selected: _picked.contains(s['id'].toString()),
-                          onSelected: (on) => setState(() => on ? _picked.add(s['id'].toString()) : _picked.remove(s['id'].toString())),
-                        ),
-                    ],
-                  ),
+                  _serviceChips(others),
                 ],
               ],
             ],
@@ -581,7 +639,10 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, Space.xs),
-                  child: SizedBox(height: c.maxHeight * 0.38, child: Center(child: preview)),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: c.maxHeight * 0.38),
+                    child: Center(child: preview),
+                  ),
                 ),
                 Expanded(child: controls),
               ],
@@ -614,437 +675,17 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
       ),
     );
   }
-}
 
-// ── رسم القاعة ───────────────────────────────────────────────
-
-class _HallPainter extends CustomPainter {
-  _HallPainter(this.d, {this.layer = 'all', this.real = const {}});
-  final DecorDesign d;
-
-  /// 'bg' الجدار والأرضية والإضاءة، 'kosha' الكوشة، 'tables' الطاولات، 'all' الكل
-  final String layer;
-
-  /// أنواع القطع المستبدلة بصور حقيقية (لا تُرسم)
-  final Set<String> real;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width, h = size.height;
-    final light = kLights[d.light]!.$2;
-    final flower = kFlowerColors[d.flower].color;
-    final cloth = kClothColors[d.cloth].color;
-    final floor = kFloors[d.floor].color;
-    if (layer == 'kosha') {
-      _kosha(canvas, Offset(w / 2, h * 0.5), w, h, flower, light);
-      return;
-    }
-    if (layer == 'tables') {
-      _tables(canvas, w, h, cloth, flower);
-      return;
-    }
-
-    _wall(canvas, w, h, light);
-    // الأرضية بمنظور
-    final floorPath = Path()
-      ..moveTo(0, h * 0.55)
-      ..lineTo(w, h * 0.55)
-      ..lineTo(w, h)
-      ..lineTo(0, h)
-      ..close();
-    canvas.drawPath(
-      floorPath,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(floor, Colors.black, 0.25)!, floor],
-        ).createShader(Rect.fromLTWH(0, h * 0.55, w, h * 0.45)),
-    );
-    _floorTexture(canvas, w, h, floor);
-    // بقع الضوء
-    final glow = Paint()..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
-    final ceiling = !real.contains('light') && d.backdrop != 'garden' && d.backdrop != 'stars';
-    for (var i = 0; i < (ceiling ? 5 : 0); i++) {
-      final x = w * (0.1 + i * 0.2);
-      canvas.drawCircle(Offset(x, h * 0.08), 26, glow..color = light.withValues(alpha: 0.55));
-      canvas.drawLine(Offset(x, 0), Offset(x, h * 0.06), Paint()..color = light..strokeWidth = 1.5);
-      canvas.drawCircle(Offset(x, h * 0.07), 4, Paint()..color = light);
-    }
-
-    if (layer == 'bg') return;
-    _kosha(canvas, Offset(w / 2, h * 0.5), w, h, flower, light);
-    _tables(canvas, w, h, cloth, flower);
-  }
-
-  /// خطوط بلاط بمنظور نحو نقطة التلاشي، وظل عند التقاء الأرضية بالجدار
-  void _floorTexture(Canvas c, double w, double h, Color floor) {
-    final top = h * 0.55;
-    final floorRect = Rect.fromLTWH(0, top, w, h - top);
-    c.save();
-    c.clipRect(floorRect);
-    final dark = floor.computeLuminance() < 0.25;
-    final line = Paint()
-      ..color = (dark ? Colors.white : Colors.black).withValues(alpha: 0.1)
-      ..strokeWidth = 1;
-    final vanish = Offset(w / 2, top - h * 0.1);
-    for (var i = -10; i <= 10; i++) {
-      c.drawLine(vanish, Offset(w / 2 + i * w * 0.18, h), line);
-    }
-    for (var i = 1; i <= 9; i++) {
-      final t = i / 9;
-      final y = top + (h - top) * t * t;
-      c.drawLine(Offset(0, y), Offset(w, y), line);
-    }
-    // لمعة خفيفة في وسط الأرضية
-    c.drawRect(
-      floorRect,
-      Paint()
-        ..shader = RadialGradient(
-          center: const Alignment(0, -0.6),
-          radius: 0.9,
-          colors: [Colors.white.withValues(alpha: 0.16), Colors.white.withValues(alpha: 0)],
-        ).createShader(floorRect),
-    );
-    // ظل الجدار على الأرضية يزيل الخط الحاد بينهما
-    final band = Rect.fromLTWH(0, top, w, h * 0.07);
-    c.drawRect(
-      band,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.black.withValues(alpha: 0.34), Colors.black.withValues(alpha: 0)],
-        ).createShader(band),
-    );
-    c.restore();
-  }
-
-  /// الخلفية حسب النوع واللون المختارين (تغطي نصف المشهد العلوي)
-  void _wall(Canvas c, double w, double h, Color light) {
-    final rect = Rect.fromLTWH(0, 0, w, h * 0.55);
-    final base = kWallColors[d.wall].color;
-    final u = h / 415;
-    Color shade(double t) => Color.lerp(base, t < 0 ? Colors.black : Colors.white, t.abs())!;
-
-    c.save();
-    c.clipRect(rect);
-    // الأساس: تدرّج من اللون مع أثر الإضاءة
-    c.drawRect(
-      rect,
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(shade(-0.35), light, 0.08)!, Color.lerp(base, light, 0.22)!],
-        ).createShader(rect),
-    );
-
-    switch (d.backdrop) {
-      case 'hall':
-        // أعمدة وأقواس وإفريز
-        const n = 6;
-        final bay = w / n;
-        final inset = Paint()..color = shade(-0.18);
-        for (var i = 0; i < n; i++) {
-          final x = i * bay + bay * 0.14;
-          final bw = bay * 0.72;
-          final top = rect.height * 0.3;
-          final r = bw / 2;
-          final arch = Path()
-            ..moveTo(x, rect.bottom)
-            ..lineTo(x, top + r)
-            ..arcToPoint(Offset(x + bw, top + r), radius: Radius.circular(r))
-            ..lineTo(x + bw, rect.bottom)
-            ..close();
-          c.drawPath(arch, inset);
-          c.drawPath(arch, Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.5 * u
-            ..color = shade(0.3).withValues(alpha: 0.6));
-        }
-        c.drawRect(Rect.fromLTWH(0, 0, w, 12 * u), Paint()..color = shade(0.22));
-      case 'curtain':
-        // طيّات ستارة عمودية بظل وضوء، مع كورنيش علوي
-        final pleats = (w / (22 * u)).ceil();
-        final pw = w / pleats;
-        for (var i = 0; i < pleats; i++) {
-          final r = Rect.fromLTWH(i * pw, 0, pw + 0.5, rect.height);
-          c.drawRect(
-            r,
-            Paint()
-              ..shader = LinearGradient(colors: [shade(-0.38), shade(0.14), shade(-0.32)]).createShader(r),
-          );
-        }
-        c.drawRect(Rect.fromLTWH(0, 0, w, 10 * u), Paint()..color = const Color(0xFFD7B56D));
-      case 'panels':
-        // إطارات جدارية كلاسيكية
-        const n = 5;
-        final pw = w / n;
-        final line = Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2 * u
-          ..color = shade(0.28).withValues(alpha: 0.75);
-        for (var i = 0; i < n; i++) {
-          c.drawRect(
-            Rect.fromLTWH(i * pw + pw * 0.1, rect.height * 0.14, pw * 0.8, rect.height * 0.76),
-            line,
-          );
-          c.drawRect(
-            Rect.fromLTWH(i * pw + pw * 0.17, rect.height * 0.2, pw * 0.66, rect.height * 0.64),
-            line..strokeWidth = 1 * u,
-          );
-          line.strokeWidth = 2 * u;
-        }
-      case 'garden':
-        // سماء من لون الخلفية وأشجار وسياج أخضر
-        c.drawRect(
-          rect,
-          Paint()
-            ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [shade(0.25), shade(0.75)],
-            ).createShader(rect),
-        );
-        final rnd = math.Random(7);
-        for (var i = 0; i < 9; i++) {
-          final x = w * (i + 0.5) / 9;
-          final tr = (34 + rnd.nextDouble() * 20) * u;
-          final y = rect.bottom - tr * (1.3 + rnd.nextDouble() * 0.5);
-          c.drawCircle(Offset(x, y), tr, Paint()..color = Color.lerp(const Color(0xFF3F6B3A), const Color(0xFF5E8A48), rnd.nextDouble())!);
-          c.drawCircle(Offset(x - tr * 0.3, y - tr * 0.3), tr * 0.55, Paint()..color = const Color(0xFF6E9A55).withValues(alpha: 0.7));
-        }
-        c.drawRect(Rect.fromLTWH(0, rect.bottom - 26 * u, w, 26 * u), Paint()..color = const Color(0xFF3B5F35));
-      case 'stars':
-        // سماء ليلية بنجوم وحبال إضاءة
-        c.drawRect(
-          rect,
-          Paint()
-            ..shader = LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color.lerp(base, Colors.black, 0.72)!, Color.lerp(base, Colors.black, 0.4)!],
-            ).createShader(rect),
-        );
-        final rnd = math.Random(11);
-        for (var i = 0; i < 90; i++) {
-          c.drawCircle(
-            Offset(rnd.nextDouble() * w, rnd.nextDouble() * rect.height),
-            (0.5 + rnd.nextDouble()) * u,
-            Paint()..color = Colors.white.withValues(alpha: 0.35 + rnd.nextDouble() * 0.6),
-          );
-        }
-        for (var s = 0; s < 3; s++) {
-          final y0 = rect.height * (0.12 + s * 0.16);
-          for (var i = 0; i <= 24; i++) {
-            final t = i / 24;
-            final p = Offset(w * t, y0 + math.sin(t * math.pi) * 26 * u);
-            c.drawCircle(p, 3 * u, Paint()
-              ..color = light.withValues(alpha: 0.5)
-              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3));
-            c.drawCircle(p, 1.2 * u, Paint()..color = light);
-          }
-        }
-      default: // plain
-        break;
-    }
-    c.restore();
-  }
-
-  void _flowerCluster(Canvas c, Offset center, double r, Color color, {int count = 9, int seed = 1}) {
-    final rnd = math.Random(seed);
-    for (var i = 0; i < count; i++) {
-      final a = rnd.nextDouble() * math.pi * 2;
-      final dist = rnd.nextDouble() * r;
-      final p = center + Offset(math.cos(a) * dist, math.sin(a) * dist * 0.7);
-      final rr = r * (0.28 + rnd.nextDouble() * 0.22);
-      c.drawCircle(p, rr, Paint()..color = Color.lerp(color, Colors.white, rnd.nextDouble() * 0.25)!);
-      c.drawCircle(p, rr * 0.45, Paint()..color = Color.lerp(color, Colors.black, 0.18)!);
-    }
-    // أوراق خضراء
-    for (var i = 0; i < 4; i++) {
-      final a = rnd.nextDouble() * math.pi * 2;
-      final p = center + Offset(math.cos(a) * r, math.sin(a) * r * 0.6);
-      c.drawOval(Rect.fromCenter(center: p, width: r * 0.6, height: r * 0.28), Paint()..color = const Color(0xFF5E7F4A));
-    }
-  }
-
-  void _kosha(Canvas c, Offset base, double w, double h, Color flower, Color light) {
-    final kh = h * 0.44;
-    final kw = math.min(w * 0.42, kh * 1.15);
-    final top = base.dy - kh;
-    // الأحجام نسبةً لمشهد مرجعي ارتفاع كوشته 180 لتبقى متناسبة على كل الشاشات
-    final u = kh / 180;
-    // منصة
-    c.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(base.dx, base.dy + 6 * u), width: kw * 1.15, height: 16 * u), const Radius.circular(6)),
-      Paint()..color = const Color(0xFFF2EBDD),
-    );
-    switch (d.kosha) {
-      case 'round':
-        c.drawCircle(Offset(base.dx, top + kh * 0.5), kh * 0.48, Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 7 * u
-          ..color = const Color(0xFFD7B56D));
-        // عنقودان: أسفل اليمين وأعلى اليسار (كما في الكوش الدائرية المعتادة)
-        for (var i = 0; i < 16; i++) {
-          final a = i < 9 ? math.pi * (0.15 + i * 0.07) : math.pi * (1.1 + (i - 9) * 0.07);
-          final p = Offset(base.dx + math.cos(a) * kh * 0.48, top + kh * 0.5 + math.sin(a) * kh * 0.48);
-          _flowerCluster(c, p, 12 * u, flower, count: 4, seed: i + 3);
-        }
-        break;
-      case 'panel':
-        c.drawRRect(
-          RRect.fromRectAndRadius(Rect.fromLTWH(base.dx - kw / 2, top, kw, kh), const Radius.circular(10)),
-          Paint()..color = Color.lerp(flower, Colors.white, 0.55)!,
-        );
-        for (var y = 0; y < 5; y++) {
-          for (var x = 0; x < 7; x++) {
-            _flowerCluster(c, Offset(base.dx - kw / 2 + kw * (x + 0.5) / 7, top + kh * (y + 0.5) / 5), 11 * u, flower, count: 3, seed: x * 7 + y);
-          }
-        }
-        break;
-      case 'drape':
-        for (var i = 0; i < 6; i++) {
-          final x = base.dx - kw / 2 + kw * i / 5;
-          final path = Path()
-            ..moveTo(x, top)
-            ..quadraticBezierTo(x + kw / 10, top + kh * 0.5, x, base.dy);
-          c.drawPath(path, Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = kw / 7
-            ..color = Color.lerp(const Color(0xFFF7F2EA), light, 0.2)!.withValues(alpha: 0.85));
-        }
-        _flowerCluster(c, Offset(base.dx - kw / 2, top + 10 * u), 22 * u, flower, count: 8, seed: 11);
-        _flowerCluster(c, Offset(base.dx + kw / 2, top + 10 * u), 22 * u, flower, count: 8, seed: 12);
-        break;
-      default: // arch
-        // نصف دائرة قمّتها عند أعلى الكوشة تماماً (لا تُقصّ)
-        final r = kw / 2;
-        final cy = math.max(top + r, top + kh * 0.45);
-        final arch = Path()
-          ..moveTo(base.dx - r, base.dy)
-          ..lineTo(base.dx - r, cy)
-          ..arcToPoint(Offset(base.dx + r, cy), radius: Radius.circular(r))
-          ..lineTo(base.dx + r, base.dy);
-        c.drawPath(arch, Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 5 * u
-          ..color = const Color(0xFFD7B56D));
-        for (var i = 0; i <= 12; i++) {
-          final t = i / 12;
-          final a = math.pi + t * math.pi;
-          final p = Offset(base.dx + math.cos(a) * r, cy + math.sin(a) * r);
-          _flowerCluster(c, p, 14 * u, flower, count: 5, seed: i + 20);
-        }
-        _flowerCluster(c, Offset(base.dx - kw / 2, base.dy - 14 * u), 18 * u, flower, count: 7, seed: 40);
-        _flowerCluster(c, Offset(base.dx + kw / 2, base.dy - 14 * u), 18 * u, flower, count: 7, seed: 41);
-    }
-    // أريكة العروسين
-    final sofa = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(base.dx, base.dy - 14 * u), width: kw * 0.42, height: 30 * u),
-      const Radius.circular(10),
-    );
-    c.drawRRect(sofa, Paint()..color = const Color(0xFFF7F1E6));
-    c.drawRRect(sofa, Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2 * u
-      ..color = const Color(0xFFD7B56D));
-  }
-
-  void _chair(Canvas c, Offset p, double s) {
-    final style = kChairStyles[d.chair]!;
-    final color = style.$2;
-    final seat = Paint()..color = color;
-    c.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: p, width: s, height: s * 1.3), Radius.circular(s * 0.2)), seat);
-    if (d.chair == 'gold' || d.chair == 'wood') {
-      for (var i = 1; i < 4; i++) {
-        c.drawLine(Offset(p.dx - s / 2 + s * i / 4, p.dy - s * 0.6), Offset(p.dx - s / 2 + s * i / 4, p.dy + s * 0.2),
-            Paint()..color = Color.lerp(color, Colors.black, 0.3)!..strokeWidth = 1);
-      }
-    }
-    if (d.chair == 'covered') {
-      c.drawCircle(Offset(p.dx, p.dy + s * 0.15), s * 0.22, Paint()..color = kFlowerColors[d.flower].color);
-    }
-    c.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromCenter(center: p, width: s, height: s * 1.3), Radius.circular(s * 0.2)),
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1
-        ..color = Colors.black.withValues(alpha: 0.18),
-    );
-  }
-
-  void _tables(Canvas c, double w, double h, Color cloth, Color flower) {
-    final slots = tableSlots(d, w, h);
-    for (var i = 0; i < slots.length; i++) {
-      _table(c, slots[i].$1, slots[i].$2, cloth, flower, i);
-    }
-  }
-
-  void _table(Canvas c, Offset p, double size, Color cloth, Color flower, int seed) {
-    final chairS = size * 0.16;
-    final drawChairs = !real.contains('chair');
-    final drawTable = !real.contains('table');
-    final drawFlowers = !real.contains('flowers');
-    if (d.table == 'long' && drawTable) {
-      final rect = Rect.fromCenter(center: p, width: size * 1.05, height: size * 0.32);
-      if (drawChairs) {
-        for (var i = 0; i < 4; i++) {
-          _chair(c, Offset(rect.left + rect.width * (i + 0.5) / 4, rect.top - chairS * 0.5), chairS);
-        }
-      }
-      c.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6)), Paint()..color = cloth);
-      c.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6)), Paint()
-        ..style = PaintingStyle.stroke
-        ..color = Colors.black.withValues(alpha: 0.12));
-      if (drawFlowers) _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.1, flower, count: 5, seed: seed + 60);
-      return;
-    }
-    // دائرية مع كراسٍ حولها (أو كراسٍ مرسومة حول صورة طاولة حقيقية)
-    if (drawChairs) {
-      for (var i = 0; i < 6; i++) {
-        final a = -math.pi + i * math.pi / 5;
-        _chair(c, p + Offset(math.cos(a) * size * 0.42, math.sin(a) * size * 0.22 - chairS * 0.2), chairS);
-      }
-    }
-    if (!drawTable) return; // صورة الطاولة والورد تُركَّب فوق الرسم
-    final tw = size * 0.7, th = size * 0.24, drop = size * 0.2;
-    c.drawOval(
-      Rect.fromCenter(center: p + Offset(0, drop), width: tw * 1.12, height: th * 0.9),
-      Paint()
-        ..color = Colors.black.withValues(alpha: 0.28)
-        ..maskFilter = MaskFilter.blur(BlurStyle.normal, size * 0.03),
-    );
-    // المفرش المنسدل بطيّات
-    final skirtRect = Rect.fromLTRB(p.dx - tw / 2, p.dy, p.dx + tw / 2, p.dy + drop + th / 2);
-    final skirt = Path()
-      ..moveTo(skirtRect.left, p.dy)
-      ..lineTo(skirtRect.left, p.dy + drop)
-      ..arcToPoint(Offset(skirtRect.right, p.dy + drop), radius: Radius.elliptical(tw / 2, th / 2), clockwise: false)
-      ..lineTo(skirtRect.right, p.dy)
-      ..close();
-    c.drawPath(
-      skirt,
-      Paint()
-        ..shader = LinearGradient(
-          colors: [
-            Color.lerp(cloth, Colors.black, 0.2)!,
-            Color.lerp(cloth, Colors.black, 0.03)!,
-            Color.lerp(cloth, Colors.black, 0.1)!,
-            Color.lerp(cloth, Colors.black, 0.02)!,
-            Color.lerp(cloth, Colors.black, 0.2)!,
-          ],
-        ).createShader(skirtRect),
-    );
-    c.drawOval(Rect.fromCenter(center: p, width: tw, height: th), Paint()..color = cloth);
-    c.drawOval(Rect.fromCenter(center: p, width: tw, height: th), Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.black.withValues(alpha: 0.12));
-    if (drawFlowers) _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.09, flower, count: 5, seed: seed + 80);
-  }
-
-  @override
-  bool shouldRepaint(covariant _HallPainter old) => true;
+  Widget _serviceChips(List<Map<String, dynamic>> list) => Wrap(
+        spacing: Space.sm,
+        runSpacing: Space.sm,
+        children: [
+          for (final s in list)
+            FilterChip(
+              label: Text('${s['name']}'),
+              selected: _picked.contains(s['id'].toString()),
+              onSelected: (on) => setState(() => on ? _picked.add(s['id'].toString()) : _picked.remove(s['id'].toString())),
+            ),
+        ],
+      );
 }

@@ -1353,7 +1353,12 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
     final categoryId = _selectedCategoryId;
     if (categoryId == null) return;
     final result = await Navigator.of(context).push<DecorStudioResult>(
-      MaterialPageRoute(builder: (_) => DecorStudioScreen(categoryId: categoryId)),
+      MaterialPageRoute(
+        builder: (_) => DecorStudioScreen(
+          categoryId: categoryId,
+          chosenServices: _cart.values.map((l) => l.service).toList(),
+        ),
+      ),
     );
     if (result == null || !mounted) return;
     for (final svc in result.services) {
@@ -1394,7 +1399,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                     children: [
                       Text('صمّم ديكورك وشاهده قبل الطلب', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15)),
                       SizedBox(height: 2),
-                      Text('اختر الكوشة والطاولات والكراسي ولون الورد والإضاءة وشاهد القاعة كاملة', style: TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
+                      Text('اختر صورة قاعتك أو ارفعها، ثم ركّب الكوشة والطاولات والورد وشاهد المكان كاملاً', style: TextStyle(color: Color(0xCCFFFFFF), fontSize: 12)),
                     ],
                   ),
                 ),
