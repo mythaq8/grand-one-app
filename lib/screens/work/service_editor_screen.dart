@@ -7,7 +7,9 @@
 //   • حقول الفئة الخاصة (يضيفها المشرف)
 // ============================================================
 
+import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../design/tokens.dart';
 import '../../design/typography.dart';
@@ -23,6 +25,20 @@ const Map<String, (String, String, IconData)> kPricingModels = {
 };
 
 const Map<String, String> kDurationUnits = {'hour': 'ساعة', 'day': 'يوم', 'night': 'ليلة'};
+
+/// أنواع قطع الديكور التي يركّبها استوديو الديكور في مشهد القاعة.
+const Map<String, (String, IconData)> kDecorPieces = {
+  'kosha': ('كوشة', Icons.weekend_outlined),
+  'table': ('طاولة', Icons.table_restaurant_outlined),
+  'chair': ('كرسي', Icons.chair_outlined),
+  'flowers': ('تنسيق ورد', Icons.local_florist_outlined),
+  'light': ('إضاءة / ثريا', Icons.light_outlined),
+  'aisle': ('ممر', Icons.linear_scale_rounded),
+  'backdrop': ('خلفية', Icons.wallpaper_outlined),
+};
+
+String decorPieceUrl(String path) =>
+    Supabase.instance.client.storage.from('decor-pieces').getPublicUrl(path);
 
 class _Row {
   _Row({String name = '', String price = '', this.mode = 'fixed', String description = ''})
@@ -72,8 +88,17 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
   final List<_Row> _packages = [];
   final List<_Row> _addons = [];
 
+  String? _piece;
+  String? _piecePath;
+  bool _uploadingPiece = false;
+
   bool _loadingProfile = false;
   bool _saving = false;
+
+  bool get _isDecor {
+    final c = widget.categories.where((c) => c['id'] == _categoryId).firstOrNull;
+    return (c?['name']?.toString() ?? '').contains('ديكور');
+  }
 
   Map<String, dynamic> get _e => widget.existing ?? const {};
 
@@ -91,6 +116,8 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
     _minQty.text = _num(_e['min_qty']);
     _maxQty.text = _num(_e['max_qty']);
     _capacity.text = _num(_e['capacity']);
+    _piece = _e['preview_piece']?.toString();
+    _piecePath = _e['preview_image_path']?.toString();
     _price.text = _num(_model == 'per_unit'
         ? (_e['unit_price'] ?? _e['base_price'])
         : _model == 'per_duration'
@@ -215,6 +242,10 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         'duration_unit': _durationUnit,
       },
       if (num.tryParse(_capacity.text.trim()) != null) 'capacity': num.tryParse(_capacity.text.trim())!.toInt(),
+      if (_isDecor) ...{
+        'preview_piece': _piece,
+        'preview_image_path': _piecePath,
+      },
     };
     try {
       String id;
@@ -243,6 +274,124 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
       if (mounted) showAppSnack(context, e.message, tone: FeedbackTone.error);
     }
     if (mounted) setState(() => _saving = false);
+  }
+
+  Future<void> _pickPiece() async {
+    if (_uploadingPiece) return;
+    try {
+      final files = await fp.FilePicker.pickFiles(
+        type: fp.FileType.custom,
+        allowedExtensions: const ['png', 'webp'],
+      );
+      if (files.isEmpty) return;
+      final f = files.first;
+      final ext = f.name.split('.').last.toLowerCase();
+      if (ext != 'png' && ext != 'webp') {
+        if (mounted) showAppSnack(context, 'اختر صورة PNG أو WebP', tone: FeedbackTone.error);
+        return;
+      }
+      final bytes = await f.xFile.readAsBytes();
+      if (bytes.isEmpty) {
+        if (mounted) showAppSnack(context, 'اختر صورة PNG أو WebP', tone: FeedbackTone.error);
+        return;
+      }
+      if (bytes.length > 5 * 1024 * 1024) {
+        if (mounted) showAppSnack(context, 'حجم الصورة أكبر من 5 ميغابايت', tone: FeedbackTone.error);
+        return;
+      }
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (uid == null) return;
+      setState(() => _uploadingPiece = true);
+      // بلا ضغط: الضغط إلى JPG يُفقد الشفافية
+      final path = '$uid/piece_${DateTime.now().millisecondsSinceEpoch}.$ext';
+      await Supabase.instance.client.storage.from('decor-pieces').uploadBinary(
+            path,
+            bytes,
+            fileOptions: FileOptions(contentType: ext == 'png' ? 'image/png' : 'image/webp', upsert: false),
+          );
+      setState(() => _piecePath = path);
+    } catch (e) {
+      if (mounted) showAppSnack(context, 'تعذّر رفع الصورة', tone: FeedbackTone.error);
+    }
+    if (mounted) setState(() => _uploadingPiece = false);
+  }
+
+  Widget _decorSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SectionHeader(title: 'المعاينة في استوديو الديكور', icon: Icons.view_in_ar_outlined),
+        Text(
+          'ارفع صورة القطعة مفرّغة الخلفية (PNG شفاف) ليراها العميل مركّبة في مشهد القاعة كما هي في الواقع.',
+          style: AppText.caption,
+        ),
+        const SizedBox(height: Space.sm),
+        Wrap(
+          spacing: Space.sm,
+          runSpacing: Space.sm,
+          children: [
+            for (final e in kDecorPieces.entries)
+              ChoiceChip(
+                avatar: Icon(e.value.$2, size: 18),
+                label: Text(e.value.$1),
+                selected: _piece == e.key,
+                onSelected: (on) => setState(() => _piece = on ? e.key : null),
+              ),
+          ],
+        ),
+        const SizedBox(height: Space.sm),
+        Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SizedBox(
+                width: 120,
+                height: 120,
+                child: CustomPaint(
+                  painter: _CheckerPainter(),
+                  child: _uploadingPiece
+                      ? const Center(child: CircularProgressIndicator())
+                      : _piecePath == null
+                          ? const Center(child: Icon(Icons.image_outlined, size: 36, color: Colors.black38))
+                          : Image.network(
+                              decorPieceUrl(_piecePath!),
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) => const Center(child: Icon(Icons.broken_image_outlined)),
+                            ),
+                ),
+              ),
+            ),
+            const SizedBox(width: Space.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(0, 44)),
+                    onPressed: _uploadingPiece ? null : _pickPiece,
+                    icon: const Icon(Icons.upload_rounded),
+                    label: Text(_piecePath == null ? 'رفع صورة القطعة' : 'تغيير الصورة'),
+                  ),
+                  if (_piecePath != null)
+                    TextButton.icon(
+                      onPressed: () => setState(() => _piecePath = null),
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text('إزالة الصورة'),
+                    ),
+                  const SizedBox(height: Space.xs),
+                  Text('نصيحة: صوّر القطعة من الأمام وأزل الخلفية (remove.bg مثلاً).', style: AppText.caption),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (_piecePath != null && _piece == null)
+          Padding(
+            padding: const EdgeInsets.only(top: Space.xs),
+            child: Text('حدّد نوع القطعة ليعرف الاستوديو أين يضعها', style: AppText.caption.copyWith(color: AppPalette.error)),
+          ),
+      ],
+    );
   }
 
   // ── أجزاء الواجهة ─────────────────────────────────────────
@@ -520,6 +669,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
                 child: Text(info.$2, style: AppText.caption),
               ),
             _priceSection(),
+            if (_isDecor) _decorSection(),
             if (_fields.isNotEmpty) ...[
               const SectionHeader(title: 'تفاصيل خاصة بالفئة', icon: Icons.tune_rounded),
               for (final f in _fields)
@@ -561,4 +711,23 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
       ),
     );
   }
+}
+
+/// خلفية مربّعات تُظهر شفافية صورة القطعة المفرّغة.
+class _CheckerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const s = 12.0;
+    final a = Paint()..color = const Color(0xFFEDEDED);
+    final b = Paint()..color = const Color(0xFFFFFFFF);
+    for (var y = 0.0; y < size.height; y += s) {
+      for (var x = 0.0; x < size.width; x += s) {
+        final odd = ((x / s).floor() + (y / s).floor()).isOdd;
+        canvas.drawRect(Rect.fromLTWH(x, y, s, s), odd ? a : b);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

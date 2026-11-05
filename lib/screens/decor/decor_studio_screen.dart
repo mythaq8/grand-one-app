@@ -9,6 +9,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../design/tokens.dart';
 import '../../design/typography.dart';
@@ -104,10 +105,47 @@ class DecorStudioScreen extends StatefulWidget {
   State<DecorStudioScreen> createState() => _DecorStudioScreenState();
 }
 
+/// أنواع القطع الحقيقية بترتيب العرض (المفتاح = services.preview_piece)
+const kRealPieces = <String, String>{
+  'kosha': 'الكوشة',
+  'backdrop': 'الخلفية',
+  'table': 'الطاولات',
+  'chair': 'الكراسي',
+  'flowers': 'تنسيق الورد',
+  'light': 'الإضاءة والثريات',
+  'aisle': 'الممر',
+};
+
+String _pieceUrl(String path) => Supabase.instance.client.storage.from('decor-pieces').getPublicUrl(path);
+
+/// مواضع الطاولات في المشهد (مركز الطاولة وحجمها) — مشتركة بين الرسم والصور
+List<(Offset, double)> tableSlots(DecorDesign d, double w, double h) {
+  final n = d.tables;
+  final rows = n <= 6 ? 1 : 2;
+  final perRow = (n / rows).ceil();
+  final out = <(Offset, double)>[];
+  for (var r = 0; r < rows; r++) {
+    final y = h * (rows == 1 ? 0.8 : (r == 0 ? 0.7 : 0.9));
+    final scale = rows == 1 ? 1.0 : (r == 0 ? 0.85 : 1.1);
+    final count = math.min(perRow, n - out.length);
+    for (var i = 0; i < count; i++) {
+      // نترك ممراً في الوسط أمام الكوشة
+      final slots = count + 1;
+      final slot = i < count / 2 ? i : i + 1;
+      final x = w * (slot + 0.5) / slots;
+      out.add((Offset(x, y), w / (perRow + 2.2) * scale));
+    }
+  }
+  return out;
+}
+
 class _DecorStudioScreenState extends State<DecorStudioScreen> {
   final DecorDesign _d = DecorDesign();
   List<Map<String, dynamic>> _services = [];
   final Set<String> _picked = {};
+
+  /// القطعة الحقيقية المختارة لكل نوع (نوع ← خدمة)
+  final Map<String, Map<String, dynamic>> _real = {};
 
   static final _elements = <(String, String, RegExp)>[
     ('kosha', 'الكوشة', RegExp('كوش|قوس|منصة')),
@@ -132,10 +170,53 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     } catch (_) {}
   }
 
+  bool _hasPiece(Map<String, dynamic> s) =>
+      kRealPieces.containsKey(s['preview_piece']) && (s['preview_image_path']?.toString() ?? '').isNotEmpty;
+
+  List<Map<String, dynamic>> _piecesOf(String type) =>
+      _services.where((s) => _hasPiece(s) && s['preview_piece'] == type).toList();
+
+  /// الخدمات بلا صورة قطعة تُعرض كخيارات نصية كما سابقاً
   List<Map<String, dynamic>> _matches(RegExp re) => _services.where((s) {
+        if (_hasPiece(s)) return false;
         final text = '${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}';
         return re.hasMatch(text);
       }).toList();
+
+  void _toggleReal(String type, Map<String, dynamic> s) {
+    setState(() {
+      final id = s['id'].toString();
+      final prev = _real[type];
+      if (prev != null) _picked.remove(prev['id'].toString());
+      if (prev?['id'].toString() == id) {
+        _real.remove(type);
+      } else {
+        _real[type] = s;
+        _picked.add(id);
+      }
+    });
+  }
+
+  String _describe() {
+    final lines = <String>[];
+    if (_real.isNotEmpty) {
+      lines.add('قطع مختارة من المزوّدين:');
+      for (final e in kRealPieces.entries) {
+        final s = _real[e.key];
+        if (s != null) lines.add('• ${e.value}: ${s['name']}');
+      }
+    }
+    final painted = _d.describe().split('\n');
+    // الأسطر المرسومة فقط للعناصر التي لم تُستبدل بقطعة حقيقية
+    final skip = <String>{
+      if (_real.containsKey('kosha')) 'الكوشة',
+      if (_real.containsKey('chair')) 'الكراسي',
+      if (_real.containsKey('flowers')) 'الورد على الطاولات',
+      if (_real.containsKey('light')) 'الإضاءة',
+    };
+    lines.addAll(painted.where((l) => !skip.any((k) => l.startsWith('$k:'))));
+    return lines.join('\n');
+  }
 
   Widget _swatches(List<DecorPalette> list, int selected, ValueChanged<int> onPick) {
     return Wrap(
@@ -192,8 +273,126 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         ),
       );
 
+  /// شريط بطاقات القطع الحقيقية لنوع واحد
+  Widget _pieceStrip(String type, String title) {
+    final items = _piecesOf(type);
+    if (items.isEmpty) return const SizedBox.shrink();
+    final sel = _real[type]?['id'].toString();
+    return Padding(
+      padding: const EdgeInsets.only(top: Space.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppText.subtitle),
+          const SizedBox(height: Space.xs),
+          SizedBox(
+            height: 128,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: items.length,
+              separatorBuilder: (_, _) => const SizedBox(width: Space.sm),
+              itemBuilder: (_, i) {
+                final s = items[i];
+                final on = s['id'].toString() == sel;
+                return InkWell(
+                  borderRadius: Radii.brMd,
+                  onTap: () => _toggleReal(type, s),
+                  child: Container(
+                    width: 104,
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppPalette.surface,
+                      borderRadius: Radii.brMd,
+                      border: Border.all(color: on ? AppPalette.navy : AppPalette.borderStrong, width: on ? 2.5 : 1),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.network(
+                                _pieceUrl(s['preview_image_path'].toString()),
+                                fit: BoxFit.contain,
+                                errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
+                              ),
+                              if (on)
+                                const Align(
+                                  alignment: AlignmentDirectional.topEnd,
+                                  child: Icon(Icons.check_circle, color: AppPalette.navy, size: 20),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Text('${s['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: AppText.caption),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── تركيب المشهد ─────────────────────────────────────────
+
+  Widget _img(Map<String, dynamic>? s, {BoxFit fit = BoxFit.contain, Alignment align = Alignment.bottomCenter}) {
+    if (s == null) return const SizedBox.shrink();
+    return Image.network(
+      _pieceUrl(s['preview_image_path'].toString()),
+      fit: fit,
+      alignment: align,
+      gaplessPlayback: true,
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+    );
+  }
+
+  Widget _scene() {
+    return LayoutBuilder(builder: (context, c) {
+      final w = c.maxWidth, h = c.maxHeight;
+      final realKeys = _real.keys.toSet();
+      final table = _real['table'], chair = _real['chair'], flowers = _real['flowers'];
+      final slots = tableSlots(_d, w, h);
+      Positioned at(double cx, double bottom, double width, double height, Widget child) =>
+          Positioned(left: cx - width / 2, top: bottom - height, width: width, height: height, child: child);
+
+      return Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'bg', real: realKeys))),
+          if (_real['backdrop'] != null)
+            Positioned(left: 0, top: 0, width: w, height: h * 0.56, child: _img(_real['backdrop'], fit: BoxFit.cover, align: Alignment.center)),
+          if (_real['light'] != null)
+            for (final x in const [0.2, 0.5, 0.8])
+              Positioned(left: w * x - w * 0.1, top: 0, width: w * 0.2, height: h * 0.22, child: _img(_real['light'], align: Alignment.topCenter)),
+          if (_real['aisle'] != null)
+            Positioned(left: w * 0.4, top: h * 0.55, width: w * 0.2, height: h * 0.45, child: _img(_real['aisle'], fit: BoxFit.fill)),
+          if (_real['kosha'] != null)
+            at(w / 2, h * 0.56, w * 0.5, h * 0.48, _img(_real['kosha']))
+          else
+            Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'kosha', real: realKeys))),
+          // الأجزاء المرسومة من الطاولات (ما لم يُستبدل بصور)
+          Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'tables', real: realKeys))),
+          // الصور الحقيقية لكل طاولة بالعمق: كراسٍ خلفية ← طاولة ← ورد ← كراسٍ جانبية
+          for (final (p, size) in slots) ...[
+            if (chair != null)
+              for (final dx in const [-0.2, 0.2]) at(p.dx + size * dx, p.dy - size * 0.02, size * 0.26, size * 0.38, _img(chair)),
+            if (table != null) at(p.dx, p.dy + size * 0.14, size * 0.78, size * 0.5, _img(table)),
+            if (flowers != null) at(p.dx, p.dy - (table != null ? size * 0.12 : size * 0.02), size * 0.3, size * 0.34, _img(flowers)),
+            if (chair != null)
+              for (final dx in const [-0.44, 0.44]) at(p.dx + size * dx, p.dy + size * 0.2, size * 0.3, size * 0.44, _img(chair)),
+          ],
+        ],
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final hasReal = kRealPieces.keys.any((k) => _piecesOf(k).isNotEmpty);
     return Scaffold(
       backgroundColor: AppPalette.background,
       appBar: AppBar(title: const Text('استوديو الديكور')),
@@ -205,13 +404,11 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
             child: ClipRRect(
               borderRadius: Radii.brLg,
               child: TweenAnimationBuilder<double>(
-                key: ValueKey(_d.describe()),
+                key: ValueKey('${_d.describe()}|${_real.values.map((s) => s['id']).join(',')}'),
                 tween: Tween(begin: 0.6, end: 1),
                 duration: const Duration(milliseconds: 350),
-                builder: (_, t, _) => Opacity(
-                  opacity: t,
-                  child: CustomPaint(painter: _HallPainter(_d), child: const SizedBox.expand()),
-                ),
+                builder: (_, t, child) => Opacity(opacity: t, child: child),
+                child: _scene(),
               ),
             ),
           );
@@ -219,13 +416,23 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
             padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 120),
             children: [
               if (!wide) ...[preview, const SizedBox(height: Space.sm)],
-              Text('غيّر أي عنصر وشاهد القاعة تتغيّر مباشرة. المعاينة تقريبية لتصوّر الفكرة.', style: AppText.caption),
-              _group('شكل الكوشة', _choices(kKoshaStyles, _d.kosha, (v) => setState(() => _d.kosha = v))),
+              Text(
+                hasReal
+                    ? 'اختر قطعاً حقيقية من المزوّدين لتظهر في القاعة بصورها، وأكمل الباقي بالألوان.'
+                    : 'غيّر أي عنصر وشاهد القاعة تتغيّر مباشرة. المعاينة تقريبية لتصوّر الفكرة.',
+                style: AppText.caption,
+              ),
+              if (hasReal) ...[
+                const SectionHeader(title: 'قطع حقيقية من المزوّدين', subtitle: 'اضغط القطعة لتركيبها في المشهد', icon: Icons.photo_library_outlined),
+                for (final e in kRealPieces.entries) _pieceStrip(e.key, e.value),
+              ],
+              if (!_real.containsKey('kosha'))
+                _group('شكل الكوشة', _choices(kKoshaStyles, _d.kosha, (v) => setState(() => _d.kosha = v))),
               _group('لون الورد', _swatches(kFlowerColors, _d.flower, (v) => setState(() => _d.flower = v))),
               _group('الطاولات', Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _choices(kTableShapes, _d.table, (v) => setState(() => _d.table = v)),
+                  if (!_real.containsKey('table')) _choices(kTableShapes, _d.table, (v) => setState(() => _d.table = v)),
                   Row(
                     children: [
                       Text('العدد: ${_d.tables}', style: AppText.body),
@@ -242,14 +449,16 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
                   ),
                 ],
               )),
-              _group('لون المفارش', _swatches(kClothColors, _d.cloth, (v) => setState(() => _d.cloth = v))),
-              _group('الكراسي', _choices({for (final e in kChairStyles.entries) e.key: e.value.$1}, _d.chair, (v) => setState(() => _d.chair = v))),
+              if (!_real.containsKey('table'))
+                _group('لون المفارش', _swatches(kClothColors, _d.cloth, (v) => setState(() => _d.cloth = v))),
+              if (!_real.containsKey('chair'))
+                _group('الكراسي', _choices({for (final e in kChairStyles.entries) e.key: e.value.$1}, _d.chair, (v) => setState(() => _d.chair = v))),
               _group('الإضاءة', _choices({for (final e in kLights.entries) e.key: e.value.$1}, _d.light, (v) => setState(() => _d.light = v))),
               _group('الأرضية', _swatches(kFloors, _d.floor, (v) => setState(() => _d.floor = v))),
               const SectionHeader(title: 'خدمات تحقق تصميمك', subtitle: 'اختر ما تريد إضافته لطلبك', icon: Icons.storefront_outlined),
               if (_services.isEmpty)
                 Text('لا خدمات ديكور منشورة بعد؛ سيُرسَل تصميمك للمنظّم ليجهّزه.', style: AppText.bodySecondary)
-              else
+              else ...[
                 for (final el in _elements) ...[
                   if (_matches(el.$3).isNotEmpty) ...[
                     Padding(
@@ -270,19 +479,26 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
                     ),
                   ],
                 ],
-              if (_services.isNotEmpty && _elements.every((e) => _matches(e.$3).isEmpty))
-                Wrap(
-                  spacing: Space.sm,
-                  runSpacing: Space.sm,
-                  children: [
-                    for (final s in _services)
-                      FilterChip(
-                        label: Text('${s['name']}'),
-                        selected: _picked.contains(s['id'].toString()),
-                        onSelected: (on) => setState(() => on ? _picked.add(s['id'].toString()) : _picked.remove(s['id'].toString())),
-                      ),
-                  ],
-                ),
+                // خدمات لا تطابق أي عنصر ولا تملك صورة قطعة
+                if (_services.where((s) => !_hasPiece(s) && _elements.every((e) => !e.$3.hasMatch('${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}'))).isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(top: Space.sm, bottom: Space.xs),
+                    child: Text('خدمات ديكور أخرى', style: AppText.subtitle),
+                  ),
+                  Wrap(
+                    spacing: Space.sm,
+                    runSpacing: Space.sm,
+                    children: [
+                      for (final s in _services.where((s) => !_hasPiece(s) && _elements.every((e) => !e.$3.hasMatch('${s['name'] ?? ''} ${s['description'] ?? ''} ${s['subcategory_name'] ?? ''}'))))
+                        FilterChip(
+                          label: Text('${s['name']}'),
+                          selected: _picked.contains(s['id'].toString()),
+                          onSelected: (on) => setState(() => on ? _picked.add(s['id'].toString()) : _picked.remove(s['id'].toString())),
+                        ),
+                    ],
+                  ),
+                ],
+              ],
             ],
           );
           if (!wide) return controls;
@@ -302,7 +518,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
             onPressed: () => Navigator.pop(
               context,
               DecorStudioResult(
-                _d.describe(),
+                _describe(),
                 _services.where((s) => _picked.contains(s['id'].toString())).toList(),
               ),
             ),
@@ -318,8 +534,14 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
 // ── رسم القاعة ───────────────────────────────────────────────
 
 class _HallPainter extends CustomPainter {
-  _HallPainter(this.d);
+  _HallPainter(this.d, {this.layer = 'all', this.real = const {}});
   final DecorDesign d;
+
+  /// 'bg' الجدار والأرضية والإضاءة، 'kosha' الكوشة، 'tables' الطاولات، 'all' الكل
+  final String layer;
+
+  /// أنواع القطع المستبدلة بصور حقيقية (لا تُرسم)
+  final Set<String> real;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -328,6 +550,14 @@ class _HallPainter extends CustomPainter {
     final flower = kFlowerColors[d.flower].color;
     final cloth = kClothColors[d.cloth].color;
     final floor = kFloors[d.floor].color;
+    if (layer == 'kosha') {
+      _kosha(canvas, Offset(w / 2, h * 0.5), w, h, flower, light);
+      return;
+    }
+    if (layer == 'tables') {
+      _tables(canvas, w, h, cloth, flower);
+      return;
+    }
 
     // الجدار مع توهّج الإضاءة
     canvas.drawRect(
@@ -357,13 +587,14 @@ class _HallPainter extends CustomPainter {
     );
     // بقع الضوء
     final glow = Paint()..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < (real.contains('light') ? 0 : 5); i++) {
       final x = w * (0.1 + i * 0.2);
       canvas.drawCircle(Offset(x, h * 0.08), 26, glow..color = light.withValues(alpha: 0.55));
       canvas.drawLine(Offset(x, 0), Offset(x, h * 0.06), Paint()..color = light..strokeWidth = 1.5);
       canvas.drawCircle(Offset(x, h * 0.07), 4, Paint()..color = light);
     }
 
+    if (layer == 'bg') return;
     _kosha(canvas, Offset(w / 2, h * 0.5), w, h, flower, light);
     _tables(canvas, w, h, cloth, flower);
   }
@@ -491,50 +722,45 @@ class _HallPainter extends CustomPainter {
   }
 
   void _tables(Canvas c, double w, double h, Color cloth, Color flower) {
-    final n = d.tables;
-    final rows = n <= 6 ? 1 : 2;
-    final perRow = (n / rows).ceil();
-    var drawn = 0;
-    for (var r = 0; r < rows; r++) {
-      final y = h * (rows == 1 ? 0.8 : (r == 0 ? 0.7 : 0.9));
-      final scale = rows == 1 ? 1.0 : (r == 0 ? 0.85 : 1.1);
-      final count = math.min(perRow, n - drawn);
-      for (var i = 0; i < count; i++) {
-        // نترك ممراً في الوسط أمام الكوشة
-        final slots = count + 1;
-        var slot = i < count / 2 ? i : i + 1;
-        final x = w * (slot + 0.5) / (slots + 0.0);
-        _table(c, Offset(x, y), w / (perRow + 2.2) * scale, cloth, flower, drawn);
-        drawn++;
-      }
+    final slots = tableSlots(d, w, h);
+    for (var i = 0; i < slots.length; i++) {
+      _table(c, slots[i].$1, slots[i].$2, cloth, flower, i);
     }
   }
 
   void _table(Canvas c, Offset p, double size, Color cloth, Color flower, int seed) {
     final chairS = size * 0.16;
-    if (d.table == 'long') {
+    final drawChairs = !real.contains('chair');
+    final drawTable = !real.contains('table');
+    final drawFlowers = !real.contains('flowers');
+    if (d.table == 'long' && drawTable) {
       final rect = Rect.fromCenter(center: p, width: size * 1.05, height: size * 0.32);
-      for (var i = 0; i < 4; i++) {
-        _chair(c, Offset(rect.left + rect.width * (i + 0.5) / 4, rect.top - chairS * 0.5), chairS);
+      if (drawChairs) {
+        for (var i = 0; i < 4; i++) {
+          _chair(c, Offset(rect.left + rect.width * (i + 0.5) / 4, rect.top - chairS * 0.5), chairS);
+        }
       }
       c.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6)), Paint()..color = cloth);
       c.drawRRect(RRect.fromRectAndRadius(rect, const Radius.circular(6)), Paint()
         ..style = PaintingStyle.stroke
         ..color = Colors.black.withValues(alpha: 0.12));
-      _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.1, flower, count: 5, seed: seed + 60);
+      if (drawFlowers) _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.1, flower, count: 5, seed: seed + 60);
       return;
     }
-    // دائرية مع كراسٍ حولها
-    for (var i = 0; i < 6; i++) {
-      final a = -math.pi + i * math.pi / 5;
-      _chair(c, p + Offset(math.cos(a) * size * 0.42, math.sin(a) * size * 0.22 - chairS * 0.2), chairS);
+    // دائرية مع كراسٍ حولها (أو كراسٍ مرسومة حول صورة طاولة حقيقية)
+    if (drawChairs) {
+      for (var i = 0; i < 6; i++) {
+        final a = -math.pi + i * math.pi / 5;
+        _chair(c, p + Offset(math.cos(a) * size * 0.42, math.sin(a) * size * 0.22 - chairS * 0.2), chairS);
+      }
     }
+    if (!drawTable) return; // صورة الطاولة والورد تُركَّب فوق الرسم
     c.drawOval(Rect.fromCenter(center: p + const Offset(0, 6), width: size * 0.7, height: size * 0.3), Paint()..color = Colors.black.withValues(alpha: 0.15));
     c.drawOval(Rect.fromCenter(center: p, width: size * 0.7, height: size * 0.3), Paint()..color = cloth);
     c.drawOval(Rect.fromCenter(center: p, width: size * 0.7, height: size * 0.3), Paint()
       ..style = PaintingStyle.stroke
       ..color = Colors.black.withValues(alpha: 0.12));
-    _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.09, flower, count: 5, seed: seed + 80);
+    if (drawFlowers) _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.09, flower, count: 5, seed: seed + 80);
   }
 
   @override
