@@ -217,7 +217,7 @@ String _statusAr(String? s) {
     case 'new':
       return 'جديد';
     case 'in_review':
-      return 'قيد المراجعة';
+      return 'قيد إعداد العرض';
     case 'awaiting_client':
       return 'بانتظار العميل';
     case 'awaiting_deposit':

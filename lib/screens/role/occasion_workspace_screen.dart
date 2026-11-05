@@ -22,6 +22,14 @@ import '../organizer_shell_screen.dart' show OrganizerQuoteScreen;
 import '../work/work_checklist_screen.dart';
 import '../work/work_formatters.dart';
 
+String _daysAr(int n) => n == 1
+    ? 'يوم واحد'
+    : n == 2
+        ? 'يومين'
+        : n <= 10
+            ? '$n أيام'
+            : '$n يوماً';
+
 const _stages = <(String, String)>[
   ('new', 'طلب جديد'),
   ('in_review', 'إعداد العرض'),
@@ -93,6 +101,10 @@ class _OccasionWorkspaceScreenState extends State<OccasionWorkspaceScreen> {
           bottom: const TabBar(
             isScrollable: true,
             tabAlignment: TabAlignment.start,
+            // الشريط كحلي: التبويب المختار ذهبي والبقية فاتحة
+            labelColor: AppPalette.gold,
+            unselectedLabelColor: Color(0xCCFFFFFF),
+            indicatorColor: AppPalette.gold,
             tabs: [
               Tab(text: 'نظرة عامة'),
               Tab(text: 'العرض'),
@@ -205,7 +217,7 @@ class _OverviewTab extends StatelessWidget {
                   icon: Icons.event_rounded,
                   label: 'الموعد',
                   value: '${workDate(req['occasion_date']?.toString())}'
-                      '${days is num ? (days > 0 ? ' • بعد ${days.toInt()} يوم' : days == 0 ? ' • اليوم' : ' • مضى') : ''}',
+                      '${days is num ? (days > 0 ? ' • بعد ${_daysAr(days.toInt())}' : days == 0 ? ' • اليوم' : ' • مضى') : ''}',
                 ),
                 InfoRow(icon: Icons.place_outlined, label: 'المكان', value: '${req['governorate'] ?? '-'}${req['address'] != null ? ' — ${req['address']}' : ''}'),
                 InfoRow(

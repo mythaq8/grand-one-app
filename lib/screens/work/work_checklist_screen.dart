@@ -200,6 +200,11 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
                               const SizedBox(width: Space.sm),
                               IconButton.filled(
                                 tooltip: 'إضافة',
+                                // قالب الأزرار يجعل الأيقونة كحلية؛ هنا الخلفية كحلية
+                                style: IconButton.styleFrom(
+                                  backgroundColor: AppPalette.navy,
+                                  foregroundColor: Colors.white,
+                                ),
                                 onPressed: _add,
                                 icon: const Icon(Icons.add),
                               ),
