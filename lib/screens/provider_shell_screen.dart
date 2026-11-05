@@ -687,6 +687,19 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
   List<Map<String, dynamic>> _items = [];
   List<Map<String, dynamic>> _categories = [];
 
+  /// الفئات المربوطة بالمزوّد من لوحة الإدارة (null: لم تصل من الخادم فلا نصفّي)
+  Set<String>? _linkedCategoryIds;
+
+  /// الفئات المتاحة في المحرّر: المربوطة فقط، مع فئة الخدمة الحالية عند التعديل
+  List<Map<String, dynamic>> _editorCategories(Map<String, dynamic>? existing) {
+    final linked = _linkedCategoryIds;
+    if (linked == null) return _categories;
+    final current = existing?['category_id']?.toString();
+    return _categories
+        .where((c) => linked.contains(c['id'].toString()) || c['id'].toString() == current)
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -701,8 +714,11 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
     try {
       final services = ApiService.getProviderServices();
       final cats = ApiService.getServiceCategories();
+      final me = ApiService.getProviderMe();
       _items = await services;
       _categories = await cats;
+      final linked = (await me)['category_ids'];
+      _linkedCategoryIds = linked is List ? linked.map((e) => e.toString()).toSet() : null;
     } on ApiException catch (e) {
       _error = e.message;
     } catch (_) {
@@ -715,7 +731,7 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
   Future<void> _upsert({Map<String, dynamic>? existing}) async {
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => ServiceEditorScreen(existing: existing, categories: _categories),
+        builder: (_) => ServiceEditorScreen(existing: existing, categories: _editorCategories(existing)),
       ),
     );
     if (saved == true) {

@@ -629,6 +629,14 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
               _loadProfile();
             },
           ),
+          if (widget.categories.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: Space.xs),
+              child: Text(
+                'لم تُربط أي فئة بحسابك بعد. تواصل مع الإدارة لتحديد فئات عملك.',
+                style: AppText.caption.copyWith(color: AppPalette.error),
+              ),
+            ),
           if (_subs.isNotEmpty) ...[
             const SizedBox(height: Space.sm),
             DropdownButtonFormField<String?>(
