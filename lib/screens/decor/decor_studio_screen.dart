@@ -387,7 +387,8 @@ class _HallPainter extends CustomPainter {
   }
 
   void _kosha(Canvas c, Offset base, double w, double h, Color flower, Color light) {
-    final kw = w * 0.42, kh = h * 0.42;
+    final kh = h * 0.44;
+    final kw = math.min(w * 0.42, kh * 1.15);
     final top = base.dy - kh;
     // منصة
     c.drawRRect(
@@ -400,8 +401,9 @@ class _HallPainter extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 7
           ..color = const Color(0xFFD7B56D));
-        for (var i = 0; i < 10; i++) {
-          final a = math.pi * 0.65 + i * 0.13;
+        // عنقودان: أسفل اليمين وأعلى اليسار (كما في الكوش الدائرية المعتادة)
+        for (var i = 0; i < 16; i++) {
+          final a = i < 9 ? math.pi * (0.15 + i * 0.07) : math.pi * (1.1 + (i - 9) * 0.07);
           final p = Offset(base.dx + math.cos(a) * kh * 0.48, top + kh * 0.5 + math.sin(a) * kh * 0.48);
           _flowerCluster(c, p, 12, flower, count: 4, seed: i + 3);
         }
@@ -432,11 +434,14 @@ class _HallPainter extends CustomPainter {
         _flowerCluster(c, Offset(base.dx + kw / 2, top + 10), 22, flower, count: 8, seed: 12);
         break;
       default: // arch
+        // نصف دائرة قمّتها عند أعلى الكوشة تماماً (لا تُقصّ)
+        final r = kw / 2;
+        final cy = math.max(top + r, top + kh * 0.45);
         final arch = Path()
-          ..moveTo(base.dx - kw / 2, base.dy)
-          ..lineTo(base.dx - kw / 2, top + kh * 0.4)
-          ..arcToPoint(Offset(base.dx + kw / 2, top + kh * 0.4), radius: Radius.circular(kw / 2))
-          ..lineTo(base.dx + kw / 2, base.dy);
+          ..moveTo(base.dx - r, base.dy)
+          ..lineTo(base.dx - r, cy)
+          ..arcToPoint(Offset(base.dx + r, cy), radius: Radius.circular(r))
+          ..lineTo(base.dx + r, base.dy);
         c.drawPath(arch, Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 5
@@ -444,7 +449,7 @@ class _HallPainter extends CustomPainter {
         for (var i = 0; i <= 12; i++) {
           final t = i / 12;
           final a = math.pi + t * math.pi;
-          final p = Offset(base.dx + math.cos(a) * kw / 2, top + kh * 0.4 + math.sin(a) * kw / 2 * 0.55);
+          final p = Offset(base.dx + math.cos(a) * r, cy + math.sin(a) * r);
           _flowerCluster(c, p, 14, flower, count: 5, seed: i + 20);
         }
         _flowerCluster(c, Offset(base.dx - kw / 2, base.dy - 14), 18, flower, count: 7, seed: 40);
