@@ -39,8 +39,6 @@ const Map<String, (String, IconData)> kDecorPieces = {
   'drapes': ('أقمشة سقف', Icons.waves_outlined),
   'aisle': ('ممر', Icons.linear_scale_rounded),
   'entrance': ('بوابة مدخل', Icons.door_sliding_outlined),
-  'balloons': ('بالونات', Icons.bubble_chart_outlined),
-  'plants': ('نباتات وأشجار', Icons.park_outlined),
   'sign': ('لوحة ترحيب', Icons.signpost_outlined),
   'photo_booth': ('ركن تصوير', Icons.photo_camera_outlined),
   'cake': ('طاولة كيك', Icons.cake_outlined),
@@ -68,9 +66,6 @@ String? decorPieceForSubcategory(String name) {
     'سجاد': 'aisle',
     'بوابات': 'entrance',
     'مداخل': 'entrance',
-    'بالون': 'balloons',
-    'نبات': 'plants',
-    'أشجار': 'plants',
     'لوحات': 'sign',
     'ركن': 'photo_booth',
   };

@@ -3,7 +3,7 @@
 // رسم مشهد الديكور على طبقات، لتتداخل مع صور القطع الحقيقية بالعمق الصحيح:
 //   bg      الجدار والأرضية (لا تُرسم فوق صورة مكان حقيقية)
 //   ceiling الثريات وأقمشة السقف
-//   back    النباتات والبالونات وركن التصوير وطاولة الكيك
+//   back    ركن التصوير وطاولة الكيك
 //   aisle   الممر
 //   kosha   الكوشة والمنصة والأريكة
 //   tables  الطاولات والكراسي وما عليها
@@ -50,14 +50,6 @@ class DecorPainter extends CustomPainter {
         final k = d.scale;
         if (_on('photo_booth')) _photoBooth(c, Offset(w * 0.1, y + h * 0.02), h * 0.36 * k);
         if (_on('cake')) _cakeTable(c, Offset(w * 0.9, y + h * 0.05), h * 0.3 * k);
-        if (_on('plants')) {
-          _plant(c, Offset(w * 0.2, y + h * 0.015), h * 0.32 * k, 3);
-          _plant(c, Offset(w * 0.8, y + h * 0.015), h * 0.32 * k, 9);
-        }
-        if (_on('balloons')) {
-          _balloons(c, Offset(w * 0.27, y + h * 0.02), h * 0.42 * k, 5);
-          _balloons(c, Offset(w * 0.73, y + h * 0.02), h * 0.42 * k, 13);
-        }
       case 'aisle':
         if (_on('aisle')) _aisle(c, w, h);
       case 'kosha':
@@ -455,67 +447,6 @@ class DecorPainter extends CustomPainter {
   }
 
   // ── العناصر الخلفية ────────────────────────────────────
-
-  void _plant(Canvas c, Offset base, double height, int seed) {
-    final potH = height * 0.2, potW = height * 0.2;
-    c.drawOval(Rect.fromCenter(center: base, width: potW * 1.7, height: potW * 0.4), Paint()
-      ..color = Colors.black.withValues(alpha: 0.28)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, height * 0.02));
-    c.drawLine(base - Offset(0, potH), base - Offset(0, height * 0.62), Paint()
-      ..color = const Color(0xFF6B4A2E)
-      ..strokeWidth = height * 0.025);
-    final pot = Path()
-      ..moveTo(base.dx - potW / 2, base.dy - potH)
-      ..lineTo(base.dx + potW / 2, base.dy - potH)
-      ..lineTo(base.dx + potW * 0.34, base.dy)
-      ..lineTo(base.dx - potW * 0.34, base.dy)
-      ..close();
-    c.drawPath(pot, Paint()..color = _gold);
-    final ball = base - Offset(0, height * 0.72);
-    final r = height * 0.28;
-    final rnd = math.Random(seed);
-    c.drawCircle(ball, r, Paint()..color = const Color(0xFF3F6636));
-    for (var i = 0; i < 26; i++) {
-      final a = rnd.nextDouble() * math.pi * 2;
-      _leaf(c, ball + Offset(math.cos(a), math.sin(a)) * (r * rnd.nextDouble() * 0.9), a, r * 0.42, seed + i);
-    }
-    for (var i = 0; i < 5; i++) {
-      final a = rnd.nextDouble() * math.pi * 2;
-      _rose(c, ball + Offset(math.cos(a), math.sin(a)) * (r * rnd.nextDouble() * 0.7), r * 0.17, _flower, seed * 3 + i);
-    }
-  }
-
-  void _balloons(Canvas c, Offset base, double height, int seed) {
-    final rnd = math.Random(seed);
-    final colors = [_flower, Colors.white, _gold, Color.lerp(_flower, Colors.white, 0.45)!];
-    final r = height * 0.1;
-    final anchor = base - Offset(0, height * 0.05);
-    c.drawCircle(anchor, height * 0.02, Paint()..color = _goldDark);
-    final pts = <Offset>[];
-    for (var i = 0; i < 12; i++) {
-      pts.add(base - Offset((rnd.nextDouble() - 0.5) * r * 3.6, height * (0.5 + rnd.nextDouble() * 0.45)));
-    }
-    pts.sort((a, b) => a.dy.compareTo(b.dy));
-    for (final p in pts) {
-      c.drawLine(anchor, p, Paint()
-        ..color = Colors.white.withValues(alpha: 0.6)
-        ..strokeWidth = 0.7);
-    }
-    for (var i = 0; i < pts.length; i++) {
-      final color = colors[i % colors.length];
-      final rect = Rect.fromCenter(center: pts[i], width: r * 1.7, height: r * 2);
-      c.drawOval(
-        rect,
-        Paint()
-          ..shader = RadialGradient(
-            center: const Alignment(-0.35, -0.45),
-            radius: 0.9,
-            colors: [Color.lerp(color, Colors.white, 0.6)!, color, Color.lerp(color, Colors.black, 0.25)!],
-            stops: const [0, 0.55, 1],
-          ).createShader(rect),
-      );
-    }
-  }
 
   void _photoBooth(Canvas c, Offset base, double height) {
     final bw = height * 0.72;

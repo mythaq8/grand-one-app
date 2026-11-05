@@ -100,7 +100,6 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     ('الإضاءة والشموع', RegExp('إضاء|اضاء|ليد|إنارة|ثري|شموع|فوانيس')),
     ('الأقمشة والخلفيات', RegExp('قماش|أقمشة|ستائر|ستار|خلفي')),
     ('الممرات والمداخل', RegExp('ممر|سجاد|مدخل|بوابة|بوابات')),
-    ('البالونات والنباتات', RegExp('بالون|نبات|أشجار|شجر')),
     ('ركن التصوير والضيافة', RegExp('تصوير|لوح|ترحيب|كيك|ضيافة')),
   ];
 
@@ -488,10 +487,6 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           _layer('back', realKeys),
           if (_real['photo_booth'] != null) at(w * 0.1, horizon + h * 0.02, w * 0.18 * k, h * 0.42 * k, _img(_real['photo_booth'])),
           if (_real['cake'] != null) at(w * 0.9, horizon + h * 0.05, w * 0.16 * k, h * 0.34 * k, _img(_real['cake'])),
-          if (_real['plants'] != null)
-            for (final x in const [0.2, 0.8]) at(w * x, horizon + h * 0.015, w * 0.14 * k, h * 0.36 * k, _img(_real['plants'])),
-          if (_real['balloons'] != null)
-            for (final x in const [0.27, 0.73]) at(w * x, horizon + h * 0.02, w * 0.16 * k, h * 0.44 * k, _img(_real['balloons'])),
           _layer('aisle', realKeys),
           if (_real['aisle'] != null)
             Positioned(left: w * 0.38, top: horizon, width: w * 0.24, height: h - horizon, child: _img(_real['aisle'], fit: BoxFit.fill)),
