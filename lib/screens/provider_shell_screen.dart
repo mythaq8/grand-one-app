@@ -9,6 +9,7 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'role/role_panels.dart';
+import 'work/work_types_screen.dart';
 import '../widgets/role_account_menu.dart';
 import '../widgets/ux_helpers.dart';
 import 'work/work_dashboard_tab.dart';
@@ -221,6 +222,17 @@ class _ProviderManageTab extends StatelessWidget {
                 Tab(icon: Icon(Icons.storefront_outlined), text: 'خدماتي وأسعاري'),
                 Tab(icon: Icon(Icons.calendar_month_outlined), text: 'ساعات العمل'),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+            child: ActionTile(
+              icon: Icons.account_tree_outlined,
+              title: 'أنواع أعمالي وخطواتها',
+              subtitle: 'خطوات كل نوع عمل تُضاف تلقائياً لحجوزاتك',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const WorkTypesScreen()),
+              ),
             ),
           ),
           const Expanded(

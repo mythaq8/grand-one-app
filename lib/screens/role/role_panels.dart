@@ -15,7 +15,9 @@ import '../../services/api_exceptions.dart';
 import '../../services/api_service.dart';
 import '../../ui/kit/kit.dart';
 import '../event/event_form_screen.dart' show kEventTypeLabels;
+import '../work/work_checklist_screen.dart';
 import '../work/work_formatters.dart';
+import '../work/work_types_screen.dart';
 
 /// مرشّح مرحلة يفتحه «الرئيسية» على تبويب طلبات المنظّم.
 final ValueNotifier<String?> organizerStageFilter = ValueNotifier<String?>(null);
@@ -121,6 +123,120 @@ String _dueIn(String? iso) {
   return '${h.floor()} ساعة';
 }
 
+// ── مهامك القريبة (من كل الأعمال داخل التطبيق وخارجه) ─────────
+
+class UpcomingTasksSection extends StatefulWidget {
+  const UpcomingTasksSection({super.key});
+
+  @override
+  State<UpcomingTasksSection> createState() => _UpcomingTasksSectionState();
+}
+
+class _UpcomingTasksSectionState extends State<UpcomingTasksSection> {
+  List<Map<String, dynamic>>? _tasks;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await ApiService.getWorkTasks();
+      final list = res['tasks'] is List ? res['tasks'] as List : const [];
+      _tasks = list.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (_) {
+      _tasks = const [];
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tasks = _tasks;
+    final overdue = tasks?.where((t) => t['overdue'] == true).length ?? 0;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(
+          title: 'مهامك القريبة',
+          subtitle: overdue > 0 ? '$overdue مهمة متأخرة' : 'المتأخرة ومهام الأسبوعين القادمين',
+          icon: Icons.checklist_rtl_rounded,
+          accent: overdue > 0 ? AppPalette.error : AppPalette.navy,
+          trailing: TextButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const WorkTypesScreen()),
+            ),
+            child: const Text('أنواع أعمالي'),
+          ),
+        ),
+        if (tasks == null)
+          const LoadingState(padding: EdgeInsets.all(Space.lg))
+        else if (tasks.isEmpty)
+          const EmptyState(
+            icon: Icons.task_alt_rounded,
+            title: 'لا مهام قريبة',
+            body: 'عرّف «أنواع أعمالك» بخطوات ومواعيد، فتظهر هنا مهام كل حجز قبل موعده.',
+            padding: EdgeInsets.all(Space.lg),
+          )
+        else
+          for (final t in tasks.take(8))
+            Padding(
+              padding: const EdgeInsets.only(bottom: Space.sm),
+              child: AppCard(
+                accent: t['overdue'] == true
+                    ? AppPalette.error
+                    : t['today'] == true
+                        ? AppPalette.gold
+                        : AppPalette.navyMuted,
+                padding: const EdgeInsets.all(Space.md),
+                onTap: () async {
+                  await Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => WorkChecklistScreen(
+                        kind: t['ref_kind'].toString(),
+                        refId: t['ref_id'].toString(),
+                        title: t['ref_title']?.toString() ?? 'الجاهزية',
+                      ),
+                    ),
+                  );
+                  _load();
+                },
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(t['title']?.toString() ?? '', style: AppText.title),
+                          Text(
+                            '${t['ref_title'] ?? ''} • الحدث ${workDate(t['ref_date']?.toString())}',
+                            style: AppText.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      t['overdue'] == true
+                          ? 'متأخرة'
+                          : t['today'] == true
+                              ? 'اليوم'
+                              : workDate(t['due_date']?.toString()),
+                      style: AppText.caption.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: t['overdue'] == true ? AppPalette.error : AppPalette.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+      ],
+    );
+  }
+}
+
 // ── المزوّد: الرئيسية ────────────────────────────────────────
 
 class ProviderHomeTab extends StatelessWidget {
@@ -184,6 +300,7 @@ class ProviderHomeTab extends StatelessWidget {
               ),
               StatTile(value: '${_n(k['active_services']).toInt()}', label: 'خدمات نشطة', icon: Icons.storefront_outlined, onTap: () => onNavigate(4)),
             ]),
+            const UpcomingTasksSection(),
             SectionHeader(
               title: 'مواعيدك القادمة',
               icon: Icons.calendar_month_rounded,
@@ -372,6 +489,7 @@ class OrganizerHomeTab extends StatelessWidget {
               StatTile(value: workMoney(k['fees_this_month']), label: 'رسومك هذا الشهر', icon: Icons.payments_outlined, accent: AppPalette.success, onTap: () => onNavigate(3)),
               StatTile(value: workMoney(k['fees_total']), label: 'رسومك الإجمالية', icon: Icons.savings_outlined, accent: AppPalette.success, onTap: () => onNavigate(3)),
             ]),
+            const UpcomingTasksSection(),
             SectionHeader(
               title: 'مناسباتك القادمة',
               icon: Icons.celebration_outlined,

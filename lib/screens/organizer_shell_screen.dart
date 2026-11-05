@@ -9,6 +9,7 @@ import '../services/api_exceptions.dart';
 import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'role/role_panels.dart';
+import 'work/work_types_screen.dart';
 import 'role/occasion_workspace_screen.dart';
 import 'event/event_form_screen.dart' show kEventTypeLabels;
 import '../widgets/role_account_menu.dart';
@@ -185,6 +186,17 @@ class _OrganizerManageTab extends StatelessWidget {
                 Tab(icon: Icon(Icons.inventory_2_outlined), text: 'أصولي وخدماتي'),
                 Tab(icon: Icon(Icons.calendar_month_outlined), text: 'أيام الإتاحة'),
               ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
+            child: ActionTile(
+              icon: Icons.account_tree_outlined,
+              title: 'أنواع أعمالي وخطواتها',
+              subtitle: 'خطوات كل نوع مناسبة بمواعيدها قبل الحفل',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const WorkTypesScreen()),
+              ),
             ),
           ),
           Padding(

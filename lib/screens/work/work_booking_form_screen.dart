@@ -37,6 +37,9 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
   DateTime? _date;
   TimeOfDay? _time;
   bool _block = false;
+  // نوع العمل يحدد خطوات الجاهزية (للحجز الجديد فقط)
+  List<Map<String, dynamic>> _types = [];
+  String? _typeId;
   bool _saving = false;
   bool _dateMissing = false;
 
@@ -46,7 +49,10 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
   void initState() {
     super.initState();
     final e = widget.existing;
-    if (e == null) return;
+    if (e == null) {
+      _loadTypes();
+      return;
+    }
     _name.text = e['customer_name']?.toString() ?? '';
     _total.text = _numText(e['total_amount']);
     _paid.text = _numText(e['paid_amount']);
@@ -61,6 +67,17 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
           hour: int.tryParse(parts[0]) ?? 0, minute: int.tryParse(parts[1]) ?? 0);
     }
     _block = e['block_calendar'] == true;
+  }
+
+  Future<void> _loadTypes() async {
+    try {
+      final res = await ApiService.getWorkTypes();
+      final list = res['types'] is List ? res['types'] as List : const [];
+      _types = list.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+      final def = _types.where((t) => t['is_default'] == true).toList();
+      _typeId = def.isNotEmpty ? def.first['id']?.toString() : null;
+      if (mounted) setState(() {});
+    } catch (_) {}
   }
 
   @override
@@ -134,6 +151,7 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
           ? null
           : '${_time!.hour.toString().padLeft(2, '0')}:${_time!.minute.toString().padLeft(2, '0')}',
       if (widget.canBlockCalendar) 'block_calendar': _block,
+      if (widget.existing == null && _typeId != null) 'work_type_id': _typeId,
     };
 
     setState(() => _saving = true);
@@ -228,6 +246,20 @@ class _WorkBookingFormScreenState extends State<WorkBookingFormScreen> {
               maxLength: 200,
               decoration: const InputDecoration(labelText: 'المكان'),
             ),
+            if (widget.existing == null && _types.isNotEmpty)
+              DropdownButtonFormField<String?>(
+                initialValue: _typeId,
+                decoration: const InputDecoration(
+                  labelText: 'نوع العمل',
+                  helperText: 'تُضاف خطواته لقائمة الجاهزية بمواعيدها',
+                ),
+                items: [
+                  const DropdownMenuItem(value: null, child: Text('بلا نوع')),
+                  for (final t in _types)
+                    DropdownMenuItem(value: t['id']?.toString(), child: Text(t['name']?.toString() ?? '')),
+                ],
+                onChanged: (v) => setState(() => _typeId = v),
+              ),
             TextFormField(
               controller: _summary,
               maxLength: 1000,

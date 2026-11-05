@@ -5,6 +5,7 @@ import '../../design/tokens.dart';
 import '../../design/typography.dart';
 import '../../services/api_exceptions.dart';
 import '../../services/api_service.dart';
+import 'work_formatters.dart';
 
 /// قائمة جاهزية حجز واحد: [kind] = external | booking | occasion.
 class WorkChecklistScreen extends StatefulWidget {
@@ -105,6 +106,76 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
     }
   }
 
+  /// موعد الخطوة: «متأخرة» بالأحمر، «اليوم» بالذهبي، وإلا التاريخ
+  Widget? _dueText(Map<String, dynamic> item, bool isDone) {
+    final due = item['due_date']?.toString();
+    if (due == null || due.length < 10) return null;
+    final now = DateTime.now();
+    final today = workIsoDate(DateTime(now.year, now.month, now.day));
+    final overdue = !isDone && due.compareTo(today) < 0;
+    final isToday = due == today;
+    return Text(
+      overdue
+          ? 'متأخرة — كانت مستحقة ${workDate(due)}'
+          : isToday
+              ? 'مستحقة اليوم'
+              : 'مستحقة ${workDate(due)}',
+      style: AppText.caption.copyWith(
+        color: overdue
+            ? AppPalette.error
+            : isToday
+                ? AppPalette.goldDeep
+                : AppPalette.textTertiary,
+        fontWeight: overdue || isToday ? FontWeight.w700 : null,
+      ),
+    );
+  }
+
+  Future<void> _applyType() async {
+    List<Map<String, dynamic>> types = [];
+    try {
+      final res = await ApiService.getWorkTypes();
+      final list = res['types'] is List ? res['types'] as List : const [];
+      types = list.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (_) {}
+    if (!mounted) return;
+    if (types.isEmpty) {
+      showAppSnack(context, 'لم تعرّف أنواع أعمالك بعد؛ أضفها من «الإدارة ← أنواع أعمالي».');
+      return;
+    }
+    final chosen = await showModalBottomSheet<String>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final t in types)
+                ListTile(
+                  leading: const Icon(Icons.account_tree_outlined),
+                  title: Text(t['name']?.toString() ?? ''),
+                  subtitle: Text('${(t['steps'] as List?)?.length ?? 0} خطوات'),
+                  onTap: () => Navigator.pop(ctx, t['id']?.toString()),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (chosen == null) return;
+    try {
+      final res = await ApiService.applyWorkType(kind: widget.kind, refId: widget.refId, workTypeId: chosen);
+      _changed = true;
+      await _load();
+      if (mounted) {
+        showAppSnack(context, 'أُضيفت ${res['added'] ?? 0} خطوة', tone: FeedbackTone.success);
+      }
+    } on ApiException catch (e) {
+      if (mounted) showAppSnack(context, e.message, tone: FeedbackTone.error);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final done = _items.where((i) => i['is_done'] == true).length;
@@ -130,8 +201,19 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('الجاهزية: $done من $total',
-                                style: AppText.subtitle),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text('الجاهزية: $done من $total',
+                                      style: AppText.subtitle),
+                                ),
+                                TextButton.icon(
+                                  onPressed: _applyType,
+                                  icon: const Icon(Icons.account_tree_outlined, size: 18),
+                                  label: const Text('إضافة خطوات نوع'),
+                                ),
+                              ],
+                            ),
                             const SizedBox(height: Space.sm),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(Radii.pill),
@@ -170,6 +252,7 @@ class _WorkChecklistScreenState extends State<WorkChecklistScreen> {
                                             : null,
                                       ),
                                     ),
+                                    subtitle: _dueText(item, isDone),
                                     secondary: IconButton(
                                       tooltip: 'حذف',
                                       icon: const Icon(Icons.delete_outline),

@@ -1073,6 +1073,28 @@ static Future<Map<String, dynamic>> getOrganizerOverview() async =>
 static Future<Map<String, dynamic>> getOrganizerEarnings() async =>
     _asMap(await _request(method: 'GET', path: '/api/organizer/earnings'));
 
+// ── أنواع أعمالي وخطواتها ──
+static Future<Map<String, dynamic>> getWorkTypes() async =>
+    _asMap(await _request(method: 'GET', path: '/api/work/types'));
+
+static Future<void> saveWorkType({String? id, required Map<String, dynamic> body}) async {
+  await _request(
+    method: id == null ? 'POST' : 'PUT',
+    path: id == null ? '/api/work/types' : '/api/work/types/$id',
+    body: body,
+  );
+}
+
+static Future<void> deleteWorkType(String id) async {
+  await _request(method: 'DELETE', path: '/api/work/types/$id');
+}
+
+static Future<Map<String, dynamic>> applyWorkType({required String kind, required String refId, required String workTypeId}) async =>
+    _asMap(await _request(method: 'POST', path: '/api/work/checklist/apply', body: {'kind': kind, 'id': refId, 'work_type_id': workTypeId}));
+
+static Future<Map<String, dynamic>> getWorkTasks() async =>
+    _asMap(await _request(method: 'GET', path: '/api/work/tasks'));
+
 // ── مساحة عمل المناسبة (منظّم) ──
 static Future<Map<String, dynamic>> getOccasionWorkspace(String requestId) async =>
     _asMap(await _request(method: 'GET', path: '/api/organizer/requests/$requestId/workspace'));
