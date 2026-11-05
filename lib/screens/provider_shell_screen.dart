@@ -10,6 +10,7 @@ import '../services/api_service.dart';
 import 'intro_screen.dart';
 import 'role/role_panels.dart';
 import 'work/work_types_screen.dart';
+import 'work/service_editor_screen.dart';
 import '../widgets/role_account_menu.dart';
 import '../widgets/ux_helpers.dart';
 import 'work/work_dashboard_tab.dart';
@@ -710,140 +711,16 @@ class _ProviderServicesTabState extends State<_ProviderServicesTab> {
     if (mounted) setState(() => _loading = false);
   }
 
+  // المحرّر الكامل يتكيّف مع ملف الفئة (النماذج والوحدات والباقات والإضافات والحقول)
   Future<void> _upsert({Map<String, dynamic>? existing}) async {
-    final nameCtrl = TextEditingController(
-      text: existing?['name']?.toString() ?? '',
-    );
-    final descCtrl = TextEditingController(
-      text: existing?['description']?.toString() ?? '',
-    );
-    final priceCtrl = TextEditingController(
-      text: (existing?['base_price'] ?? '').toString(),
-    );
-    String? categoryId = existing?['category_id']?.toString();
-    var isActive = existing?['is_active'] != false;
-    var isBookable = existing?['is_bookable'] == true;
-
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => Directionality(
-        textDirection: TextDirection.rtl,
-        child: StatefulBuilder(
-          builder: (ctx, setLocal) => AlertDialog(
-            title: Text(existing == null ? 'خدمة جديدة' : 'تعديل الخدمة'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: nameCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'اسم الخدمة *',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  DropdownButtonFormField<String>(
-                    value: categoryId,
-                    decoration: const InputDecoration(
-                      labelText: 'التصنيف *',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: _categories.map((c) {
-                      final id = c['id']?.toString() ?? '';
-                      return DropdownMenuItem(
-                        value: id,
-                        child: Text(c['name']?.toString() ?? id),
-                      );
-                    }).toList(),
-                    onChanged: (v) => setLocal(() => categoryId = v),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  TextField(
-                    controller: priceCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'السعر الأساسي (\$)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: Space.sm),
-                  TextField(
-                    controller: descCtrl,
-                    maxLines: 3,
-                    decoration: const InputDecoration(
-                      labelText: 'الوصف',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('نشطة'),
-                    value: isActive,
-                    onChanged: (v) => setLocal(() => isActive = v),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('قابلة للحجز المباشر'),
-                    value: isBookable,
-                    onChanged: (v) => setLocal(() => isBookable = v),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('إلغاء'),
-              ),
-              FilledButton(
-                onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('حفظ'),
-              ),
-            ],
-          ),
-        ),
+    final saved = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => ServiceEditorScreen(existing: existing, categories: _categories),
       ),
     );
-
-    final name = nameCtrl.text.trim();
-    final desc = descCtrl.text.trim();
-    final price = num.tryParse(priceCtrl.text.trim());
-    nameCtrl.dispose();
-    descCtrl.dispose();
-    priceCtrl.dispose();
-    if (ok != true) return;
-
-    if (name.isEmpty || categoryId == null || categoryId!.isEmpty) {
-      if (!mounted) return;
-      showAppSnack(context, 'الاسم والتصنيف مطلوبان');
-      return;
-    }
-
-    final fields = <String, dynamic>{
-      'name': name,
-      'category_id': categoryId,
-      'description': desc.isEmpty ? null : desc,
-      'base_price': price,
-      'is_active': isActive,
-      'is_bookable': isBookable,
-      'pricing_model': existing?['pricing_model'] ?? 'fixed_package',
-    };
-
-    try {
-      if (existing == null) {
-        await ApiService.createProviderService(fields);
-      } else {
-        await ApiService.updateProviderService(
-          serviceId: existing['id'].toString(),
-          fields: fields,
-        );
-      }
-      await _load();
-    } on ApiException catch (e) {
-      if (!mounted) return;
-      showAppSnack(context, e.message, tone: FeedbackTone.error);
+    if (saved == true) {
+      if (mounted) showAppSnack(context, 'حُفظت الخدمة', tone: FeedbackTone.success);
+      _load();
     }
   }
 

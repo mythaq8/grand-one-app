@@ -893,14 +893,6 @@ static Future<Map<String, dynamic>> decideOccasionQuote({
 // بوابة المزوّد (Grand One)
 // ═══════════════════════════════════════════════════════════
 
-// ── التأجير بين المنظّمين ومتابعة المزوّدين ──
-
-static Future<List<Map<String, dynamic>>> _listOf(dynamic data, String key) async {
-  final v = _asMap(data)[key];
-  return v is List
-      ? v.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
-      : <Map<String, dynamic>>[];
-}
 
 static Future<Map<String, dynamic>> getRequestProviders(String requestId) async {
   final data = await _request(
@@ -1189,6 +1181,21 @@ static Future<List<Map<String, dynamic>>> getProviderServices() async {
       .whereType<Map>()
       .map((e) => Map<String, dynamic>.from(e))
       .toList();
+}
+
+/// ملف الفئة لنموذج الخدمة: نماذج التسعير والوحدات والاقتراحات والحقول
+static Future<Map<String, dynamic>> getCategoryProfile(String categoryId, {String? subcategoryId}) async =>
+    _asMap(await _request(
+      method: 'GET',
+      path: '/api/provider/category-profile',
+      query: {'category_id': categoryId, if (subcategoryId != null) 'subcategory_id': subcategoryId},
+    ));
+
+static Future<Map<String, dynamic>> getServiceExtras(String serviceId) async =>
+    _asMap(await _request(method: 'GET', path: '/api/provider/services/$serviceId/extras'));
+
+static Future<void> saveServiceExtras(String serviceId, Map<String, dynamic> body) async {
+  await _request(method: 'PUT', path: '/api/provider/services/$serviceId/extras', body: body);
 }
 
 static Future<Map<String, dynamic>> createProviderService(
