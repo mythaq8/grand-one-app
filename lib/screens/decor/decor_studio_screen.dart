@@ -415,7 +415,6 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           final controls = ListView(
             padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, 120),
             children: [
-              if (!wide) ...[preview, const SizedBox(height: Space.sm)],
               Text(
                 hasReal
                     ? 'اختر قطعاً حقيقية من المزوّدين لتظهر في القاعة بصورها، وأكمل الباقي بالألوان.'
@@ -501,7 +500,18 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
               ],
             ],
           );
-          if (!wide) return controls;
+          // على الشاشات الضيقة يبقى المشهد ثابتاً أعلى الشاشة ليظهر أثر كل اختيار فوراً
+          if (!wide) {
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, Space.xs),
+                  child: SizedBox(height: c.maxHeight * 0.38, child: Center(child: preview)),
+                ),
+                Expanded(child: controls),
+              ],
+            );
+          }
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -621,22 +631,24 @@ class _HallPainter extends CustomPainter {
     final kh = h * 0.44;
     final kw = math.min(w * 0.42, kh * 1.15);
     final top = base.dy - kh;
+    // الأحجام نسبةً لمشهد مرجعي ارتفاع كوشته 180 لتبقى متناسبة على كل الشاشات
+    final u = kh / 180;
     // منصة
     c.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(base.dx, base.dy + 6), width: kw * 1.15, height: 16), const Radius.circular(6)),
+      RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(base.dx, base.dy + 6 * u), width: kw * 1.15, height: 16 * u), const Radius.circular(6)),
       Paint()..color = const Color(0xFFF2EBDD),
     );
     switch (d.kosha) {
       case 'round':
         c.drawCircle(Offset(base.dx, top + kh * 0.5), kh * 0.48, Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 7
+          ..strokeWidth = 7 * u
           ..color = const Color(0xFFD7B56D));
         // عنقودان: أسفل اليمين وأعلى اليسار (كما في الكوش الدائرية المعتادة)
         for (var i = 0; i < 16; i++) {
           final a = i < 9 ? math.pi * (0.15 + i * 0.07) : math.pi * (1.1 + (i - 9) * 0.07);
           final p = Offset(base.dx + math.cos(a) * kh * 0.48, top + kh * 0.5 + math.sin(a) * kh * 0.48);
-          _flowerCluster(c, p, 12, flower, count: 4, seed: i + 3);
+          _flowerCluster(c, p, 12 * u, flower, count: 4, seed: i + 3);
         }
         break;
       case 'panel':
@@ -646,7 +658,7 @@ class _HallPainter extends CustomPainter {
         );
         for (var y = 0; y < 5; y++) {
           for (var x = 0; x < 7; x++) {
-            _flowerCluster(c, Offset(base.dx - kw / 2 + kw * (x + 0.5) / 7, top + kh * (y + 0.5) / 5), 11, flower, count: 3, seed: x * 7 + y);
+            _flowerCluster(c, Offset(base.dx - kw / 2 + kw * (x + 0.5) / 7, top + kh * (y + 0.5) / 5), 11 * u, flower, count: 3, seed: x * 7 + y);
           }
         }
         break;
@@ -661,8 +673,8 @@ class _HallPainter extends CustomPainter {
             ..strokeWidth = kw / 7
             ..color = Color.lerp(const Color(0xFFF7F2EA), light, 0.2)!.withValues(alpha: 0.85));
         }
-        _flowerCluster(c, Offset(base.dx - kw / 2, top + 10), 22, flower, count: 8, seed: 11);
-        _flowerCluster(c, Offset(base.dx + kw / 2, top + 10), 22, flower, count: 8, seed: 12);
+        _flowerCluster(c, Offset(base.dx - kw / 2, top + 10 * u), 22 * u, flower, count: 8, seed: 11);
+        _flowerCluster(c, Offset(base.dx + kw / 2, top + 10 * u), 22 * u, flower, count: 8, seed: 12);
         break;
       default: // arch
         // نصف دائرة قمّتها عند أعلى الكوشة تماماً (لا تُقصّ)
@@ -675,26 +687,26 @@ class _HallPainter extends CustomPainter {
           ..lineTo(base.dx + r, base.dy);
         c.drawPath(arch, Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 5
+          ..strokeWidth = 5 * u
           ..color = const Color(0xFFD7B56D));
         for (var i = 0; i <= 12; i++) {
           final t = i / 12;
           final a = math.pi + t * math.pi;
           final p = Offset(base.dx + math.cos(a) * r, cy + math.sin(a) * r);
-          _flowerCluster(c, p, 14, flower, count: 5, seed: i + 20);
+          _flowerCluster(c, p, 14 * u, flower, count: 5, seed: i + 20);
         }
-        _flowerCluster(c, Offset(base.dx - kw / 2, base.dy - 14), 18, flower, count: 7, seed: 40);
-        _flowerCluster(c, Offset(base.dx + kw / 2, base.dy - 14), 18, flower, count: 7, seed: 41);
+        _flowerCluster(c, Offset(base.dx - kw / 2, base.dy - 14 * u), 18 * u, flower, count: 7, seed: 40);
+        _flowerCluster(c, Offset(base.dx + kw / 2, base.dy - 14 * u), 18 * u, flower, count: 7, seed: 41);
     }
     // أريكة العروسين
     final sofa = RRect.fromRectAndRadius(
-      Rect.fromCenter(center: Offset(base.dx, base.dy - 14), width: kw * 0.42, height: 30),
+      Rect.fromCenter(center: Offset(base.dx, base.dy - 14 * u), width: kw * 0.42, height: 30 * u),
       const Radius.circular(10),
     );
     c.drawRRect(sofa, Paint()..color = const Color(0xFFF7F1E6));
     c.drawRRect(sofa, Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
+      ..strokeWidth = 2 * u
       ..color = const Color(0xFFD7B56D));
   }
 
