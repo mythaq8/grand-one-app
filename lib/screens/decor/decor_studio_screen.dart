@@ -62,6 +62,25 @@ const kLights = {
   'pink': ('زهرية', Color(0xFFFFB3D1)),
   'purple': ('بنفسجية', Color(0xFFC6A8FF)),
 };
+/// خلفيات المشهد: كلها تأخذ لونها من kWallColors
+const kBackdropStyles = {
+  'hall': 'قاعة',
+  'plain': 'لون سادة',
+  'curtain': 'ستائر',
+  'panels': 'جدار كلاسيكي',
+  'garden': 'حديقة',
+  'stars': 'سماء ليلية',
+};
+const kWallColors = [
+  DecorPalette('رمادي دافئ', Color(0xFF6B6459)),
+  DecorPalette('عاجي', Color(0xFFE8DFCB)),
+  DecorPalette('زهري غامق', Color(0xFFB9707F)),
+  DecorPalette('عنابي', Color(0xFF6A1F2E)),
+  DecorPalette('كحلي', Color(0xFF1F2F57)),
+  DecorPalette('أخضر زيتي', Color(0xFF55633E)),
+  DecorPalette('بنفسجي', Color(0xFF5B4A7E)),
+  DecorPalette('أسود', Color(0xFF1E1D22)),
+];
 const kFloors = [
   DecorPalette('رخام أبيض', Color(0xFFF1EEE9)),
   DecorPalette('سجاد أحمر', Color(0xFF9E2235)),
@@ -77,6 +96,8 @@ class DecorDesign {
   String table = 'round';
   String light = 'warm';
   int floor = 0;
+  String backdrop = 'hall';
+  int wall = 0;
   int tables = 6;
 
   String describe() => [
@@ -86,6 +107,7 @@ class DecorDesign {
         'الورد على الطاولات: ${kFlowerColors[flower].name}',
         'الإضاءة: ${kLights[light]!.$1}',
         'الأرضية: ${kFloors[floor].name}',
+        'الخلفية: ${kBackdropStyles[backdrop]} بلون ${kWallColors[wall].name}',
       ].join('\n');
 }
 
@@ -120,20 +142,43 @@ String _pieceUrl(String path) => Supabase.instance.client.storage.from('decor-pi
 
 /// مواضع الطاولات في المشهد (مركز الطاولة وحجمها) — مشتركة بين الرسم والصور
 List<(Offset, double)> tableSlots(DecorDesign d, double w, double h) {
+  // حتى 4 طاولات في الصف، موزّعة بالتساوي على جانبي الممر؛ الباقي للصف الخلفي
   final n = d.tables;
-  final rows = n <= 6 ? 1 : 2;
-  final perRow = (n / rows).ceil();
+  final rows = math.min(3, (n / 4).ceil());
+  final counts = List<int>.filled(rows, 0);
+  var left = n;
+  for (var r = rows - 1; r >= 0; r--) {
+    counts[r] = r == 0 ? left : math.min(4, left);
+    left -= counts[r];
+  }
+  const ys = {
+    1: [0.76],
+    2: [0.67, 0.83],
+    3: [0.63, 0.73, 0.86],
+  };
+  const scales = {
+    1: [1.0],
+    2: [0.8, 1.0],
+    3: [0.64, 0.8, 1.0],
+  };
+  const aisle = 0.1; // نصف عرض الممر من عرض المشهد
   final out = <(Offset, double)>[];
   for (var r = 0; r < rows; r++) {
-    final y = h * (rows == 1 ? 0.8 : (r == 0 ? 0.7 : 0.9));
-    final scale = rows == 1 ? 1.0 : (r == 0 ? 0.85 : 1.1);
-    final count = math.min(perRow, n - out.length);
-    for (var i = 0; i < count; i++) {
-      // نترك ممراً في الوسط أمام الكوشة
-      final slots = count + 1;
-      final slot = i < count / 2 ? i : i + 1;
-      final x = w * (slot + 0.5) / slots;
-      out.add((Offset(x, y), w / (perRow + 2.2) * scale));
+    final count = counts[r];
+    final leftSide = (count / 2).ceil();
+    final rightSide = count - leftSide;
+    final scale = scales[rows]![r];
+    final size = math.min(0.2, (0.5 - aisle) / math.max(leftSide, 1)) * w * scale * 1.05;
+    final y = h * ys[rows]![r];
+    // تضيق الصفوف الخلفية نحو نقطة التلاشي لتبدو بمنظور
+    final span = (0.5 - aisle) * (0.72 + 0.28 * scale);
+    for (var i = 0; i < leftSide; i++) {
+      final t = (i + 0.5) / leftSide;
+      out.add((Offset(w * (0.5 - aisle - span * (1 - t)), y), size));
+    }
+    for (var i = 0; i < rightSide; i++) {
+      final t = (i + 0.5) / rightSide;
+      out.add((Offset(w * (0.5 + aisle + span * t), y), size));
     }
   }
   return out;
@@ -213,6 +258,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
       if (_real.containsKey('chair')) 'الكراسي',
       if (_real.containsKey('flowers')) 'الورد على الطاولات',
       if (_real.containsKey('light')) 'الإضاءة',
+      if (_real.containsKey('backdrop')) 'الخلفية',
     };
     lines.addAll(painted.where((l) => !skip.any((k) => l.startsWith('$k:'))));
     return lines.join('\n');
@@ -350,6 +396,22 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     );
   }
 
+  /// ظل تماس بيضاوي تحت القطعة ليبدو أنها تقف على الأرضية
+  Widget _contactShadow(double cx, double y, double width) {
+    final h = width * 0.26;
+    return Positioned(
+      left: cx - width / 2,
+      top: y - h / 2,
+      width: width,
+      height: h,
+      child: const DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(colors: [Color(0x66000000), Color(0x00000000)]),
+        ),
+      ),
+    );
+  }
+
   Widget _scene() {
     return LayoutBuilder(builder: (context, c) {
       final w = c.maxWidth, h = c.maxHeight;
@@ -371,7 +433,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           if (_real['aisle'] != null)
             Positioned(left: w * 0.4, top: h * 0.55, width: w * 0.2, height: h * 0.45, child: _img(_real['aisle'], fit: BoxFit.fill)),
           if (_real['kosha'] != null)
-            at(w / 2, h * 0.56, w * 0.5, h * 0.48, _img(_real['kosha']))
+            at(w / 2, h * 0.6, w * 0.56, h * 0.54, _img(_real['kosha']))
           else
             Positioned.fill(child: CustomPaint(painter: _HallPainter(_d, layer: 'kosha', real: realKeys))),
           // الأجزاء المرسومة من الطاولات (ما لم يُستبدل بصور)
@@ -379,11 +441,20 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           // الصور الحقيقية لكل طاولة بالعمق: كراسٍ خلفية ← طاولة ← ورد ← كراسٍ جانبية
           for (final (p, size) in slots) ...[
             if (chair != null)
-              for (final dx in const [-0.2, 0.2]) at(p.dx + size * dx, p.dy - size * 0.02, size * 0.26, size * 0.38, _img(chair)),
-            if (table != null) at(p.dx, p.dy + size * 0.14, size * 0.78, size * 0.5, _img(table)),
-            if (flowers != null) at(p.dx, p.dy - (table != null ? size * 0.12 : size * 0.02), size * 0.3, size * 0.34, _img(flowers)),
+              for (final dx in const [-0.24, 0.24]) ...[
+                _contactShadow(p.dx + size * dx, p.dy + size * 0.03, size * 0.3),
+                at(p.dx + size * dx, p.dy + size * 0.04, size * 0.3, size * 0.5, _img(chair)),
+              ],
+            if (table != null) ...[
+              _contactShadow(p.dx, p.dy + size * 0.22, size * 0.85),
+              at(p.dx, p.dy + size * 0.24, size * 0.85, size * 0.56, _img(table)),
+            ],
+            if (flowers != null) at(p.dx, p.dy + (table != null ? -size * 0.1 : size * 0.01), size * 0.34, size * 0.34, _img(flowers)),
             if (chair != null)
-              for (final dx in const [-0.44, 0.44]) at(p.dx + size * dx, p.dy + size * 0.2, size * 0.3, size * 0.44, _img(chair)),
+              for (final dx in const [-0.44, 0.44]) ...[
+                _contactShadow(p.dx + size * dx, p.dy + size * 0.27, size * 0.3),
+                at(p.dx + size * dx, p.dy + size * 0.28, size * 0.3, size * 0.52, _img(chair)),
+              ],
           ],
         ],
       );
@@ -454,6 +525,10 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
                 _group('الكراسي', _choices({for (final e in kChairStyles.entries) e.key: e.value.$1}, _d.chair, (v) => setState(() => _d.chair = v))),
               _group('الإضاءة', _choices({for (final e in kLights.entries) e.key: e.value.$1}, _d.light, (v) => setState(() => _d.light = v))),
               _group('الأرضية', _swatches(kFloors, _d.floor, (v) => setState(() => _d.floor = v))),
+              if (!_real.containsKey('backdrop')) ...[
+                _group('الخلفية', _choices(kBackdropStyles, _d.backdrop, (v) => setState(() => _d.backdrop = v))),
+                _group('لون الخلفية', _swatches(kWallColors, _d.wall, (v) => setState(() => _d.wall = v))),
+              ],
               const SectionHeader(title: 'خدمات تحقق تصميمك', subtitle: 'اختر ما تريد إضافته لطلبك', icon: Icons.storefront_outlined),
               if (_services.isEmpty)
                 Text('لا خدمات ديكور منشورة بعد؛ سيُرسَل تصميمك للمنظّم ليجهّزه.', style: AppText.bodySecondary)
@@ -569,16 +644,7 @@ class _HallPainter extends CustomPainter {
       return;
     }
 
-    // الجدار مع توهّج الإضاءة
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, w, h * 0.55),
-      Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color.lerp(const Color(0xFF2B2A33), light, 0.25)!, Color.lerp(const Color(0xFF4A4552), light, 0.45)!],
-        ).createShader(Rect.fromLTWH(0, 0, w, h * 0.55)),
-    );
+    _wall(canvas, w, h, light);
     // الأرضية بمنظور
     final floorPath = Path()
       ..moveTo(0, h * 0.55)
@@ -595,9 +661,11 @@ class _HallPainter extends CustomPainter {
           colors: [Color.lerp(floor, Colors.black, 0.25)!, floor],
         ).createShader(Rect.fromLTWH(0, h * 0.55, w, h * 0.45)),
     );
+    _floorTexture(canvas, w, h, floor);
     // بقع الضوء
     final glow = Paint()..maskFilter = const MaskFilter.blur(BlurStyle.normal, 30);
-    for (var i = 0; i < (real.contains('light') ? 0 : 5); i++) {
+    final ceiling = !real.contains('light') && d.backdrop != 'garden' && d.backdrop != 'stars';
+    for (var i = 0; i < (ceiling ? 5 : 0); i++) {
       final x = w * (0.1 + i * 0.2);
       canvas.drawCircle(Offset(x, h * 0.08), 26, glow..color = light.withValues(alpha: 0.55));
       canvas.drawLine(Offset(x, 0), Offset(x, h * 0.06), Paint()..color = light..strokeWidth = 1.5);
@@ -607,6 +675,181 @@ class _HallPainter extends CustomPainter {
     if (layer == 'bg') return;
     _kosha(canvas, Offset(w / 2, h * 0.5), w, h, flower, light);
     _tables(canvas, w, h, cloth, flower);
+  }
+
+  /// خطوط بلاط بمنظور نحو نقطة التلاشي، وظل عند التقاء الأرضية بالجدار
+  void _floorTexture(Canvas c, double w, double h, Color floor) {
+    final top = h * 0.55;
+    final floorRect = Rect.fromLTWH(0, top, w, h - top);
+    c.save();
+    c.clipRect(floorRect);
+    final dark = floor.computeLuminance() < 0.25;
+    final line = Paint()
+      ..color = (dark ? Colors.white : Colors.black).withValues(alpha: 0.1)
+      ..strokeWidth = 1;
+    final vanish = Offset(w / 2, top - h * 0.1);
+    for (var i = -10; i <= 10; i++) {
+      c.drawLine(vanish, Offset(w / 2 + i * w * 0.18, h), line);
+    }
+    for (var i = 1; i <= 9; i++) {
+      final t = i / 9;
+      final y = top + (h - top) * t * t;
+      c.drawLine(Offset(0, y), Offset(w, y), line);
+    }
+    // لمعة خفيفة في وسط الأرضية
+    c.drawRect(
+      floorRect,
+      Paint()
+        ..shader = RadialGradient(
+          center: const Alignment(0, -0.6),
+          radius: 0.9,
+          colors: [Colors.white.withValues(alpha: 0.16), Colors.white.withValues(alpha: 0)],
+        ).createShader(floorRect),
+    );
+    // ظل الجدار على الأرضية يزيل الخط الحاد بينهما
+    final band = Rect.fromLTWH(0, top, w, h * 0.07);
+    c.drawRect(
+      band,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.black.withValues(alpha: 0.34), Colors.black.withValues(alpha: 0)],
+        ).createShader(band),
+    );
+    c.restore();
+  }
+
+  /// الخلفية حسب النوع واللون المختارين (تغطي نصف المشهد العلوي)
+  void _wall(Canvas c, double w, double h, Color light) {
+    final rect = Rect.fromLTWH(0, 0, w, h * 0.55);
+    final base = kWallColors[d.wall].color;
+    final u = h / 415;
+    Color shade(double t) => Color.lerp(base, t < 0 ? Colors.black : Colors.white, t.abs())!;
+
+    c.save();
+    c.clipRect(rect);
+    // الأساس: تدرّج من اللون مع أثر الإضاءة
+    c.drawRect(
+      rect,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color.lerp(shade(-0.35), light, 0.08)!, Color.lerp(base, light, 0.22)!],
+        ).createShader(rect),
+    );
+
+    switch (d.backdrop) {
+      case 'hall':
+        // أعمدة وأقواس وإفريز
+        const n = 6;
+        final bay = w / n;
+        final inset = Paint()..color = shade(-0.18);
+        for (var i = 0; i < n; i++) {
+          final x = i * bay + bay * 0.14;
+          final bw = bay * 0.72;
+          final top = rect.height * 0.3;
+          final r = bw / 2;
+          final arch = Path()
+            ..moveTo(x, rect.bottom)
+            ..lineTo(x, top + r)
+            ..arcToPoint(Offset(x + bw, top + r), radius: Radius.circular(r))
+            ..lineTo(x + bw, rect.bottom)
+            ..close();
+          c.drawPath(arch, inset);
+          c.drawPath(arch, Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 1.5 * u
+            ..color = shade(0.3).withValues(alpha: 0.6));
+        }
+        c.drawRect(Rect.fromLTWH(0, 0, w, 12 * u), Paint()..color = shade(0.22));
+      case 'curtain':
+        // طيّات ستارة عمودية بظل وضوء، مع كورنيش علوي
+        final pleats = (w / (22 * u)).ceil();
+        final pw = w / pleats;
+        for (var i = 0; i < pleats; i++) {
+          final r = Rect.fromLTWH(i * pw, 0, pw + 0.5, rect.height);
+          c.drawRect(
+            r,
+            Paint()
+              ..shader = LinearGradient(colors: [shade(-0.38), shade(0.14), shade(-0.32)]).createShader(r),
+          );
+        }
+        c.drawRect(Rect.fromLTWH(0, 0, w, 10 * u), Paint()..color = const Color(0xFFD7B56D));
+      case 'panels':
+        // إطارات جدارية كلاسيكية
+        const n = 5;
+        final pw = w / n;
+        final line = Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2 * u
+          ..color = shade(0.28).withValues(alpha: 0.75);
+        for (var i = 0; i < n; i++) {
+          c.drawRect(
+            Rect.fromLTWH(i * pw + pw * 0.1, rect.height * 0.14, pw * 0.8, rect.height * 0.76),
+            line,
+          );
+          c.drawRect(
+            Rect.fromLTWH(i * pw + pw * 0.17, rect.height * 0.2, pw * 0.66, rect.height * 0.64),
+            line..strokeWidth = 1 * u,
+          );
+          line.strokeWidth = 2 * u;
+        }
+      case 'garden':
+        // سماء من لون الخلفية وأشجار وسياج أخضر
+        c.drawRect(
+          rect,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [shade(0.25), shade(0.75)],
+            ).createShader(rect),
+        );
+        final rnd = math.Random(7);
+        for (var i = 0; i < 9; i++) {
+          final x = w * (i + 0.5) / 9;
+          final tr = (34 + rnd.nextDouble() * 20) * u;
+          final y = rect.bottom - tr * (1.3 + rnd.nextDouble() * 0.5);
+          c.drawCircle(Offset(x, y), tr, Paint()..color = Color.lerp(const Color(0xFF3F6B3A), const Color(0xFF5E8A48), rnd.nextDouble())!);
+          c.drawCircle(Offset(x - tr * 0.3, y - tr * 0.3), tr * 0.55, Paint()..color = const Color(0xFF6E9A55).withValues(alpha: 0.7));
+        }
+        c.drawRect(Rect.fromLTWH(0, rect.bottom - 26 * u, w, 26 * u), Paint()..color = const Color(0xFF3B5F35));
+      case 'stars':
+        // سماء ليلية بنجوم وحبال إضاءة
+        c.drawRect(
+          rect,
+          Paint()
+            ..shader = LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color.lerp(base, Colors.black, 0.72)!, Color.lerp(base, Colors.black, 0.4)!],
+            ).createShader(rect),
+        );
+        final rnd = math.Random(11);
+        for (var i = 0; i < 90; i++) {
+          c.drawCircle(
+            Offset(rnd.nextDouble() * w, rnd.nextDouble() * rect.height),
+            (0.5 + rnd.nextDouble()) * u,
+            Paint()..color = Colors.white.withValues(alpha: 0.35 + rnd.nextDouble() * 0.6),
+          );
+        }
+        for (var s = 0; s < 3; s++) {
+          final y0 = rect.height * (0.12 + s * 0.16);
+          for (var i = 0; i <= 24; i++) {
+            final t = i / 24;
+            final p = Offset(w * t, y0 + math.sin(t * math.pi) * 26 * u);
+            c.drawCircle(p, 3 * u, Paint()
+              ..color = light.withValues(alpha: 0.5)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3));
+            c.drawCircle(p, 1.2 * u, Paint()..color = light);
+          }
+        }
+      default: // plain
+        break;
+    }
+    c.restore();
   }
 
   void _flowerCluster(Canvas c, Offset center, double r, Color color, {int count = 9, int seed = 1}) {
@@ -767,9 +1010,36 @@ class _HallPainter extends CustomPainter {
       }
     }
     if (!drawTable) return; // صورة الطاولة والورد تُركَّب فوق الرسم
-    c.drawOval(Rect.fromCenter(center: p + const Offset(0, 6), width: size * 0.7, height: size * 0.3), Paint()..color = Colors.black.withValues(alpha: 0.15));
-    c.drawOval(Rect.fromCenter(center: p, width: size * 0.7, height: size * 0.3), Paint()..color = cloth);
-    c.drawOval(Rect.fromCenter(center: p, width: size * 0.7, height: size * 0.3), Paint()
+    final tw = size * 0.7, th = size * 0.24, drop = size * 0.2;
+    c.drawOval(
+      Rect.fromCenter(center: p + Offset(0, drop), width: tw * 1.12, height: th * 0.9),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.28)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, size * 0.03),
+    );
+    // المفرش المنسدل بطيّات
+    final skirtRect = Rect.fromLTRB(p.dx - tw / 2, p.dy, p.dx + tw / 2, p.dy + drop + th / 2);
+    final skirt = Path()
+      ..moveTo(skirtRect.left, p.dy)
+      ..lineTo(skirtRect.left, p.dy + drop)
+      ..arcToPoint(Offset(skirtRect.right, p.dy + drop), radius: Radius.elliptical(tw / 2, th / 2), clockwise: false)
+      ..lineTo(skirtRect.right, p.dy)
+      ..close();
+    c.drawPath(
+      skirt,
+      Paint()
+        ..shader = LinearGradient(
+          colors: [
+            Color.lerp(cloth, Colors.black, 0.2)!,
+            Color.lerp(cloth, Colors.black, 0.03)!,
+            Color.lerp(cloth, Colors.black, 0.1)!,
+            Color.lerp(cloth, Colors.black, 0.02)!,
+            Color.lerp(cloth, Colors.black, 0.2)!,
+          ],
+        ).createShader(skirtRect),
+    );
+    c.drawOval(Rect.fromCenter(center: p, width: tw, height: th), Paint()..color = cloth);
+    c.drawOval(Rect.fromCenter(center: p, width: tw, height: th), Paint()
       ..style = PaintingStyle.stroke
       ..color = Colors.black.withValues(alpha: 0.12));
     if (drawFlowers) _flowerCluster(c, Offset(p.dx, p.dy - size * 0.05), size * 0.09, flower, count: 5, seed: seed + 80);
