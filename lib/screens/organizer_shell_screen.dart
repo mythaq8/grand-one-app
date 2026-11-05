@@ -14,7 +14,6 @@ import 'role/occasion_workspace_screen.dart';
 import 'event/event_form_screen.dart' show kEventTypeLabels;
 import '../widgets/role_account_menu.dart';
 import 'work/work_dashboard_tab.dart';
-import 'organizer_rentals_screen.dart';
 import 'organizer_request_providers_screen.dart';
 
 /// لوحة المنظّم — طلبات المناسبات / عروض / خدمات خاصة
@@ -78,13 +77,6 @@ class _OrganizerShellScreenState extends State<OrganizerShellScreen> {
               : _organizerName!,
         ),
         actions: [
-          IconButton(
-            tooltip: 'التأجير بين المنظّمين',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const OrganizerRentalsScreen()),
-            ),
-            icon: const Icon(Icons.swap_horiz_rounded),
-          ),
           RoleAccountButton(onSignOut: _signOut),
         ],
       ),
@@ -196,17 +188,6 @@ class _OrganizerManageTab extends StatelessWidget {
               subtitle: 'خطوات كل نوع مناسبة بمواعيدها قبل الحفل',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const WorkTypesScreen()),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(Space.md, Space.sm, Space.md, 0),
-            child: ActionTile(
-              icon: Icons.swap_horiz_rounded,
-              title: 'التأجير بين المنظّمين',
-              subtitle: 'استأجر معدات من زملائك أو أجّرهم أصولك',
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const OrganizerRentalsScreen()),
               ),
             ),
           ),
@@ -771,10 +752,6 @@ class _OrganizerOwnedServicesTabState
     );
     String? categoryId = existing?['category_id']?.toString();
     var isActive = existing?['is_active'] != false;
-    var rentable = existing?['rentable'] == true;
-    final rentalCtrl = TextEditingController(
-      text: existing?['rental_price']?.toString() ?? '',
-    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -846,22 +823,6 @@ class _OrganizerOwnedServicesTabState
                     value: isActive,
                     onChanged: (v) => setLocal(() => isActive = v),
                   ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('متاحة للتأجير لمنظّمين آخرين'),
-                    value: rentable,
-                    onChanged: (v) => setLocal(() => rentable = v),
-                  ),
-                  if (rentable)
-                    TextField(
-                      controller: rentalCtrl,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'سعر التأجير لليوم (\$) *',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -883,8 +844,6 @@ class _OrganizerOwnedServicesTabState
     final name = nameCtrl.text.trim();
     final desc = descCtrl.text.trim();
     final price = num.tryParse(priceCtrl.text.trim());
-    final rentalPrice = num.tryParse(rentalCtrl.text.trim());
-    rentalCtrl.dispose();
     nameCtrl.dispose();
     descCtrl.dispose();
     priceCtrl.dispose();
@@ -902,8 +861,6 @@ class _OrganizerOwnedServicesTabState
       'base_price': price,
       'is_active': isActive,
       'capacity_mode': existing?['capacity_mode'] ?? 'exclusive',
-      'rentable': rentable,
-      'rental_price': rentable ? rentalPrice : null,
       if (categoryId != null && categoryId!.isNotEmpty)
         'category_id': categoryId,
     };

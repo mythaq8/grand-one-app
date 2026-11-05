@@ -902,29 +902,6 @@ static Future<List<Map<String, dynamic>>> _listOf(dynamic data, String key) asyn
       : <Map<String, dynamic>>[];
 }
 
-static Future<List<Map<String, dynamic>>> getRentalCatalog() async =>
-    _listOf(await _request(method: 'GET', path: '/api/organizer/rentals/catalog'), 'data');
-
-static Future<List<Map<String, dynamic>>> getOrganizerRentals(String box) async =>
-    _listOf(
-      await _request(
-        method: 'GET',
-        path: '/api/organizer/rentals',
-        query: {'box': box},
-      ),
-      'data',
-    );
-
-static Future<Map<String, dynamic>> requestRental(Map<String, dynamic> body) async {
-  final data = await _request(method: 'POST', path: '/api/organizer/rentals', body: body);
-  return _asMap(data);
-}
-
-static Future<Map<String, dynamic>> actOnRental(String id, String action) async {
-  final data = await _request(method: 'POST', path: '/api/organizer/rentals/$id/$action');
-  return _asMap(data);
-}
-
 static Future<Map<String, dynamic>> getRequestProviders(String requestId) async {
   final data = await _request(
       method: 'GET', path: '/api/organizer/requests/$requestId/providers');
