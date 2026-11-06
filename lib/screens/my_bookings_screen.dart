@@ -76,11 +76,16 @@ void _onTabShown() {
   if (mounted && !_isLoading) _loadBookings();
 }
 
+/// رقم آخر طلب تحميل: يُتجاهل أي ردّ قديم يصل بعد ردّ أحدث
+int _loadSeq = 0;
+
 Future<void> _loadBookings() async {
   if (!mounted) return;
+  final seq = ++_loadSeq;
 
   setState(() {
-    _isLoading = true;
+    // أثناء التحديث تبقى القائمة ظاهرة (دوّامة كاملة فقط عند عدم وجود بيانات)
+    _isLoading = _bookings.isEmpty;
     _errorMessage = null;
   });
 
@@ -127,7 +132,10 @@ Future<void> _loadBookings() async {
       }
     }
 
-    if (!mounted) return;
+    if (!mounted || seq != _loadSeq) return;
+
+    await _markReviewedBookings(bookings, user.id);
+    if (!mounted || seq != _loadSeq) return;
 
     setState(() {
       _bookings
@@ -138,7 +146,7 @@ Future<void> _loadBookings() async {
   } catch (e) {
     debugPrint('🔴 Load bookings error: $e');
 
-    if (!mounted) return;
+    if (!mounted || seq != _loadSeq) return;
     setState(() {
       _isLoading = false;
       _errorMessage = ErrorHandler.getErrorMessage(e);
@@ -181,6 +189,49 @@ Future<void> _loadBookings() async {
   // ═══════════════════════════════════════════════════════════
   // تصفية القائمة
   // ═══════════════════════════════════════════════════════════
+
+  /// يعلّم الحجوزات المكتملة التي قيّمها المستخدم، ليظهر زر التقييم منجزاً
+  /// (الخادم يمنع التقييم المكرر لكن الحجز نفسه لا يحمل هذه المعلومة).
+  Future<void> _markReviewedBookings(
+    List<Map<String, dynamic>> bookings,
+    String userId,
+  ) async {
+    final ids = [
+      for (final b in bookings)
+        if (b['status']?.toString() == 'completed' && b['id'] != null)
+          b['id'].toString(),
+    ];
+    if (ids.isEmpty) return;
+    try {
+      final results = await Future.wait([
+        _supabase
+            .from('service_reviews')
+            .select('booking_id')
+            .eq('user_id', userId)
+            .inFilter('booking_id', ids),
+        _supabase
+            .from('provider_reviews')
+            .select('booking_id')
+            .eq('user_id', userId)
+            .inFilter('booking_id', ids),
+      ]);
+      final service = {
+        for (final r in results[0]) (r as Map)['booking_id'].toString(),
+      };
+      final provider = {
+        for (final r in results[1]) (r as Map)['booking_id'].toString(),
+      };
+      for (final b in bookings) {
+        final id = b['id']?.toString();
+        if (id == null) continue;
+        b['service_reviewed'] = service.contains(id);
+        b['provider_reviewed'] = provider.contains(id);
+      }
+    } catch (e) {
+      // عند الفشل يبقى الزر متاحاً والخادم يرفض التكرار برسالة واضحة
+      debugPrint('⚠️ Reviews lookup failed: $e');
+    }
+  }
 
   List<Map<String, dynamic>> get _filteredBookings {
     if (_selectedFilter == 'all') return _bookings;
