@@ -25,6 +25,8 @@ import '../widgets/notification_badge_icon.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
 import 'services_screen.dart';
+import 'service_detail_screen.dart';
+import 'provider_details_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 import '../services/search_date.dart';
 import 'event/event_screen.dart';
@@ -1121,19 +1123,38 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
   }
 
   Future<void> _loadRemote() async {
-    List<Map<String, dynamic>> rows;
-    try {
-      rows = await ApiService.getHomePromoCards();
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _loading = false);
-      return;
-    }
+    var rows = <Map<String, dynamic>>[];
+    var ads = <Map<String, dynamic>>[];
+    // كل مصدر مستقل: فشل أحدهما لا يُسقط الآخر
+    await Future.wait([
+      ApiService.getHomePromoCards().then((v) => rows = v).catchError(
+            (_) => rows = <Map<String, dynamic>>[],
+          ),
+      ApiService.getAdvertisements().then((v) => ads = v).catchError(
+            (_) => ads = <Map<String, dynamic>>[],
+          ),
+    ]);
     if (!mounted) return;
-    if (rows.isEmpty) {
-      setState(() => _loading = false);
-      return;
+
+    // الإعلانات النشطة أولاً في مربع الصور
+    final adSlides = <_HeroSlide>[];
+    for (final ad in ads) {
+      final signed = (ad['signed_url'] ?? ad['image_url'])?.toString().trim();
+      final title = ad['title']?.toString().trim() ?? '';
+      final description = ad['description']?.toString().trim() ?? '';
+      adSlides.add(
+        _HeroSlide(
+          imageUrl: (signed != null && signed.isNotEmpty) ? signed : null,
+          tag: 'إعلان',
+          title: title.isNotEmpty ? title : 'عرض مميّز',
+          description: description,
+          targetType: ad['target_type']?.toString() ?? 'ad',
+          serviceId: ad['service_id']?.toString(),
+          providerId: ad['provider_id']?.toString(),
+        ),
+      );
     }
+
     final slides = <_HeroSlide>[];
     for (var i = 0; i < rows.length; i++) {
       final r = rows[i];
@@ -1151,12 +1172,36 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
         ),
       );
     }
+    final promo = slides.isEmpty ? _fallbackSlides() : slides;
     setState(() {
-      _slides = slides;
+      _slides = [...adSlides, ...promo];
       _currentPage = 0;
       _loading = false;
     });
+    if (_controller.hasClients) _controller.jumpToPage(0);
     _schedule();
+  }
+
+  void _openAd(_HeroSlide slide) {
+    final serviceId = slide.serviceId;
+    final providerId = slide.providerId;
+    if (slide.targetType == 'service' &&
+        serviceId != null &&
+        serviceId.isNotEmpty &&
+        serviceId != 'null') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ServiceDetailScreen(serviceId: serviceId)),
+      );
+    } else if (slide.targetType == 'provider' &&
+        providerId != null &&
+        providerId.isNotEmpty &&
+        providerId != 'null') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProviderDetailsScreen(providerId: providerId)),
+      );
+    }
   }
 
   /// بعد كل تقليب — سواء تلقائياً أو بالسحب — نعيد العدّ من جديد
@@ -1219,7 +1264,16 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
               setState(() => _currentPage = i);
               _schedule();
             },
-            itemBuilder: (context, index) => _buildSlide(_slides[index], index),
+            itemBuilder: (context, index) {
+              final slide = _slides[index];
+              final card = _buildSlide(slide, index);
+              if (!slide.isAd) return card;
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _openAd(slide),
+                child: card,
+              );
+            },
           ),
         ),
         const SizedBox(height: Space.sm),
@@ -1391,11 +1445,21 @@ class _HeroSlide {
   final String title;
   final String description;
 
+  /// للإعلانات فقط: عند النقر تُفتح الخدمة أو المزوّد
+  final String? targetType;
+  final String? serviceId;
+  final String? providerId;
+
   const _HeroSlide({
     this.imageUrl,
     this.assetImage,
     required this.tag,
     required this.title,
     required this.description,
+    this.targetType,
+    this.serviceId,
+    this.providerId,
   });
+
+  bool get isAd => targetType != null;
 }
