@@ -57,7 +57,6 @@ class _HomeScreenState extends State<HomeScreen>
   final _client = Supabase.instance.client;
 
   String _userName = '';
-  String? _avatarUrl;
   bool _isLoading = true;
 
   /// الفئات العامة التي تُتصفّح مباشرة (فئات التنظيم تظهر في مسار التخطيط)
@@ -140,7 +139,6 @@ class _HomeScreenState extends State<HomeScreen>
         _userName = (name != null && name.isNotEmpty)
             ? name
             : 'مستخدم ${AppConfig.appName}';
-        _avatarUrl = null;
         _isLoading = false;
       });
     } catch (e) {
@@ -148,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) {
         setState(() {
           _userName = 'مستخدم ${AppConfig.appName}';
-          _avatarUrl = null;
           _isLoading = false;
         });
       }
@@ -350,8 +347,6 @@ class _HomeScreenState extends State<HomeScreen>
                 children: [
                   Row(
                     children: [
-                      _buildPersonAvatar(size: 44),
-                      const SizedBox(width: Space.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -620,38 +615,6 @@ class _HomeScreenState extends State<HomeScreen>
     widget.onOpenServicesTab?.call();
   }
 
-  Widget _buildPersonAvatar({required double size}) {
-    final fallback = Center(
-      child: Text(
-        _userName.isNotEmpty ? _userName.characters.first : '؟',
-        style: TextStyle(
-          fontFamily: 'Tajawal',
-          fontSize: size * 0.42,
-          fontWeight: FontWeight.w800,
-          color: AppColors.goldLight,
-        ),
-      ),
-    );
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: 0.12),
-        border: Border.all(color: AppColors.gold, width: 2),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: _avatarUrl != null && _avatarUrl!.isNotEmpty
-          ? Image.network(
-              _avatarUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => fallback,
-            )
-          : fallback,
-    );
-  }
-
   // ═══════════════════════════════════════════════════════════
   // Hero Pages (قابل للتقليب)
   // ═══════════════════════════════════════════════════════════
@@ -849,8 +812,6 @@ class _HomeScreenState extends State<HomeScreen>
         children: [
           Row(
             children: [
-              _buildPersonAvatar(size: 56),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

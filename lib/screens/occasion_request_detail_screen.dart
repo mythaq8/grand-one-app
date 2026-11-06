@@ -221,6 +221,15 @@ class _OccasionRequestDetailScreenState
     }
   }
 
+  /// يحوّل نص ISO القادم من الخادم إلى «2026-11-07 16:47» بالتوقيت المحلي
+  String _friendlyDateTime(dynamic raw) {
+    final text = raw?.toString() ?? '';
+    final dt = DateTime.tryParse(text)?.toLocal();
+    if (dt == null) return text;
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${dt.year}-${two(dt.month)}-${two(dt.day)} ${two(dt.hour)}:${two(dt.minute)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final quote = _activeQuote;
@@ -302,7 +311,7 @@ class _OccasionRequestDetailScreenState
                               const SizedBox(height: 8),
                               Text(
                                 _request?['deposit_due_at'] != null
-                                    ? 'ادفع العربون قبل: ${_request?['deposit_due_at']}'
+                                    ? 'ادفع العربون قبل: ${_friendlyDateTime(_request?['deposit_due_at'])}'
                                     : 'ادفع العربون خلال المهلة المحددة لتثبيت الحجز.',
                                 style: const TextStyle(
                                   fontSize: 12,
@@ -433,7 +442,7 @@ class _OccasionRequestDetailScreenState
                                 Text('الشروط: ${quote['terms']}'),
                               if (quote['valid_until'] != null)
                                 Text(
-                                  'صالح حتى: ${quote['valid_until']}',
+                                  'صالح حتى: ${_friendlyDateTime(quote['valid_until'])}',
                                   style: const TextStyle(fontSize: 12),
                                 ),
                               if (status == 'awaiting_client') ...[
