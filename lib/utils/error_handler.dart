@@ -275,7 +275,10 @@ class ErrorHandler {
 
     if (errorStr.contains('network') ||
         errorStr.contains('socket') ||
-        errorStr.contains('failed host lookup')) {
+        errorStr.contains('failed host lookup') ||
+        errorStr.contains('failed to fetch') ||
+        errorStr.contains('clientexception') ||
+        errorStr.contains('xmlhttprequest')) {
       return 'تعذر الاتصال بالإنترنت.';
     }
 

@@ -1,5 +1,6 @@
 // lib/services/api_service.dart
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -107,7 +108,9 @@ class ApiService {
     } on ApiException {
       rethrow;
     } catch (e) {
-      throw ApiException.network('فشل الاتصال بالخادم: $e');
+      // التفاصيل التقنية في السجل فقط، لا تُعرض للمستخدم
+      debugPrint('API connection error: $e');
+      throw ApiException.network('فشل الاتصال بالخادم، تحقق من اتصالك بالإنترنت');
     }
   }
 

@@ -14,6 +14,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../utils/error_handler.dart';
 import '../design/tokens.dart';
 import '../ui/kit/kit.dart';
 import '../ui/layout/responsive.dart';
@@ -112,7 +113,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'حدث خطأ غير متوقع: $e';
+        _errorMessage = ErrorHandler.getErrorMessage(e);
       });
     }
   }

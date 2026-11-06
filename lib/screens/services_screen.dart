@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../utils/error_handler.dart';
 import '../design/tokens.dart';
 import '../design/typography.dart';
 import '../ui/kit/kit.dart';
@@ -241,7 +242,7 @@ final PageController _adsPageController = PageController();
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'حدث خطأ غير متوقع: $e';
+        _errorMessage = ErrorHandler.getErrorMessage(e);
       });
     }
   }

@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_colors.dart';
+import '../utils/error_handler.dart';
 import '../design/tokens.dart';
 import '../design/typography.dart';
 import '../ui/kit/kit.dart';
@@ -211,7 +212,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'حدث خطأ غير متوقع: $e';
+        _errorMessage = ErrorHandler.getErrorMessage(e);
       });
     }
   }

@@ -18,6 +18,7 @@ import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 import '../app_colors.dart';
+import '../utils/error_handler.dart';
 import '../ui_copy.dart';
 import '../services/api_service.dart';
 import '../services/api_exceptions.dart';
@@ -140,7 +141,7 @@ Future<void> _loadBookings() async {
     if (!mounted) return;
     setState(() {
       _isLoading = false;
-      _errorMessage = 'فشل تحميل الحجوزات: $e';
+      _errorMessage = ErrorHandler.getErrorMessage(e);
     });
   }
 }
