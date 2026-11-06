@@ -315,7 +315,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
     try {
       await ApiService.respondProviderBooking(bookingId: id, action: action);
       if (!mounted) return;
-      showAppSnack(context, action == 'confirm' ? 'تم التأكيد' : 'تم الرفض', tone: FeedbackTone.success);
+      showAppSnack(context, action == 'confirm' ? 'تمت الموافقة' : 'تم الرفض', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
       if (!mounted) return;
@@ -489,7 +489,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
       );
       if (!mounted) return;
       showAppSnack(context, action == 'confirm'
-                ? 'تم تأكيد ${res['updated'] ?? 0} طلب'
+                ? 'تمت الموافقة على ${res['updated'] ?? 0} طلب'
                 : 'تم رفض ${res['updated'] ?? 0} طلب', tone: FeedbackTone.success);
       await _load();
     } on ApiException catch (e) {
@@ -526,7 +526,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                     style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                     onPressed: () =>
                         _respondGroup(row['id'].toString(), 'confirm'),
-                    child: Text('تأكيد الكل ($open)'),
+                    child: Text('موافقة على الكل ($open)'),
                   ),
                   const SizedBox(width: Space.sm),
                   OutlinedButton(
@@ -643,7 +643,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                             style: FilledButton.styleFrom(minimumSize: const Size(0, 44)),
                             onPressed: () =>
                                 _respond(b['id'].toString(), 'confirm'),
-                            child: const Text('تأكيد'),
+                            child: const Text('موافقة'),
                           ),
                           const SizedBox(width: Space.sm),
                         ],
