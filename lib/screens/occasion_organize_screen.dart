@@ -8,10 +8,12 @@
 
 import 'decor/decor_studio_screen.dart';
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_colors.dart';
 import '../services/api_exceptions.dart';
@@ -106,6 +108,11 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
   double? _filterMaxPrice;
   String? _filterSort;
   final Map<String, _CartLine> _cart = {};
+
+  /// تصميم الديكور: يعود إليه المستخدم ليعدّله، وصورته تُحفظ مع الطلب
+  final DecorStudioDraft _decorDraft = DecorStudioDraft();
+  Uint8List? _designImage;
+  String? _designImagePath;
   final Map<String, TextEditingController> _qtyCtrls = {};
 
   static const _governorates = [
@@ -624,6 +631,72 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
   int get _manualCount =>
       _cart.values.where((e) => e.needsManualQuote).length;
 
+  /// يرفع صورة التصميم مرة واحدة؛ فشلها لا يمنع إرسال الطلب ويبقى الوصف النصي
+  Future<String?> _uploadDesignImage() async {
+    final bytes = _designImage;
+    if (bytes == null) return null;
+    if (_designImagePath != null) return _designImagePath;
+    try {
+      final uid = Supabase.instance.client.auth.currentUser?.id;
+      if (uid == null) return null;
+      final path = '$uid/design_${DateTime.now().millisecondsSinceEpoch}.png';
+      await Supabase.instance.client.storage.from('occasion-designs').uploadBinary(
+            path,
+            bytes,
+            fileOptions: const FileOptions(contentType: 'image/png', upsert: false),
+          );
+      _designImagePath = path;
+      return path;
+    } catch (e) {
+      debugPrint('design upload failed: $e');
+      if (mounted) {
+        ErrorHandler.showWarning(context, 'تعذّر رفع صورة التصميم؛ سيصل وصفه النصي للمنظّم');
+      }
+      return null;
+    }
+  }
+
+  Widget _designPreview() {
+    final bytes = _designImage;
+    if (bytes == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: BrandCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text('صورة تصميم الديكور', style: TextStyle(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            const Text('تُحفظ مع طلبك ليراها المنظّم', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: AspectRatio(aspectRatio: 16 / 10, child: Image.memory(bytes, fit: BoxFit.cover)),
+            ),
+            Row(
+              children: [
+                TextButton.icon(
+                  onPressed: _openDecorStudio,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  label: const Text('تعديل التصميم'),
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => setState(() {
+                    _designImage = null;
+                    _designImagePath = null;
+                  }),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('إزالة الصورة'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (_submitting) return;
     if (!_validateStep0()) return;
@@ -637,6 +710,8 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         'occ_${DateTime.now().millisecondsSinceEpoch}_${_cart.length}';
 
     try {
+      final designPath = await _uploadDesignImage();
+      if (!mounted) return;
       final items = _cart.values
           .map(
             (l) => {
@@ -658,6 +733,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
             : _occasionDate!.toIso8601String().substring(0, 10),
         items: items,
         clientRequestKey: clientKey,
+        designImagePath: designPath,
       );
 
       if (!mounted) return;
@@ -1357,12 +1433,20 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
         builder: (_) => DecorStudioScreen(
           categoryId: categoryId,
           chosenServices: _cart.values.map((l) => l.service).toList(),
+          draft: _decorDraft,
         ),
       ),
     );
     if (result == null || !mounted) return;
+    for (final id in result.removedIds) {
+      _cart.remove(id);
+    }
     for (final svc in result.services) {
       if (!_cart.containsKey(svc['id']?.toString())) _addToCart(svc);
+    }
+    if (result.image != null) {
+      _designImage = result.image;
+      _designImagePath = null;
     }
     // وصف التصميم يُرسَل مع الطلب ليراه المنظّم (يُستبدل إن أعيد التصميم)
     final marker = '— تصميم الديكور —';
@@ -1375,7 +1459,11 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
       result.description,
     ].join('\n');
     setState(() {});
-    ErrorHandler.showSuccess(context, 'اعتُمد تصميم الديكور وأُرفق بطلبك');
+    if (_cart.isEmpty) {
+      ErrorHandler.showWarning(context, 'حُفظ تصميمك. أضف خدمة واحدة على الأقل لتتمكن من إرسال الطلب');
+    } else {
+      ErrorHandler.showSuccess(context, 'اعتُمد تصميم الديكور وأُرفق بطلبك');
+    }
   }
 
   Widget _decorBanner() {
@@ -1999,6 +2087,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
             ),
           );
         }),
+        _designPreview(),
         TextField(
           controller: _notesCtrl,
           maxLines: 3,

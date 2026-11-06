@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
+import '../widgets/design_image_card.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -280,6 +281,8 @@ class _OccasionRequestDetailScreenState
                               'التاريخ: ${_request?['occasion_date'] ?? 'غير محدد'}',
                             ),
                             Text('واتساب: ${_request?['whatsapp'] ?? '-'}'),
+                            if ((_request?['design_image_url']?.toString() ?? '').startsWith('http'))
+                              DesignImageCard(url: _request!['design_image_url'].toString()),
                             if ((_request?['notes']?.toString() ?? '')
                                 .isNotEmpty)
                               Text('ملاحظاتك: ${_request?['notes']}'),

@@ -7,9 +7,11 @@
 // ============================================================
 
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../design/tokens.dart';
@@ -23,9 +25,25 @@ export 'decor_models.dart';
 
 /// نتيجة الاستوديو: وصف التصميم والخدمات المختارة لإضافتها لطلب التنظيم
 class DecorStudioResult {
-  DecorStudioResult(this.description, this.services);
+  DecorStudioResult(this.description, this.services, {this.removedIds = const {}, this.image});
   final String description;
+
+  /// الخدمات المختارة في التصميم
   final List<Map<String, dynamic>> services;
+
+  /// خدمات كانت في الطلب وأزالها المستخدم أو استبدلها
+  final Set<String> removedIds;
+
+  /// صورة المشهد كما يراه المستخدم (PNG)
+  final Uint8List? image;
+}
+
+/// حالة الاستوديو بين مرات فتحه، ليعود المستخدم إلى تصميمه ويعدّل عليه
+class DecorStudioDraft {
+  final DecorDesign design = DecorDesign();
+  final Map<String, Map<String, dynamic>> real = {};
+  DecorVenue? venue;
+  DecorVenue? uploaded;
 }
 
 class DecorStudioScreen extends StatefulWidget {
@@ -33,12 +51,16 @@ class DecorStudioScreen extends StatefulWidget {
     super.key,
     required this.categoryId,
     this.chosenServices = const [],
+    this.draft,
   });
 
   final String categoryId;
 
   /// خدمات اختارها المستخدم في طلبه؛ منها تُقترح قاعته تلقائياً
   final List<Map<String, dynamic>> chosenServices;
+
+  /// مسودة التصميم المحفوظة في طلب التنظيم
+  final DecorStudioDraft? draft;
 
   @override
   State<DecorStudioScreen> createState() => _DecorStudioScreenState();
@@ -68,8 +90,8 @@ String? _serviceImageUrl(Map<String, dynamic> service) {
 }
 
 /// مكان الحفل: صورة خدمة (قاعة/مطعم/مزرعة) أو صورة رفعها المستخدم
-class _Venue {
-  const _Venue({required this.name, this.url, this.bytes, this.inOrder = false});
+class DecorVenue {
+  const DecorVenue({required this.name, this.url, this.bytes, this.inOrder = false});
   final String name;
   final String? url;
   final Uint8List? bytes;
@@ -78,17 +100,25 @@ class _Venue {
 }
 
 class _DecorStudioScreenState extends State<DecorStudioScreen> {
-  final DecorDesign _d = DecorDesign();
+  late final DecorStudioDraft _draft = widget.draft ?? DecorStudioDraft();
+  DecorDesign get _d => _draft.design;
   List<Map<String, dynamic>> _services = [];
   bool _loading = true;
+  bool _approving = false;
   final Set<String> _picked = {};
 
-  /// القطعة الحقيقية المختارة لكل نوع (نوع ← خدمة)
-  final Map<String, Map<String, dynamic>> _real = {};
+  /// خدمات هذه الفئة التي كانت في الطلب عند فتح الاستوديو
+  final Set<String> _initialPicked = {};
+  final GlobalKey _sceneKey = GlobalKey();
 
-  List<_Venue> _venues = [];
-  _Venue? _uploaded;
-  _Venue? _venue;
+  /// القطعة الحقيقية المختارة لكل نوع (نوع ← خدمة)
+  Map<String, Map<String, dynamic>> get _real => _draft.real;
+
+  List<DecorVenue> _venues = [];
+  DecorVenue? get _uploaded => _draft.uploaded;
+  set _uploaded(DecorVenue? v) => _draft.uploaded = v;
+  DecorVenue? get _venue => _draft.venue;
+  set _venue(DecorVenue? v) => _draft.venue = v;
 
   static const _venueCategoryNames = ['القاعات', 'المطاعم', 'المزارع'];
 
@@ -106,6 +136,18 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
   @override
   void initState() {
     super.initState();
+    // خدمات الديكور في الطلب تظهر مختارة ليمكن تغييرها؛ وما أُزيل من الطلب يخرج من المشهد
+    final mine = widget.chosenServices
+        .where((s) => s['category_id']?.toString() == widget.categoryId)
+        .toList();
+    final ids = mine.map((s) => s['id'].toString()).toSet();
+    _picked.addAll(ids);
+    _initialPicked.addAll(ids);
+    _real.removeWhere((_, s) => !ids.contains(s['id'].toString()));
+    for (final s in mine) {
+      final type = s['preview_piece']?.toString();
+      if (_hasPiece(s) && type != null) _real.putIfAbsent(type, () => s);
+    }
     _load();
   }
 
@@ -130,11 +172,11 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           .where((c) => _venueCategoryNames.contains(c['name']?.toString()))
           .map((c) => c['id'].toString())
           .toSet();
-      final out = <String, _Venue>{};
+      final out = <String, DecorVenue>{};
       for (final s in widget.chosenServices) {
         final url = _serviceImageUrl(s);
         if (url != null && ids.contains(s['category_id']?.toString())) {
-          out[s['id'].toString()] = _Venue(name: '${s['name']}', url: url, inOrder: true);
+          out[s['id'].toString()] = DecorVenue(name: '${s['name']}', url: url, inOrder: true);
         }
       }
       final lists = await Future.wait(
@@ -147,17 +189,23 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
           final m = Map<String, dynamic>.from(s);
           final url = _serviceImageUrl(m);
           final id = m['id'].toString();
-          if (url != null && !out.containsKey(id)) out[id] = _Venue(name: '${m['name']}', url: url);
+          if (url != null && !out.containsKey(id)) out[id] = DecorVenue(name: '${m['name']}', url: url);
         }
       }
       _venues = out.values.toList();
       // قاعة الطلب تُعرض مباشرة
       final inOrder = _venues.where((v) => v.inOrder).firstOrNull;
       if (inOrder != null && _venue == null && mounted) _selectVenue(inOrder);
+      // مكان محفوظ في المسودة: نربطه بعنصره في القائمة الجديدة ليظهر مختاراً
+      final saved = _venue;
+      if (saved != null && !saved.uploaded) {
+        final same = _venues.where((v) => v.name == saved.name).firstOrNull;
+        if (same != null) _venue = same;
+      }
     } catch (_) {}
   }
 
-  void _selectVenue(_Venue? v) {
+  void _selectVenue(DecorVenue? v) {
     setState(() {
       final wasNull = _venue == null;
       _venue = v;
@@ -180,7 +228,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         if (mounted) showAppSnack(context, 'حجم الصورة أكبر من 15 ميغابايت', tone: FeedbackTone.error);
         return;
       }
-      final v = _Venue(name: 'صورة مكاني', bytes: bytes);
+      final v = DecorVenue(name: 'صورة مكاني', bytes: bytes);
       _uploaded = v;
       _selectVenue(v);
     } catch (_) {
@@ -213,11 +261,178 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     });
   }
 
+  /// البدائل المتاحة لخدمة مختارة: نفس نوع القطعة، أو نفس مجموعة الخدمات النصية
+  List<Map<String, dynamic>> _alternativesOf(Map<String, dynamic> s) {
+    final id = s['id'].toString();
+    List<Map<String, dynamic>> list;
+    if (_hasPiece(s)) {
+      list = _piecesOf(s['preview_piece'].toString());
+    } else {
+      final group = _elements.where((e) => e.$2.hasMatch(_text(s))).firstOrNull;
+      list = group != null
+          ? _matches(group.$2)
+          : _services.where((x) => !_hasPiece(x) && _elements.every((e) => !e.$2.hasMatch(_text(x)))).toList();
+    }
+    return list.where((x) => x['id'].toString() != id).toList();
+  }
+
+  void _remove(Map<String, dynamic> s) {
+    setState(() {
+      _picked.remove(s['id'].toString());
+      if (_hasPiece(s)) _real.remove(s['preview_piece'].toString());
+    });
+  }
+
+  void _swap(Map<String, dynamic> from, Map<String, dynamic> to) {
+    setState(() {
+      _picked.remove(from['id'].toString());
+      _picked.add(to['id'].toString());
+      if (_hasPiece(to)) _real[to['preview_piece'].toString()] = to;
+    });
+  }
+
+  String _priceOf(Map<String, dynamic> s) {
+    final v = s['unit_price'] ?? s['duration_price'] ?? s['base_price'];
+    final n = v is num ? v : num.tryParse('$v');
+    if (n == null || n == 0) return 'حسب العرض';
+    return '${n == n.roundToDouble() ? n.toInt() : n} \$';
+  }
+
+  Widget _serviceThumb(Map<String, dynamic> s, double size) {
+    final path = s['preview_image_path']?.toString() ?? '';
+    final url = path.isNotEmpty ? _pieceUrl(path) : _serviceImageUrl(s);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: size,
+        height: size,
+        color: AppPalette.background,
+        child: url == null
+            ? const Icon(Icons.auto_awesome_outlined, color: AppPalette.navy)
+            : Image.network(url, fit: BoxFit.contain, errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
+      ),
+    );
+  }
+
+  Future<void> _openChange(Map<String, dynamic> s) async {
+    final options = _alternativesOf(s);
+    final picked = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.6),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(Space.lg),
+            children: [
+              Text('تغيير «${s['name']}»', style: AppText.title),
+              const SizedBox(height: Space.sm),
+              for (final o in options)
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: _serviceThumb(o, 52),
+                  title: Text('${o['name']}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                  subtitle: Text(_priceOf(o)),
+                  trailing: _picked.contains(o['id'].toString())
+                      ? const Icon(Icons.check_circle, color: AppPalette.navy)
+                      : const Icon(Icons.swap_horiz_rounded),
+                  onTap: () => Navigator.pop(ctx, o),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (picked != null && mounted) _swap(s, picked);
+  }
+
+  /// الخدمات المختارة في التصميم، مع تغيير كل منها أو إزالته
+  Widget _chosenSection() {
+    final chosen = _services.where((s) => _picked.contains(s['id'].toString())).toList();
+    if (chosen.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionHeader(
+          title: 'خدمات تصميمك (${chosen.length})',
+          subtitle: 'غيّر أي خدمة بأخرى من نوعها، أو أزلها',
+          icon: Icons.checklist_rounded,
+        ),
+        for (final s in chosen)
+          Padding(
+            padding: const EdgeInsets.only(bottom: Space.sm),
+            child: AppCard(
+              padding: const EdgeInsets.all(Space.sm),
+              child: Row(
+                children: [
+                  _serviceThumb(s, 52),
+                  const SizedBox(width: Space.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${s['name']}', maxLines: 2, overflow: TextOverflow.ellipsis, style: AppText.subtitle),
+                        Text(_priceOf(s), style: AppText.caption),
+                      ],
+                    ),
+                  ),
+                  if (_alternativesOf(s).isNotEmpty)
+                    TextButton.icon(
+                      onPressed: () => _openChange(s),
+                      icon: const Icon(Icons.swap_horiz_rounded, size: 18),
+                      label: const Text('تغيير'),
+                    ),
+                  IconButton(
+                    tooltip: 'إزالة',
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => _remove(s),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// يلتقط المشهد صورة PNG كما يراه المستخدم
+  Future<Uint8List?> _captureScene() async {
+    try {
+      final box = _sceneKey.currentContext?.findRenderObject();
+      if (box is! RenderRepaintBoundary) return null;
+      final ratio = (1280 / box.size.width).clamp(1.0, 4.0);
+      final image = await box.toImage(pixelRatio: ratio);
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      return data?.buffer.asUint8List();
+    } catch (e) {
+      debugPrint('decor capture failed: $e');
+      return null;
+    }
+  }
+
+  Future<void> _approve() async {
+    if (_approving) return;
+    setState(() => _approving = true);
+    final image = await _captureScene();
+    if (!mounted) return;
+    Navigator.pop(
+      context,
+      DecorStudioResult(
+        _describe(),
+        _services.where((s) => _picked.contains(s['id'].toString())).toList(),
+        removedIds: _initialPicked.difference(_picked),
+        image: image,
+      ),
+    );
+  }
+
   String _describe() {
     final lines = <String>[];
     final v = _venue;
     if (v != null) {
-      lines.add(v.uploaded ? 'المكان: صورة رفعها العميل (للمعاينة عنده فقط، اطلبها منه عند الحاجة)' : 'المكان: ${v.name}');
+      lines.add(v.uploaded ? 'المكان: صورة رفعها العميل (ظاهرة في صورة التصميم)' : 'المكان: ${v.name}');
     }
     if (_real.isNotEmpty) {
       lines.add('قطع مختارة من المزوّدين:');
@@ -369,7 +584,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
                   ? Image.memory(v.bytes!, fit: BoxFit.cover)
                   : Image.network(v.url!, fit: BoxFit.cover, errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
               label: v.inOrder ? '${v.name} (في طلبك)' : v.name,
-              selected: identical(_venue, v),
+              selected: identical(_venue, v) || (v.url != null && v.url == _venue?.url) || (v.bytes != null && identical(v.bytes, _venue?.bytes)),
               onTap: () => _selectVenue(v),
             ),
         ]),
@@ -448,7 +663,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
     );
   }
 
-  Widget _venueImage(_Venue v) => v.bytes != null
+  Widget _venueImage(DecorVenue v) => v.bytes != null
       ? Image.memory(v.bytes!, fit: BoxFit.cover, gaplessPlayback: true)
       : Image.network(v.url!, fit: BoxFit.cover, gaplessPlayback: true, errorBuilder: (_, _, _) => const ColoredBox(color: Colors.black12));
 
@@ -539,7 +754,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
             aspectRatio: 16 / 10,
             child: ClipRRect(
               borderRadius: Radii.brLg,
-              child: _scene(),
+              child: RepaintBoundary(key: _sceneKey, child: _scene()),
             ),
           );
           final controls = ListView(
@@ -548,6 +763,7 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
               _venueSection(),
               _slider('حجم القطع', _d.scale, 0.6, 1.5, (v) => setState(() => _d.scale = v)),
               if (_loading) const LinearProgressIndicator(),
+              _chosenSection(),
               if (hasReal) ...[
                 const SectionHeader(title: 'قطع حقيقية من المزوّدين', subtitle: 'اضغط القطعة لتركيبها في المشهد', icon: Icons.photo_library_outlined),
                 for (final e in kRealPieces.entries) _pieceStrip(e.key, e.value),
@@ -656,15 +872,9 @@ class _DecorStudioScreenState extends State<DecorStudioScreen> {
         child: Padding(
           padding: const EdgeInsets.all(Space.lg),
           child: FilledButton.icon(
-            onPressed: () => Navigator.pop(
-              context,
-              DecorStudioResult(
-                _describe(),
-                _services.where((s) => _picked.contains(s['id'].toString())).toList(),
-              ),
-            ),
+            onPressed: _approving ? null : _approve,
             icon: const Icon(Icons.check_rounded),
-            label: Text(_picked.isEmpty ? 'اعتماد التصميم' : 'اعتماد التصميم وإضافة ${_picked.length} خدمة'),
+            label: Text(_picked.isEmpty ? 'اعتماد التصميم' : 'اعتماد التصميم (${_picked.length} خدمة)'),
           ),
         ),
       ),

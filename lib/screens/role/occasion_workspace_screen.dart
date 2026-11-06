@@ -16,6 +16,7 @@ import '../../design/typography.dart';
 import '../../services/api_exceptions.dart';
 import '../../services/api_service.dart';
 import '../../ui/kit/kit.dart';
+import '../../widgets/design_image_card.dart';
 import '../event/event_form_screen.dart' show kEventTypeLabels;
 import '../organizer_request_providers_screen.dart';
 import '../organizer_shell_screen.dart' show OrganizerQuoteScreen;
@@ -227,6 +228,8 @@ class _OverviewTab extends StatelessWidget {
                       ? 'يظهر بعد تأكيد العربون'
                       : (req['whatsapp']?.toString() ?? '-'),
                 ),
+                if ((req['design_image_url']?.toString() ?? '').startsWith('http'))
+                  DesignImageCard(url: req['design_image_url'].toString()),
                 if ((req['notes']?.toString() ?? '').isNotEmpty)
                   InfoRow(icon: Icons.notes_rounded, label: 'ملاحظات العميل', value: req['notes'].toString()),
               ],

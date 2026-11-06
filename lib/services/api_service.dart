@@ -844,6 +844,7 @@ static Future<Map<String, dynamic>> createOccasionRequest({
   String? occasionDate,
   String? occasionDateEnd,
   String? clientRequestKey,
+  String? designImagePath,
 }) async {
   final data = await _request(
     method: 'POST',
@@ -863,6 +864,7 @@ static Future<Map<String, dynamic>> createOccasionRequest({
         'occasion_date_end': occasionDateEnd.trim(),
       if (clientRequestKey != null && clientRequestKey.trim().isNotEmpty)
         'client_request_key': clientRequestKey.trim(),
+      if (designImagePath != null) 'design_image_path': designImagePath,
     },
   );
   return _asMap(data);
