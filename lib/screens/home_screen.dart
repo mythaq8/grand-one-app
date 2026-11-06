@@ -503,7 +503,7 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildCategoryTile(Map<String, dynamic>? cat) {
     final name = cat?['name']?.toString() ?? '';
     return SizedBox(
-      height: 78,
+      height: 96,
       child: Material(
         color: AppPalette.surface,
         borderRadius: Radii.brMd,
@@ -517,10 +517,11 @@ class _HomeScreenState extends State<HomeScreen>
               boxShadow: AppShadows.subtle,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: Space.md),
+              padding: const EdgeInsets.symmetric(horizontal: Space.sm),
               child: cat == null
                   ? const SizedBox.expand()
-                  : Row(
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
                           width: 40,
@@ -531,14 +532,13 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                           child: Icon(_categoryIcon(name), size: 21, color: AppPalette.navy),
                         ),
-                        const SizedBox(width: Space.sm),
-                        Expanded(
-                          child: Text(
-                            name,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppText.title.copyWith(fontSize: 13.5, height: 1.3),
-                          ),
+                        const SizedBox(height: Space.xs + 2),
+                        Text(
+                          name,
+                          maxLines: 2,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppText.title.copyWith(fontSize: 13, height: 1.25),
                         ),
                       ],
                     ),

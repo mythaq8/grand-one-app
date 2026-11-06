@@ -59,8 +59,8 @@ abstract final class AppPalette {
   // ── النصوص ──
   static const Color textPrimary = Color(0xFF121A2A);
   static const Color textSecondary = Color(0xFF5A6575);
-  static const Color textTertiary = Color(0xFF667082);
-  static const Color textMuted = Color(0xFF6B7686);
+  static const Color textTertiary = Color(0xFF5E6A7B);
+  static const Color textMuted = Color(0xFF626E7E);
   static const Color onPrimary = Color(0xFFFFFFFF);
   static const Color onGold = Color(0xFF1A1508);
   static const Color onNavy = Color(0xFFF5F7FA);
@@ -104,17 +104,16 @@ abstract final class AppPalette {
 // ============================================================
 
 abstract final class AppGradients {
-  /// لمعان معدني على الأسطح الداكنة.
+  /// كحلي هادئ للأسطح الداكنة: عمق خفيف بلا لمعان معدني.
   static const LinearGradient sheen = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF2A5694),
+      Color(0xFF17305C),
       Color(0xFF0B1E44),
-      Color(0xFF1A3A6E),
-      Color(0xFF071428),
+      Color(0xFF081732),
     ],
-    stops: [0.0, 0.38, 0.72, 1.0],
+    stops: [0.0, 0.6, 1.0],
   );
 
   static const LinearGradient primary = sheen;
@@ -122,30 +121,28 @@ abstract final class AppGradients {
   static const LinearGradient primaryDeep = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [Color(0xFF16325F), AppPalette.navyDeep, Color(0xFF0B1E44)],
+    colors: [Color(0xFF0F2650), AppPalette.navy, AppPalette.navyDark],
     stops: [0.0, 0.55, 1.0],
   );
 
   static const LinearGradient header = sheen;
 
-  /// ذهب مصقول: ظل، لمعة، ثم ظل.
+  /// ذهب ناعم بلا خطوط لمعان.
   static const LinearGradient gold = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
     colors: [
-      Color(0xFF8A682C),
-      Color(0xFFE8D5A3),
-      Color(0xFFC6A35A),
-      Color(0xFFFFF1CC),
-      Color(0xFFA8863F),
+      Color(0xFFB08F4A),
+      Color(0xFFD8BC7E),
+      Color(0xFFB8964F),
     ],
-    stops: [0.0, 0.22, 0.48, 0.68, 1.0],
+    stops: [0.0, 0.5, 1.0],
   );
 
   static const LinearGradient goldSoft = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFFFFFBF2), Color(0xFFF4E6C4), Color(0xFFFFF8EA)],
+    colors: [Color(0xFFFCFAF5), Color(0xFFF7F2E8)],
   );
 
   /// صفحة فاتحة نظيفة بلا اصفرار.
@@ -166,7 +163,7 @@ abstract final class AppGradients {
   static const LinearGradient splash = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF1A3A6E), AppPalette.navyDeep, Color(0xFF0B1E44)],
+    colors: [Color(0xFF17305C), AppPalette.navy, AppPalette.navyDeep],
   );
 }
 
