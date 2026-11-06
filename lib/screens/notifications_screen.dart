@@ -315,7 +315,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                               fontFamily: 'Tajawal',
                               fontSize: 14,
                               fontWeight: isRead
-                                  ? FontWeight.w600
+                                  ? FontWeight.w700
                                   : FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),

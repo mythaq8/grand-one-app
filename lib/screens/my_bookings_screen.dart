@@ -892,7 +892,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
                           '$label ($count)',
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w700,
                             color: selected
                                 ? Colors.white
                                 : AppColors.textPrimary,
@@ -1054,7 +1054,7 @@ Future<void> _uploadDeposit(Map<String, dynamic> booking) async {
               'لا توجد حجوزات في هذه الحالة',
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
@@ -1349,7 +1349,7 @@ if (status == 'pending' || status == 'approved') ...[
                           fontSize: 13,
                           height: 1.4,
                           color: AppColors.goldDark,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
@@ -1551,7 +1551,7 @@ Widget _buildDepositSection(
               style: TextStyle(
                 fontSize: 13,
                 color: AppColors.info,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1709,7 +1709,8 @@ Widget _buildDepositSection(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 11),
+        minimumSize: const Size(0, 42),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
@@ -1864,7 +1865,7 @@ Widget _buildDepositSection(
               textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: highlight
                     ? AppColors.goldDark
                     : AppColors.textPrimary,

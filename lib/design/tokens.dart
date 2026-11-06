@@ -148,24 +148,19 @@ abstract final class AppGradients {
     colors: [Color(0xFFFFFBF2), Color(0xFFF4E6C4), Color(0xFFFFF8EA)],
   );
 
-  /// صفحة فاتحة مع دفء ذهبي في الأعلى.
+  /// صفحة فاتحة نظيفة بلا اصفرار.
   static const LinearGradient primarySoft = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFFFFF6E4),
-      Color(0xFFF8F4EC),
-      Color(0xFFF4F7FB),
-    ],
-    stops: [0.0, 0.32, 1.0],
+    colors: [Color(0xFFFBFCFE), Color(0xFFF5F7FA)],
   );
 
   static const RadialGradient glowGold = RadialGradient(
-    colors: [Color(0x66E8D5A3), Color(0x00E8D5A3)],
+    colors: [Color(0x14E8D5A3), Color(0x00E8D5A3)],
   );
 
   static const RadialGradient glowNavy = RadialGradient(
-    colors: [Color(0x261A335F), Color(0x001A335F)],
+    colors: [Color(0x0F1A335F), Color(0x001A335F)],
   );
 
   static const LinearGradient splash = LinearGradient(
@@ -286,7 +281,7 @@ abstract final class Motion {
 
 abstract final class Sizes {
   static const double touchTarget = 48;
-  static const double buttonHeight = 52;
+  static const double buttonHeight = 48;
   static const double fieldHeight = 56;
   static const double navBarHeight = 68;
 

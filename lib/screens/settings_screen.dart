@@ -222,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 'إلغاء',
                 style: TextStyle(
                   color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -474,7 +474,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: titleColor ?? AppColors.textPrimary,
                     ),
                   ),
@@ -647,7 +647,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           fontFamily: 'Tajawal',
                           fontSize: 12,
                           letterSpacing: 1.1,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.mutedText,
                         ),
                       ),

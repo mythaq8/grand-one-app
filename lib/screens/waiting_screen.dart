@@ -383,7 +383,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               _checking ? tr('checking') : tr('refresh'),
               style: const TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textSecondary,
               ),
             ),

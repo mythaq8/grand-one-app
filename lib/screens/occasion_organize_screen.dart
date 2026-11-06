@@ -1404,7 +1404,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
             title: Text(
               name,
               style: TextStyle(
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
                 color: AppColors.primary,
               ),
             ),
@@ -1702,7 +1702,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                 price.isEmpty ? 'بانتظار التسعير' : price,
                 style: const TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: AppColors.goldDark,
                 ),
               ),
@@ -1808,7 +1808,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                       style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
-                    const Text('التقييم', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const Text('التقييم', style: TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
@@ -1821,7 +1821,7 @@ class _OccasionOrganizeScreenState extends State<OccasionOrganizeScreen> {
                       ],
                     ),
                     const SizedBox(height: 14),
-                    const Text('السعر', style: TextStyle(fontWeight: FontWeight.w600)),
+                    const Text('السعر', style: TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     Row(
                       children: [

@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../app_colors.dart';
 import '../config.dart';
 import '../design/tokens.dart';
+import '../design/typography.dart';
 import '../services/api_service.dart';
 import '../services/notifications_service.dart';
 import '../services/session_service.dart';
@@ -23,6 +24,7 @@ import '../widgets/screen_fit.dart';
 import '../widgets/notification_badge_icon.dart';
 import 'my_bookings_screen.dart';
 import 'my_occasion_requests_screen.dart';
+import 'services_screen.dart';
 import 'services_user_profile_setup_screen.dart';
 import '../services/search_date.dart';
 import 'event/event_screen.dart';
@@ -56,11 +58,45 @@ class _HomeScreenState extends State<HomeScreen>
   String? _avatarUrl;
   bool _isLoading = true;
 
+  /// الفئات العامة التي تُتصفّح مباشرة (فئات التنظيم تظهر في مسار التخطيط)
+  List<Map<String, dynamic>> _categories = [];
+  bool _categoriesLoading = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _loadUserData();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final all = await ApiService.getServiceCategories();
+      if (!mounted) return;
+      setState(() {
+        _categories = all.where((c) => c['requires_organizer'] != true).toList();
+        _categoriesLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Home categories error: $e');
+      if (mounted) setState(() => _categoriesLoading = false);
+    }
+  }
+
+  Future<void> _refreshHome() async {
+    await Future.wait([_loadUserData(), _loadCategories()]);
+  }
+
+  void _openServices({String? categoryId}) {
+    ServicesBrowse.categoryId.value = categoryId;
+    if (widget.onOpenServicesTab != null) {
+      widget.onOpenServicesTab!.call();
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ServicesScreen()),
+      );
+    }
   }
 
   @override
@@ -147,24 +183,22 @@ class _HomeScreenState extends State<HomeScreen>
             Expanded(
               child: RefreshIndicator(
                 color: AppColors.primary,
-                onRefresh: _loadUserData,
+                onRefresh: _refreshHome,
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(
                     parent: BouncingScrollPhysics(),
                   ),
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // ── 1. من أنت الآن ──
                       _buildWelcomeCard(),
-
-                      // ── 2. بطاقات التعريف بالخدمات ──
-                      const SizedBox(height: 24),
+                      const SizedBox(height: Space.xxl),
+                      _buildCategoriesSection(),
+                      const SizedBox(height: Space.xxl),
+                      _buildPlanCard(),
+                      const SizedBox(height: Space.xxl),
                       _buildHeroPages(),
-
-                      const SizedBox(height: 24),
-                      _buildBrandPromiseCard(),
                     ],
                   ),
                 ),
@@ -198,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             const SizedBox(width: 10),
           ],
-          const BrandMark(size: 56),
+          const BrandMark(size: 42),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -209,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen>
                   AppConfig.appName,
                   style: const TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 20,
+                    fontSize: 17,
                     height: 1.15,
                     fontWeight: FontWeight.w800,
                     color: AppColors.primary,
@@ -222,9 +256,9 @@ class _HomeScreenState extends State<HomeScreen>
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontFamily: 'Tajawal',
-                    fontSize: 12,
+                    fontSize: 10.5,
                     height: 1.3,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: 1.4,
                     color: AppColors.goldDark,
                   ),
@@ -290,92 +324,68 @@ class _HomeScreenState extends State<HomeScreen>
     return Container(
       decoration: BoxDecoration(
         gradient: AppColors.headerGradient,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: Radii.brXl,
         boxShadow: AppColors.shadowMedium,
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: Radii.brXl,
         child: Stack(
           children: [
-            // زخرفة هندسية خفيفة + الشعار كعلامة مائية على الطرف.
             Positioned.fill(
               child: IgnorePointer(
                 child: CustomPaint(
                   painter: GeometricPatternPainter(
-                    color: AppColors.gold.withValues(alpha: 0.09),
+                    color: AppColors.gold.withValues(alpha: 0.07),
                     spacing: 44,
                   ),
                 ),
               ),
             ),
-            Positioned(
-              left: -22,
-              bottom: -26,
-              child: IgnorePointer(
-                child: Opacity(
-                  opacity: 0.20,
-                  child: const BrandMark(size: 128, framed: false),
-                ),
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-              child: Row(
+              padding: const EdgeInsets.all(Space.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildPersonAvatar(size: 58),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          greeting,
-                          style: TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white.withValues(alpha: 0.82),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          _isLoading ? '...' : _userName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Tajawal',
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                            color: Colors.white,
-                            height: 1.25,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.gold.withValues(alpha: 0.18),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: AppColors.goldLight.withValues(alpha: 0.45),
+                  Row(
+                    children: [
+                      _buildPersonAvatar(size: 44),
+                      const SizedBox(width: Space.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              greeting,
+                              style: AppText.caption.copyWith(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'حساب عميل',
-                            style: TextStyle(
-                              fontFamily: 'Tajawal',
-                              fontSize: 12,
-                              color: AppColors.goldLight,
-                              fontWeight: FontWeight.w700,
+                            Text(
+                              _isLoading ? '...' : _userName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppText.section.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 19,
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Space.md),
+                  Text(
+                    UiCopy.homeHeroTitle,
+                    style: AppText.bodySecondary.copyWith(
+                      color: Colors.white.withValues(alpha: 0.86),
                     ),
                   ),
+                  const SizedBox(height: Space.md),
+                  _buildSearchPill(),
+                  const SizedBox(height: Space.sm),
+                  _buildDatePill(),
                 ],
               ),
             ),
@@ -385,70 +395,211 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildBrandPromiseCard() {
-    return Container(
-      padding: const EdgeInsets.all(Space.xl),
-      decoration: BoxDecoration(
-        color: AppPalette.surface,
-        borderRadius: Radii.brLg,
-        border: Border.all(color: AppPalette.borderLight),
-        boxShadow: AppShadows.subtle,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            UiCopy.homeHeroTitle,
-            style: const TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: Space.sm),
-          Text(
-            UiCopy.homeHeroBody,
-            style: TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 14,
-              height: 1.55,
-              color: AppColors.textSecondary,
-            ),
-          ),
-          const SizedBox(height: Space.lg),
-          OutlinedButton.icon(
-            onPressed: _pickEventDate,
-            icon: const Icon(Icons.event),
-            label: ValueListenableBuilder<DateTime?>(
-              valueListenable: SearchDate.date,
-              builder: (_, d, __) => Text(
-                d == null ? 'متى مناسبتك؟ اختر التاريخ' : 'مناسبتك: ' + (SearchDate.iso ?? ''),
-              ),
-            ),
-          ),
-          const SizedBox(height: Space.sm),
-          Row(
+  /// يبدو حقل بحث ويفتح تبويب الخدمات حيث البحث الفعلي
+  Widget _buildSearchPill() {
+    return Material(
+      color: AppPalette.surface,
+      borderRadius: Radii.brMd,
+      child: InkWell(
+        borderRadius: Radii.brMd,
+        onTap: () => _openServices(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: 13),
+          child: Row(
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: widget.onOpenServicesTab,
-                  child: const Text(UiCopy.homePrimaryCta),
-                ),
-              ),
+              const Icon(Icons.search_rounded, color: AppPalette.navy, size: 21),
               const SizedBox(width: Space.sm),
               Expanded(
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const EventScreen()),
-                  ),
-                  child: const Text(UiCopy.homeSecondaryCta),
+                child: Text(
+                  'ابحث عن قاعة، مصوّر، خدمة...',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppText.subtitle.copyWith(color: AppPalette.textMuted),
                 ),
               ),
             ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDatePill() {
+    return Material(
+      color: Colors.white.withValues(alpha: 0.12),
+      borderRadius: Radii.brMd,
+      child: InkWell(
+        borderRadius: Radii.brMd,
+        onTap: _pickEventDate,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Space.md, vertical: 11),
+          child: Row(
+            children: [
+              const Icon(Icons.event_outlined, color: AppPalette.goldLight, size: 20),
+              const SizedBox(width: Space.sm),
+              Expanded(
+                child: ValueListenableBuilder<DateTime?>(
+                  valueListenable: SearchDate.date,
+                  builder: (_, d, _) => Text(
+                    d == null ? 'متى مناسبتك؟ اختر التاريخ' : 'مناسبتك: ${SearchDate.iso ?? ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppText.subtitle.copyWith(color: Colors.white),
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_left_rounded, color: Colors.white.withValues(alpha: 0.7), size: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _categoryIcon(String name) {
+    if (name.contains('قاع')) return Icons.account_balance_outlined;
+    if (name.contains('تصوير') && !name.contains('منع')) return Icons.photo_camera_outlined;
+    if (name.contains('عراض')) return Icons.music_note_outlined;
+    if (name.contains('تخديم') || name.contains('حماية')) return Icons.groups_outlined;
+    return Icons.storefront_outlined;
+  }
+
+  Widget _buildCategoriesSection() {
+    if (!_categoriesLoading && _categories.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text('تصفّح الخدمات', style: AppText.section.copyWith(fontSize: 18))),
+            TextButton(
+              onPressed: () => _openServices(),
+              child: const Text('عرض الكل'),
+            ),
+          ],
+        ),
+        const SizedBox(height: Space.xs),
+        LayoutBuilder(
+          builder: (context, c) {
+            final columns = c.maxWidth >= 700 ? 4 : 2;
+            final itemWidth = (c.maxWidth - Space.sm * (columns - 1)) / columns;
+            final items = _categoriesLoading
+                ? List<Map<String, dynamic>?>.filled(4, null)
+                : _categories.cast<Map<String, dynamic>?>();
+            return Wrap(
+              spacing: Space.sm,
+              runSpacing: Space.sm,
+              children: [
+                for (final cat in items)
+                  SizedBox(width: itemWidth, child: _buildCategoryTile(cat)),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryTile(Map<String, dynamic>? cat) {
+    final name = cat?['name']?.toString() ?? '';
+    return SizedBox(
+      height: 78,
+      child: Material(
+        color: AppPalette.surface,
+        borderRadius: Radii.brMd,
+        child: InkWell(
+          borderRadius: Radii.brMd,
+          onTap: cat == null ? null : () => _openServices(categoryId: cat['id']?.toString()),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: Radii.brMd,
+              border: Border.all(color: AppPalette.borderLight),
+              boxShadow: AppShadows.subtle,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Space.md),
+              child: cat == null
+                  ? const SizedBox.expand()
+                  : Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            color: AppPalette.navySoft,
+                            borderRadius: Radii.brSm,
+                          ),
+                          child: Icon(_categoryIcon(name), size: 21, color: AppPalette.navy),
+                        ),
+                        const SizedBox(width: Space.sm),
+                        Expanded(
+                          child: Text(
+                            name,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppText.title.copyWith(fontSize: 13.5, height: 1.3),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// مدخل التخطيط الكامل: طلب واحد لكل خدمات المناسبة عبر منظّم
+  Widget _buildPlanCard() {
+    return Material(
+      color: AppPalette.surface,
+      borderRadius: Radii.brLg,
+      child: InkWell(
+        borderRadius: Radii.brLg,
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const EventScreen()),
+        ),
+        child: Ink(
+          padding: const EdgeInsets.all(Space.lg),
+          decoration: BoxDecoration(
+            borderRadius: Radii.brLg,
+            border: Border.all(color: AppPalette.gold.withValues(alpha: 0.5)),
+            gradient: const LinearGradient(
+              colors: [AppPalette.goldSoft, AppPalette.surface],
+              begin: Alignment.centerRight,
+              end: Alignment.centerLeft,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: const BoxDecoration(
+                  color: AppPalette.navy,
+                  borderRadius: Radii.brSm,
+                ),
+                child: const Icon(Icons.celebration_outlined, color: AppPalette.goldLight),
+              ),
+              const SizedBox(width: Space.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('نظّم مناسبتك كاملة', style: AppText.title),
+                    const SizedBox(height: 2),
+                    Text(
+                      'قاعة وتصوير وديكور وضيافة في طلب واحد، مع منظّم يتابع كل التفاصيل.',
+                      style: AppText.bodySecondary,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: Space.sm),
+              const Icon(Icons.chevron_left_rounded, color: AppPalette.navy),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -750,7 +901,7 @@ class _HomeScreenState extends State<HomeScreen>
               fontFamily: 'Tajawal',
               fontSize: 12,
               color: Colors.white.withValues(alpha: 0.82),
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -842,7 +993,7 @@ class _HomeScreenState extends State<HomeScreen>
                   style: TextStyle(
                     fontFamily: 'Tajawal',
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -1057,68 +1208,10 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Container(
-              width: 4,
-              height: 22,
-              decoration: BoxDecoration(
-                color: AppColors.gold,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(width: 10),
-            const Expanded(
-              child: Text(
-                'لماذا GRAND ONE',
-                style: TextStyle(
-                  fontFamily: 'Tajawal',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-            if (_slides.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.goldSoft,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: AppColors.gold.withValues(alpha: 0.35),
-                  ),
-                ),
-                child: Text(
-                  '${_currentPage + 1} / ${_slides.length}',
-                  textDirection: ui.TextDirection.ltr,
-                  style: const TextStyle(
-                    fontFamily: 'Tajawal',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.goldDeep,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        const Padding(
-          padding: EdgeInsets.only(right: 14),
-          child: Text(
-            'من الحجز إلى الدفع، خطوات واضحة وموثوقة',
-            style: TextStyle(
-              fontFamily: 'Tajawal',
-              fontSize: 13,
-              height: 1.35,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 14),
+        Text('لماذا GRAND ONE', style: AppText.section.copyWith(fontSize: 18)),
+        const SizedBox(height: Space.sm),
         SizedBox(
-          height: 300,
+          height: 196,
           child: PageView.builder(
             controller: _controller,
             itemCount: _slides.length,
@@ -1129,7 +1222,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
             itemBuilder: (context, index) => _buildSlide(_slides[index], index),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: Space.sm),
         _buildIndicator(),
       ],
     );
@@ -1165,18 +1258,12 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
   }
 
   Widget _buildSlide(_HeroSlide slide, int index) {
-    final radius = BorderRadius.circular(24);
+    final radius = Radii.brLg;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.22),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        boxShadow: AppShadows.soft,
       ),
       child: ClipRRect(
         borderRadius: radius,
@@ -1190,9 +1277,9 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Color(0x6603352E),
-                    Color(0x1403352E),
-                    Color(0xF003352E),
+                    Color(0x33060F20),
+                    Color(0x14060F20),
+                    Color(0xE6060F20),
                   ],
                   stops: [0.0, 0.42, 1.0],
                 ),
@@ -1231,15 +1318,6 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                         ),
                       ),
                       const Spacer(),
-                      Text(
-                        '${index + 1}'.padLeft(2, '0'),
-                        style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      ),
                     ],
                   ),
                   const Spacer(),
@@ -1249,7 +1327,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontFamily: 'Tajawal',
-                      fontSize: 22,
+                      fontSize: 18,
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                       height: 1.3,
@@ -1262,7 +1340,7 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontFamily: 'Tajawal',
-                      fontSize: 14,
+                      fontSize: 13,
                       height: 1.45,
                       color: Colors.white.withValues(alpha: 0.94),
                       fontWeight: FontWeight.w500,
@@ -1293,25 +1371,11 @@ class _HomePromoCarouselState extends State<HomePromoCarousel> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 280),
             margin: const EdgeInsets.symmetric(horizontal: 4),
-            width: isActive ? 28 : 9,
-            height: 9,
+            width: isActive ? 22 : 7,
+            height: 7,
             decoration: BoxDecoration(
-              gradient: isActive
-                  ? LinearGradient(
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                    )
-                  : null,
-              color: isActive ? null : AppColors.borderStrong,
+              color: isActive ? AppColors.primary : AppColors.borderStrong,
               borderRadius: BorderRadius.circular(6),
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.28),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
             ),
           ),
         );

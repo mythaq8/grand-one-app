@@ -264,7 +264,7 @@ class _ContactAdminScreenState extends State<ContactAdminScreen> {
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textPrimary,
                       ),
                     ),

@@ -714,7 +714,7 @@ class _PartyRequestScreenState extends State<PartyRequestScreen> {
                 : 'اضغط لاختيار صورة',
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: hasFile
                   ? AppColors.success
                   : AppColors.textSecondary,

@@ -122,7 +122,7 @@ class _MyRequestsScreenState extends State<MyRequestsScreen> {
                                     ? AppPalette.navy
                                     : AppPalette.textSecondary,
                                 fontWeight: selected
-                                    ? FontWeight.w600
+                                    ? FontWeight.w700
                                     : FontWeight.w400,
                               ),
                             ),

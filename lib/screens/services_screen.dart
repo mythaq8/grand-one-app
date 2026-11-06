@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../design/tokens.dart';
+import '../design/typography.dart';
 import '../ui/kit/kit.dart';
 import '../ui/layout/responsive.dart';
 import '../ui_copy.dart';
@@ -98,7 +99,27 @@ final PageController _adsPageController = PageController();
     super.initState();
     _scrollController.addListener(_onScroll);
     SearchDate.date.addListener(_onSearchDateChanged);
+    ServicesBrowse.categoryId.addListener(_onBrowseCategory);
+    _selectedCategoryId = ServicesBrowse.categoryId.value;
     _loadAll();
+  }
+
+  /// فئة اختارها المستخدم من الرئيسية
+  void _onBrowseCategory() {
+    if (!mounted) return;
+    final id = ServicesBrowse.categoryId.value;
+    if (_showProviders) _switchTab(false);
+    if (id == _selectedCategoryId) return;
+    _selectCategory(id);
+  }
+
+  void _selectCategory(String? id) {
+    if (_showProviders) {
+      _providerCategoryId = id;
+    } else {
+      _selectedCategoryId = id;
+    }
+    _applySearch();
   }
 
   void _onSearchDateChanged() {
@@ -113,6 +134,7 @@ final PageController _adsPageController = PageController();
   @override
   void dispose() {
     SearchDate.date.removeListener(_onSearchDateChanged);
+    ServicesBrowse.categoryId.removeListener(_onBrowseCategory);
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _searchController.dispose();
@@ -510,9 +532,9 @@ Widget build(BuildContext context) {
                         tone: InfoBannerTone.info,
                       ),
                     _buildAdsBanner(),
-                    _buildDateBar(),
                     _buildSearchBar(),
                     _buildTabs(),
+                    _buildFilterStrip(),
                     Expanded(child: _buildBody()),
                   ],
                 ),
@@ -538,36 +560,43 @@ Widget build(BuildContext context) {
     if (picked != null) SearchDate.date.value = picked;
   }
 
-  Widget _buildDateBar() {
+  /// صف أفقي واحد: تاريخ المناسبة ثم الفئات، بدل زر كبير يأخذ مساحة القائمة
+  Widget _buildFilterStrip() {
     final date = SearchDate.date.value;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    final current = _showProviders ? _providerCategoryId : _selectedCategoryId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: _pickSearchDate,
-                  icon: const Icon(Icons.event, size: 18),
-                  label: Text(
-                    date == null
-                        ? 'اختر تاريخ مناسبتك'
-                        : 'المناسبة: ${SearchDate.iso}',
-                  ),
-                ),
+              _stripChip(
+                icon: Icons.event_outlined,
+                label: date == null ? 'التاريخ' : SearchDate.iso!,
+                selected: date != null,
+                onTap: _pickSearchDate,
+                onClear: date == null ? null : () => SearchDate.date.value = null,
               ),
-              if (date != null)
-                IconButton(
-                  tooltip: 'إزالة التاريخ',
-                  icon: const Icon(Icons.close),
-                  onPressed: () => SearchDate.date.value = null,
+              const SizedBox(width: Space.sm),
+              _stripChip(label: 'الكل', selected: current == null, onTap: () => _selectCategory(null)),
+              for (final c in _categories) ...[
+                const SizedBox(width: Space.sm),
+                _stripChip(
+                  label: c['name']?.toString() ?? '',
+                  selected: current == c['id']?.toString(),
+                  onTap: () => _selectCategory(c['id']?.toString()),
                 ),
+              ],
             ],
           ),
-          if (date != null)
-            SwitchListTile(
+        ),
+        if (date != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SwitchListTile(
               dense: true,
               contentPadding: EdgeInsets.zero,
               title: const Text('المتاحون في هذا التاريخ فقط'),
@@ -577,7 +606,49 @@ Widget build(BuildContext context) {
                 _onSearchDateChanged();
               },
             ),
-        ],
+          ),
+        const SizedBox(height: Space.sm),
+      ],
+    );
+  }
+
+  Widget _stripChip({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+    IconData? icon,
+    VoidCallback? onClear,
+  }) {
+    final fg = selected ? AppPalette.onPrimary : AppPalette.textPrimary;
+    return Material(
+      color: selected ? AppPalette.navy : AppPalette.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: Radii.brPill,
+        side: BorderSide(color: selected ? AppPalette.navy : AppPalette.border),
+      ),
+      child: InkWell(
+        customBorder: const StadiumBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 16, color: fg),
+                const SizedBox(width: 6),
+              ],
+              Text(label, style: AppText.caption.copyWith(color: fg, fontSize: 13)),
+              if (onClear != null) ...[
+                const SizedBox(width: 6),
+                InkWell(
+                  onTap: onClear,
+                  child: Icon(Icons.close_rounded, size: 16, color: fg),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -615,7 +686,7 @@ Widget build(BuildContext context) {
   // ═══ البحث ═══
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
       child: Row(
         children: [
           Expanded(
@@ -645,24 +716,9 @@ Widget build(BuildContext context) {
                         },
                       )
                     : null,
-                filled: true,
-                fillColor: AppColors.surface,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 14,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide(
-                    color: AppPalette.gold.withValues(alpha: 0.35),
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(
-                    color: AppColors.primary,
-                    width: 1.4,
-                  ),
+                  horizontal: Space.lg,
+                  vertical: 12,
                 ),
               ),
             ),
@@ -675,14 +731,14 @@ Widget build(BuildContext context) {
               borderRadius: BorderRadius.circular(16),
               onTap: _openFiltersSheet,
               child: Container(
-                width: 52,
-                height: 52,
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _hasActiveFilters
                         ? AppColors.primary
-                        : AppPalette.gold.withValues(alpha: 0.45),
+                        : AppPalette.border,
                   ),
                 ),
                 child: Stack(
@@ -726,49 +782,55 @@ Widget build(BuildContext context) {
 
   // ═══ التبويبات ═══
  Widget _buildTabs() {
-  return Container(
-    margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-    padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      color: AppColors.surfaceTint,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: AppColors.borderLight),
-    ),
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
     child: Row(
       children: [
         Expanded(
-          child: _buildTab(
-            title: 'الخدمات',
-            icon: Icons.miscellaneous_services_rounded,
-            selected: !_showProviders,
-            onTap: () => _switchTab(false),
+          child: Container(
+            padding: const EdgeInsets.all(3),
+            decoration: BoxDecoration(
+              color: AppPalette.backgroundAlt,
+              borderRadius: Radii.brSm,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _buildTab(
+                    title: 'الخدمات',
+                    icon: Icons.miscellaneous_services_rounded,
+                    selected: !_showProviders,
+                    onTap: () => _switchTab(false),
+                  ),
+                ),
+                Expanded(
+                  child: _buildTab(
+                    title: 'المزوّدون',
+                    icon: Icons.storefront_rounded,
+                    selected: _showProviders,
+                    onTap: () => _switchTab(true),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        Expanded(
-          child: _buildTab(
-            title: 'المزوّدون',
-            icon: Icons.storefront_rounded,
-            selected: _showProviders,
-            onTap: () => _switchTab(true),
-          ),
-        ),
-        Expanded(
-          child: _buildPartyTab(),
-        ),
+        const SizedBox(width: Space.sm),
+        _buildPartyTab(),
       ],
     ),
   );
 }
 
 Widget _buildPartyTab() {
-  return AnimatedContainer(
-    duration: const Duration(milliseconds: 200),
-    decoration: BoxDecoration(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
+  return Material(
+    color: AppPalette.goldSoft,
+    shape: RoundedRectangleBorder(
+      borderRadius: Radii.brSm,
+      side: BorderSide(color: AppPalette.gold.withValues(alpha: 0.5)),
     ),
     child: InkWell(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: Radii.brSm,
       onTap: () {
         Navigator.push(
           context,
@@ -778,20 +840,26 @@ Widget _buildPartyTab() {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 8,
-        ),
-        child: const ShrinkIconLabel(
-          icon: Icons.celebration_outlined,
-          label: 'ابدأ التخطيط',
-          color: AppColors.goldDark,
-          fontSize: 12,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 12),
+        child: _tabLabel(Icons.celebration_outlined, 'التخطيط', AppColors.goldDeep),
       ),
     ),
   );
 }
+  Widget _tabLabel(IconData icon, String label, Color color) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 17, color: color),
+          const SizedBox(width: 5),
+          Text(label, style: AppText.buttonSmall.copyWith(color: color)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTab({
     required String title,
     required IconData icon,
@@ -802,18 +870,14 @@ Widget _buildPartyTab() {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: selected ? AppColors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(9),
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(9),
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: ShrinkIconLabel(
-            icon: icon,
-            label: title,
-            color: selected ? Colors.white : AppColors.textSecondary,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: _tabLabel(icon, title, selected ? Colors.white : AppColors.textSecondary),
         ),
       ),
     );

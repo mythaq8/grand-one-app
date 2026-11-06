@@ -626,7 +626,7 @@ class _ProviderBookingsTabState extends State<_ProviderBookingsTab> {
                         if ((b['customer'] as Map)['phone'] != null)
                           'هاتف: ${(b['customer'] as Map)['phone']}',
                       ].join(' • '),
-                      style: AppText.body.copyWith(fontWeight: FontWeight.w600),
+                      style: AppText.body.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ] else if (b['customer_contact_hidden'] == true)
                     Text(

@@ -20,7 +20,7 @@ const EdgeInsets _fieldPadding = EdgeInsets.symmetric(
 const TextStyle _fieldLabelStyle = TextStyle(
   fontFamily: 'Tajawal',
   fontSize: 14,
-  fontWeight: FontWeight.w600,
+  fontWeight: FontWeight.w700,
   color: AppColors.textPrimary,
 );
 
@@ -46,7 +46,7 @@ const TextStyle _fieldHintStyle = TextStyle(
   fontFamily: 'Tajawal',
   fontSize: 13,
   height: 1.45,
-  fontWeight: FontWeight.w600,
+  fontWeight: FontWeight.w700,
   color: AppColors.goldDeep,
 );
 
@@ -389,7 +389,7 @@ class AppMultiSelect extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         color: AppColors.error,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -402,7 +402,7 @@ class AppMultiSelect extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),

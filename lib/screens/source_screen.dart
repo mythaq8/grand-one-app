@@ -533,7 +533,7 @@ class _SourceScreenState extends State<SourceScreen> {
                       fontSize: 14,
                       fontWeight: isSelected
                           ? FontWeight.w700
-                          : FontWeight.w600,
+                          : FontWeight.w700,
                       color: isSelected
                           ? AppColors.primary
                           : AppColors.textPrimary,

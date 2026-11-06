@@ -13,3 +13,10 @@ class SearchDate {
     return '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
 }
+
+/// فئة تختارها الرئيسية فتفتح بها شاشة الخدمات (في الذاكرة فقط).
+class ServicesBrowse {
+  ServicesBrowse._();
+
+  static final ValueNotifier<String?> categoryId = ValueNotifier<String?>(null);
+}

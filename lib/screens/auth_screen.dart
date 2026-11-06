@@ -944,7 +944,7 @@ Widget _buildInputFields() {
                         style: TextStyle(
                           fontFamily: 'Tajawal',
                           fontSize: 11,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
                           color: AppColors.mutedText,
                         ),

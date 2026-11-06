@@ -189,9 +189,7 @@ class ServiceCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppPalette.surface,
             borderRadius: Radii.brLg,
-            border: Border.all(
-              color: AppPalette.gold.withValues(alpha: 0.22),
-            ),
+            border: Border.all(color: AppPalette.borderLight),
             boxShadow: AppShadows.subtle,
           ),
           child: compact ? _buildCompact(context) : _buildRow(context),

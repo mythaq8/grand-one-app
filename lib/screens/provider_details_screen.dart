@@ -491,7 +491,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
             textAlign: TextAlign.end,
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
@@ -573,7 +573,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                       name,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.primary,
                       ),
                     ),
@@ -736,7 +736,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                       name,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -750,7 +750,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -1182,7 +1182,7 @@ class _ProviderDetailsScreenState extends State<ProviderDetailsScreen> {
                     style: TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

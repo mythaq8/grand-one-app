@@ -15,6 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../app_colors.dart';
 import '../design/tokens.dart';
+import '../design/typography.dart';
 import '../ui/kit/kit.dart';
 import '../ui/layout/responsive.dart';
 import '../ui_copy.dart';
@@ -699,7 +700,63 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         appBar: BrandAppBar(
           title: _service?['name']?.toString() ?? 'تفاصيل الخدمة',
         ),
-        body: _buildBody(),
+        body: Column(
+          children: [
+            Expanded(child: _buildBody()),
+            if (_showBookBar) _buildBookBar(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// مفتاح قسم الحجز: زر الشريط السفلي ينقل إليه مباشرة
+  final GlobalKey _bookingSectionKey = GlobalKey();
+
+  bool get _showBookBar =>
+      _service != null &&
+      !widget.forOccasionCart &&
+      _service?['is_bookable'] == true &&
+      _category?['requires_organizer'] != true;
+
+  /// شريط ثابت بالسعر وزر الحجز، حتى لا يبحث العميل عنه أسفل الصفحة
+  Widget _buildBookBar() {
+    final price = servicePriceLabel(_service, formatPrice: _formatPrice);
+    return Container(
+      padding: const EdgeInsets.fromLTRB(Space.lg, Space.sm, Space.lg, Space.sm),
+      decoration: const BoxDecoration(
+        color: AppPalette.surface,
+        border: Border(top: BorderSide(color: AppPalette.borderLight)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              price,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.title.copyWith(color: AppPalette.goldDeep),
+            ),
+          ),
+          const SizedBox(width: Space.md),
+          SizedBox(
+            width: 150,
+            child: ElevatedButton(
+              onPressed: () {
+                final ctx = _bookingSectionKey.currentContext;
+                if (ctx != null) {
+                  Scrollable.ensureVisible(
+                    ctx,
+                    duration: Motion.slow,
+                    curve: Motion.curve,
+                    alignment: 0.05,
+                  );
+                }
+              },
+              child: const Text('احجز الآن'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -747,12 +804,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   const SizedBox(height: Space.md),
                   _buildDynamicFieldsCard(),
                 ],
-                const SizedBox(height: Space.md),
-                _buildReviewsCard(),
                 const SizedBox(height: Space.lg),
-                widget.forOccasionCart
-                    ? _buildOccasionCartSection()
-                    : _buildBookingSection(),
+                KeyedSubtree(
+                  key: _bookingSectionKey,
+                  child: widget.forOccasionCart
+                      ? _buildOccasionCartSection()
+                      : _buildBookingSection(),
+                ),
+                const SizedBox(height: Space.lg),
+                _buildReviewsCard(),
                 const SizedBox(height: Space.xxl),
               ],
             ),
@@ -767,21 +827,21 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   Widget _buildImagesGallery() {
     if (_images.isEmpty) {
       return Container(
-        height: 220,
+        height: 96,
         decoration: BoxDecoration(
-          gradient: AppColors.primarySoftGradient,
-          borderRadius: BorderRadius.circular(20),
+          color: AppPalette.surfaceTint,
+          borderRadius: Radii.brLg,
           border: Border.all(color: AppColors.borderLight),
         ),
-        child: const Column(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.business_center_outlined,
-              size: 56,
-              color: AppColors.primary,
+              Icons.image_outlined,
+              size: 26,
+              color: AppColors.mutedText,
             ),
-            SizedBox(height: 8),
+            SizedBox(width: 8),
             Text(
               'لا توجد صور',
               style: TextStyle(
@@ -1026,7 +1086,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 color: highlight
                     ? AppColors.goldDark
                     : AppColors.textPrimary,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -1101,7 +1161,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   ),
                 ],
                 const SizedBox(height: 5),
-                Row(
+                if (rating > 0) Row(
                   children: [
                     const Icon(
                       Icons.star_rounded,
@@ -1238,7 +1298,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       name,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -1252,7 +1312,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textPrimary,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -1551,7 +1611,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     'عدد الضيوف',
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -2114,7 +2174,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],

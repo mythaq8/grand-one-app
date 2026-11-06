@@ -350,7 +350,7 @@ class _MyPartyRequestsScreenState extends State<MyPartyRequestsScreen> {
               value,
               style: const TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),

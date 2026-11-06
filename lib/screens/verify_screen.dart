@@ -492,7 +492,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                   : TextDirection.rtl,
               style: const TextStyle(
                 fontSize: 15,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: AppColors.primary,
               ),
             ),
@@ -767,7 +767,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: AppColors.goldDark,
                         ),
                       ),
